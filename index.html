@@ -147,7 +147,6 @@
             background: #f1f5f9;
         }
 
-        /* Se l'evento non è cliccabile per il cliente, cambia il cursore */
         .movie-card.non-cliccabile img {
             cursor: not-allowed;
         }
@@ -717,7 +716,6 @@
                     luogoUnito = ev.citta || ev.posto || "In attesa di conferma";
                 }
 
-                // Gestione della classe CSS se l'evento è in modalità "A Breve" e l'utente NON è admin
                 const classeNonCliccabile = (ev.aBreve && !modalitaAdmin) ? 'non-cliccabile' : '';
 
                 const card = document.createElement('div');
@@ -744,17 +742,14 @@
             });
         }
 
-        // Funzione per filtrare l'apertura del modal in base alla modalità "A Breve"
         window.gestisciAperturaModal = function(key) {
             const ev = eventi[key];
             if (!ev) return;
 
-            // Se l'evento è "A breve in vendita" e NON sei l'amministratore, non fa nulla (blocca il click)
             if (ev.aBreve && !modalitaAdmin) {
                 return; 
             }
 
-            // Altrimenti apre il modal normalmente
             apriModal(key);
         }
 
@@ -999,7 +994,7 @@
 
         window.eliminaEvento = function(key) {
             if (confirm("Eliminare definitivamente questo spettacolo dalla vetrina pubblica?")) {
-                const合同 specificoRef = ref(db, 'eventi/' + key);
+                const specificoRef = ref(db, 'eventi/' + key);
                 remove(specificoRef)
                     .then(() => {
                         alert("Evento rimosso con successo.");
@@ -1015,7 +1010,6 @@
 
             const hashIniziale = window.location.hash.substring(1);
             if (hashIniziale && eventi[hashIniziale]) {
-                // Se l'hash iniziale punta ad un evento "A Breve", l'apertura automatica viene comunque filtrata
                 gestisciAperturaModal(hashIniziale);
             }
         });
