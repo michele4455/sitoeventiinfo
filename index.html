@@ -250,6 +250,23 @@
             border-color: rgba(14, 165, 233, 0.3);
         }
 
+        .date-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .date-input-row input { flex: 1; margin: 0 !important; }
+        .btn-remove-row {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
         .price-input-row {
             display: flex;
             align-items: center;
@@ -286,7 +303,7 @@
             white-space: nowrap;
         }
         
-        .btn-add-price {
+        .btn-add-item {
             background: transparent;
             color: var(--accent-color);
             border: 1px solid var(--accent-color);
@@ -294,12 +311,13 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            margin-top: 5px;
             margin-bottom: 15px;
             display: inline-block;
             font-size: 0.85rem;
             transition: background 0.2s;
         }
-        .btn-add-price:hover { background: #f0f9ff; }
+        .btn-add-item:hover { background: #f0f9ff; }
 
         .admin-actions {
             display: flex;
@@ -427,6 +445,7 @@
             color: var(--text-main);
         }
         .detail-badge strong { color: var(--text-main); margin-right: 4px; }
+        .detail-badge ul { margin-top: 5px; padding-left: 20px; }
 
         .price-list { background: #f8fafc; padding: 15px 20px; border-radius: 14px; margin-bottom: 25px; border: 1px solid var(--border-color); }
         .price-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
@@ -521,15 +540,10 @@
             <label for="form-comingsoon" style="margin:0; color:var(--text-main); cursor:pointer;">🕒 Contrassegna come A BREVE IN VENDITA</label>
         </div>
         
-        <div class="form-row-grid">
-            <div>
-                <label for="form-date">Data Evento:</label>
-                <input type="date" id="form-date">
-            </div>
-            <div>
-                <label for="form-time">Ora Evento:</label>
-                <input type="time" id="form-time">
-            </div>
+        <div>
+            <label>Date e Orari dello Spettacolo:</label>
+            <div id="dynamic-dates-container"></div>
+            <button type="button" class="btn-add-item" onclick="aggiungiRigaData()">➕ Aggiungi un'altra Data / Ora</button>
         </div>
 
         <div class="form-row-grid">
@@ -559,7 +573,7 @@
         
         <label>Listino Prezzi per Settori (Spunta "Esaurito" se terminati):</label>
         <div id="dynamic-price-container"></div>
-        <button type="button" class="btn-add-price" onclick="aggiungiRigaPrezzo()">➕ Aggiungi Settore Prezzo</button>
+        <button type="button" class="btn-add-item" onclick="aggiungiRigaPrezzo()">➕ Aggiungi Settore Prezzo</button>
         
         <div class="admin-actions">
             <button class="btn-pubblica" id="btn-salva-evento" onclick="salvaInVetrina()">Pubblica Evento</button>
@@ -587,8 +601,7 @@
                 <h2 id="modal-title">Titolo Evento</h2>
                 
                 <div class="event-details-badge-box">
-                    <div class="detail-badge" id="modal-detail-date">📅 <strong>Data:</strong> --/--/----</div>
-                    <div class="detail-badge" id="modal-detail-time">🕒 <strong>Ora:</strong> --:--</div>
+                    <div class="detail-badge" id="modal-detail-dates-list">📅 <strong>Date e Orari:</strong> ---</div>
                     <div class="detail-badge" id="modal-detail-location">📍 <strong>Luogo:</strong> ---</div>
                 </div>
 
@@ -631,7 +644,7 @@
             if (btoa(JSON.stringify(pw)) === "IjIwMjYi") {
                 modalitaAdmin = true;
                 document.getElementById('admin-panel').style.display = 'block';
-                svuotaERinizializzaPrezzi();
+                svuotaERinizializzaForm();
                 renderEventi();
                 alert("Identità verificata correttamente.");
             } else {
@@ -650,10 +663,24 @@
             renderEventi();
         }
 
-        function svuotaERinizializzaPrezzi() {
-            const container = document.getElementById('dynamic-price-container');
-            container.innerHTML = '';
+        function svuotaERinizializzaForm() {
+            document.getElementById('dynamic-price-container').innerHTML = '';
             aggiungiRigaPrezzo("", "", false, "#0ea5e9");
+            
+            document.getElementById('dynamic-dates-container').innerHTML = '';
+            aggiungiRigaData("", "");
+        }
+
+        window.aggiungiRigaData = function(data = "", ora = "") {
+            const container = document.getElementById('dynamic-dates-container');
+            const row = document.createElement('div');
+            row.className = 'date-input-row';
+            row.innerHTML = `
+                <input type="date" class="input-data" value="${data}">
+                <input type="time" class="input-ora" value="${ora}">
+                <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">✕</button>
+            `;
+            container.appendChild(row);
         }
 
         window.gestisciInputPrezzo = function(input) {
@@ -686,6 +713,12 @@
             container.appendChild(row);
         }
 
+        function formattaDataLeggibile(dataString) {
+            if(!dataString) return "";
+            const opzioni = { day: '2-digit', month: 'short', year: 'numeric' };
+            return new Date(dataString).toLocaleDateString('it-IT', opzioni);
+        }
+
         function renderEventi() {
             const grid = document.getElementById('event-grid');
             grid.innerHTML = '';
@@ -699,10 +732,16 @@
 
             keys.forEach((key) => {
                 const ev = eventi[key];
-                let dataFormattata = "Data non specificata";
-                if(ev.data) {
-                    const opzioni = { day: '2-digit', month: 'short', year: 'numeric' };
-                    dataFormattata = new Date(ev.data).toLocaleDateString('it-IT', opzioni);
+                
+                let dataAnteprima = "Data in attesa di conferma";
+                if(ev.dateList && ev.dateList.length > 0) {
+                    const primaData = ev.dateList[0];
+                    dataAnteprima = `📅 ${formattaDataLeggibile(primaData.data)} ${primaData.ora ? 'ore ' + primaData.ora : ''}`;
+                    if(ev.dateList.length > 1) {
+                        dataAnteprima += " <span style='color:var(--accent-color); font-weight:bold;'>+ altre date</span>";
+                    }
+                } else if (ev.data) { // Vecchia compatibilità
+                    dataAnteprima = `📅 ${formattaDataLeggibile(ev.data)} ${ev.ora ? 'ore ' + ev.ora : ''}`;
                 }
 
                 let luogoUnito = "";
@@ -734,7 +773,7 @@
                     <div class="movie-info">
                         <div>
                             <div class="movie-title">${ev.titolo}</div>
-                            <div class="movie-meta-preview">📅 ${dataFormattata} ${ev.ora ? 'ore ' + ev.ora : ''}</div>
+                            <div class="movie-meta-preview">${dataAnteprima}</div>
                             <div class="movie-meta-preview" style="font-size:0.85rem; font-weight:600;">📍 ${luogoUnito}</div>
                         </div>
                         ${modalitaAdmin ? `
@@ -753,8 +792,6 @@
             const ev = eventi[key];
             document.getElementById('edit-id').value = key;
             document.getElementById('form-title').value = ev.titolo;
-            document.getElementById('form-date').value = ev.data || '';
-            document.getElementById('form-time').value = ev.ora || '';
             document.getElementById('form-city').value = ev.citta || '';
             document.getElementById('form-location').value = ev.posto || '';
             document.getElementById('form-link').value = ev.linkSite || '';
@@ -764,8 +801,20 @@
             document.getElementById('admin-panel-title').innerText = "✏️ Modifica Spettacolo: " + ev.titolo;
             document.getElementById('btn-salva-evento').innerText = "Salva Modifiche";
 
-            const container = document.getElementById('dynamic-price-container');
-            container.innerHTML = '';
+            // Caricamento date
+            const containerDate = document.getElementById('dynamic-dates-container');
+            containerDate.innerHTML = '';
+            if(ev.dateList && ev.dateList.length > 0) {
+                ev.dateList.forEach(d => aggiungiRigaData(d.data, d.ora));
+            } else if(ev.data) { // Compatibilità vecchi salvataggi
+                aggiungiRigaData(ev.data, ev.ora || "");
+            } else {
+                aggiungiRigaData("", "");
+            }
+
+            // Caricamento prezzi
+            const containerPrezzi = document.getElementById('dynamic-price-container');
+            containerPrezzi.innerHTML = '';
             if (ev.prezzi && ev.prezzi.length > 0) {
                 ev.prezzi.forEach(p => aggiungiRigaPrezzo(p.settore, p.prezzo, p.esaurito || false, p.colore || "#0ea5e9"));
             } else {
@@ -802,8 +851,6 @@
         window.salvaInVetrina = async function() {
             const currentId = document.getElementById('edit-id').value;
             const titolo = document.getElementById('form-title').value.trim();
-            const dataEv = document.getElementById('form-date').value;
-            const oraEv = document.getElementById('form-time').value;
             const cittaEv = document.getElementById('form-city').value.trim();
             const postoEv = document.getElementById('form-location').value.trim();
             const fLocandina = document.getElementById('form-locandina').files[0];
@@ -817,6 +864,17 @@
                 alert("Locandina e mappa sono obbligatorie per i nuovi inserimenti!");
                 return;
             }
+
+            // Recupero delle date multiple
+            const righeDate = document.querySelectorAll('.date-input-row');
+            let elencoDate = [];
+            righeDate.forEach(row => {
+                const dVal = row.querySelector('.input-data').value;
+                const oVal = row.querySelector('.input-ora').value;
+                if(dVal) {
+                    elencoDate.push({ data: dVal, ora: oVal });
+                }
+            });
 
             const righPrezzo = document.querySelectorAll('.price-input-row');
             let listinoPrezzi = [];
@@ -856,15 +914,15 @@
             }
 
             const oggettoSpettacolo = {
-                titolo: titolo, data: dataEv, ora: oraEv,
-                citta: cittaEv || "", posto: postoEv || "In attesa di conferma", locandina: locandinaRes,
-                mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
-                prezzi: listinoPrezzi, soldOut: soldOutGenerale, comingSoon: comingSoonGenerale
+                titolo: titolo, citta: cittaEv || "", posto: postoEv || "In attesa di conferma", 
+                locandina: locandinaRes, mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
+                prezzi: listinoPrezzi, soldOut: soldOutGenerale, comingSoon: comingSoonGenerale,
+                dateList: elencoDate
             };
 
             if (!currentId) {
                 const nuovoPostRef = push(eventiRef);
-                set(nuovoPostRef, oggettoSpettacolo)
+                set(nuovoPostRef, objetoSpettacolo)
                     .then(() => resetFormEAvvisa())
                     .catch(err => alert("Errore nel salvataggio: " + err.message));
             } else {
@@ -882,8 +940,6 @@
 
         function resetFormEAvvisa() {
             document.getElementById('form-title').value = '';
-            document.getElementById('form-date').value = '';
-            document.getElementById('form-time').value = '';
             document.getElementById('form-city').value = '';
             document.getElementById('form-location').value = '';
             document.getElementById('form-locandina').value = '';
@@ -891,7 +947,7 @@
             document.getElementById('form-link').value = '';
             document.getElementById('form-soldout').checked = false;
             document.getElementById('form-comingsoon').checked = false;
-            svuotaERinizializzaPrezzi();
+            svuotaERinizializzaForm();
             alert("Operazione completata con successo!");
         }
 
@@ -906,14 +962,28 @@
             document.getElementById('modal-map-timestamp').innerText = ev.timestamp || 'Recentemente';
             document.getElementById('link-mappa-btn').href = ev.linkSite || '#';
 
-            if(ev.data) {
-                const d = new Date(ev.data);
-                document.getElementById('modal-detail-date').innerHTML = `📅 <strong>Data:</strong> ${d.toLocaleDateString('it-IT')}`;
-            } else {
-                document.getElementById('modal-detail-date').innerHTML = `📅 <strong>Data:</strong> Non specificata`;
-            }
+            // Rendering Date Multiple nel modal
+            const containerDateModal = document.getElementById('modal-detail-dates-list');
+            let stringaDateWhatsApp = ""; 
             
-            document.getElementById('modal-detail-time').innerHTML = `🕒 <strong>Ora:</strong> ${ev.ora || 'Da definire'}`;
+            if(ev.dateList && ev.dateList.length > 0) {
+                let htmlDate = `<strong>Date e Orari disponibili:</strong><ul>`;
+                ev.dateList.forEach(d => {
+                    const dataLetta = formattaDataLeggibile(d.data);
+                    const oraLetta = d.ora ? 'ore ' + d.ora : '';
+                    htmlDate += `<li>📅 ${dataLetta} ${oraLetta}</li>`;
+                    stringaDateWhatsApp += `\n- ${dataLetta} ${oraLetta}`;
+                });
+                htmlDate += `</ul>`;
+                containerDateModal.innerHTML = htmlDate;
+            } else if (ev.data) { // Fallback vecchio tipo
+                const dLetta = formattaDataLeggibile(ev.data);
+                const oLetta = ev.ora ? 'ore ' + ev.ora : '';
+                containerDateModal.innerHTML = `📅 <strong>Data:</strong> ${dLetta} ${oLetta}`;
+                stringaDateWhatsApp = ` il ${dLetta} ${oLetta}`;
+            } else {
+                containerDateModal.innerHTML = `📅 <strong>Data:</strong> In attesa di conferma`;
+            }
             
             let luogoUnito = "";
             if (ev.citta && ev.posto) {
@@ -946,7 +1016,8 @@
             if (ev.soldOut) {
                 wrapperWa.innerHTML = `<div class="soldout-notice-btn">❌ Tutti i Biglietti sono Esauriti</div>`;
             } else {
-                const messaggioWa = encodeURIComponent(`Salve! Vorrei ricevere informazioni e riservare un posto per l'evento: ${ev.titolo} del ${ev.data ? new Date(ev.data).toLocaleDateString('it-IT') : ''}`);
+                const testoMessaggio = `Salve! Vorrei ricevere informazioni e riservare un posto per l'evento: ${ev.titolo}.\nDate disponibili:${stringaDateWhatsApp}`;
+                const messaggioWa = encodeURIComponent(testoMessaggio);
                 wrapperWa.innerHTML = `<a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${messaggioWa}" target="_blank" class="whatsapp-btn">💬 Richiedi Prenotazione su WhatsApp</a>`;
             }
             
@@ -1006,7 +1077,6 @@
 
             const hashIniziale = window.location.hash.substring(1);
             if (hashIniziale && eventi[hashIniziale]) {
-                // Se l'evento è in comingSoon ed è aperto da un link diretto esterno senza modalità admin attiva, non lo mostra.
                 if (eventi[hashIniziale].comingSoon && !modalitaAdmin) {
                     history.replaceState(null, null, ' ');
                 } else {
