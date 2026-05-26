@@ -19,7 +19,6 @@
             --share-hover: #0891b2;
             --border-color: #e2e8f0;
             --dark-overlay: rgba(15, 23, 42, 0.6);
-            --warning-color: #f59e0b;
         }
 
         * {
@@ -121,22 +120,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
-            z-index: 5;
-        }
-
-        .comingsoon-badge {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: var(--accent-color);
-            color: white;
-            font-weight: 700;
-            padding: 6px 14px;
-            border-radius: 9999px;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
             z-index: 5;
         }
 
@@ -245,11 +228,6 @@
             cursor: pointer;
         }
 
-        .checkbox-container.comingsoon-box {
-            background: #f0f9ff;
-            border-color: rgba(14, 165, 233, 0.3);
-        }
-
         .date-input-row {
             display: flex;
             gap: 10px;
@@ -303,7 +281,7 @@
             white-space: nowrap;
         }
         
-        .btn-add-item {
+        .btn-add-price {
             background: transparent;
             color: var(--accent-color);
             border: 1px solid var(--accent-color);
@@ -317,7 +295,7 @@
             font-size: 0.85rem;
             transition: background 0.2s;
         }
-        .btn-add-item:hover { background: #f0f9ff; }
+        .btn-add-price:hover { background: #f0f9ff; }
 
         .admin-actions {
             display: flex;
@@ -534,16 +512,11 @@
             <input type="checkbox" id="form-soldout">
             <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE)</label>
         </div>
-
-        <div class="checkbox-container comingsoon-box">
-            <input type="checkbox" id="form-comingsoon">
-            <label for="form-comingsoon" style="margin:0; color:var(--text-main); cursor:pointer;">🕒 Contrassegna come A BREVE IN VENDITA</label>
-        </div>
         
         <div>
             <label>Date e Orari dello Spettacolo:</label>
             <div id="dynamic-dates-container"></div>
-            <button type="button" class="btn-add-item" onclick="aggiungiRigaData()">➕ Aggiungi un'altra Data / Ora</button>
+            <button type="button" class="btn-add-price" onclick="aggiungiRigaData()">➕ Aggiungi un'altra Data / Ora</button>
         </div>
 
         <div class="form-row-grid">
@@ -573,7 +546,7 @@
         
         <label>Listino Prezzi per Settori (Spunta "Esaurito" se terminati):</label>
         <div id="dynamic-price-container"></div>
-        <button type="button" class="btn-add-item" onclick="aggiungiRigaPrezzo()">➕ Aggiungi Settore Prezzo</button>
+        <button type="button" class="btn-add-price" onclick="aggiungiRigaPrezzo()">➕ Aggiungi Settore Prezzo</button>
         
         <div class="admin-actions">
             <button class="btn-pubblica" id="btn-salva-evento" onclick="salvaInVetrina()">Pubblica Evento</button>
@@ -658,7 +631,6 @@
             document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
             document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
             document.getElementById('form-soldout').checked = false;
-            document.getElementById('form-comingsoon').checked = false;
             modalitaAdmin = false;
             renderEventi();
         }
@@ -733,14 +705,14 @@
             keys.forEach((key) => {
                 const ev = eventi[key];
                 
-                let dataAnteprima = "Data in attesa di conferma";
+                let dataAnteprima = "Data non specificata";
                 if(ev.dateList && ev.dateList.length > 0) {
                     const primaData = ev.dateList[0];
                     dataAnteprima = `📅 ${formattaDataLeggibile(primaData.data)} ${primaData.ora ? 'ore ' + primaData.ora : ''}`;
                     if(ev.dateList.length > 1) {
                         dataAnteprima += " <span style='color:var(--accent-color); font-weight:bold;'>+ altre date</span>";
                     }
-                } else if (ev.data) { // Vecchia compatibilità
+                } else if (ev.data) {
                     dataAnteprima = `📅 ${formattaDataLeggibile(ev.data)} ${ev.ora ? 'ore ' + ev.ora : ''}`;
                 }
 
@@ -751,25 +723,11 @@
                     luogoUnito = ev.citta || ev.posto || "In attesa di conferma";
                 }
 
-                let badgeHTML = '';
-                if (ev.soldOut) {
-                    badgeHTML = `<div class="soldout-badge">🔴 Sold Out</div>`;
-                } else if (ev.comingSoon) {
-                    badgeHTML = `<div class="comingsoon-badge">🕒 A Breve in Vendita</div>`;
-                }
-
-                let clickHandler = `onclick="apriModal('${key}')"`;
-                let stileCursore = '';
-                if (ev.comingSoon && !modalitaAdmin) {
-                    clickHandler = '';
-                    stileCursore = 'style="cursor: default;"';
-                }
-
                 const card = document.createElement('div');
                 card.className = 'movie-card';
                 card.innerHTML = `
-                    ${badgeHTML}
-                    <img src="${ev.locandina}" alt="${ev.titolo}" ${clickHandler} ${stileCursore}>
+                    ${ev.soldOut ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
+                    <img src="${ev.locandina}" alt="${ev.titolo}" onclick="apriModal('${key}')">
                     <div class="movie-info">
                         <div>
                             <div class="movie-title">${ev.titolo}</div>
@@ -796,7 +754,6 @@
             document.getElementById('form-location').value = ev.posto || '';
             document.getElementById('form-link').value = ev.linkSite || '';
             document.getElementById('form-soldout').checked = ev.soldOut || false;
-            document.getElementById('form-comingsoon').checked = ev.comingSoon || false;
             
             document.getElementById('admin-panel-title').innerText = "✏️ Modifica Spettacolo: " + ev.titolo;
             document.getElementById('btn-salva-evento').innerText = "Salva Modifiche";
@@ -806,7 +763,7 @@
             containerDate.innerHTML = '';
             if(ev.dateList && ev.dateList.length > 0) {
                 ev.dateList.forEach(d => aggiungiRigaData(d.data, d.ora));
-            } else if(ev.data) { // Compatibilità vecchi salvataggi
+            } else if(ev.data) {
                 aggiungiRigaData(ev.data, ev.ora || "");
             } else {
                 aggiungiRigaData("", "");
@@ -857,7 +814,6 @@
             const fMappa = document.getElementById('form-mappa').files[0];
             const linkEsterno = document.getElementById('form-link').value.trim() || "#";
             const soldOutGenerale = document.getElementById('form-soldout').checked;
-            const comingSoonGenerale = document.getElementById('form-comingsoon').checked;
 
             if (!titolo) { alert("Inserisci il titolo!"); return; }
             if (!currentId && (!fLocandina || !fMappa)) {
@@ -916,13 +872,12 @@
             const oggettoSpettacolo = {
                 titolo: titolo, citta: cittaEv || "", posto: postoEv || "In attesa di conferma", 
                 locandina: locandinaRes, mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
-                prezzi: listinoPrezzi, soldOut: soldOutGenerale, comingSoon: comingSoonGenerale,
-                dateList: elencoDate
+                prezzi: listinoPrezzi, soldOut: soldOutGenerale, dateList: elencoDate
             };
 
             if (!currentId) {
                 const nuovoPostRef = push(eventiRef);
-                set(nuovoPostRef, objetoSpettacolo)
+                set(nuovoPostRef, oggettoSpettacolo)
                     .then(() => resetFormEAvvisa())
                     .catch(err => alert("Errore nel salvataggio: " + err.message));
             } else {
@@ -946,7 +901,6 @@
             document.getElementById('form-mappa').value = '';
             document.getElementById('form-link').value = '';
             document.getElementById('form-soldout').checked = false;
-            document.getElementById('form-comingsoon').checked = false;
             svuotaERinizializzaForm();
             alert("Operazione completata con successo!");
         }
@@ -976,7 +930,7 @@
                 });
                 htmlDate += `</ul>`;
                 containerDateModal.innerHTML = htmlDate;
-            } else if (ev.data) { // Fallback vecchio tipo
+            } else if (ev.data) {
                 const dLetta = formattaDataLeggibile(ev.data);
                 const oLetta = ev.ora ? 'ore ' + ev.ora : '';
                 containerDateModal.innerHTML = `📅 <strong>Data:</strong> ${dLetta} ${oLetta}`;
@@ -1061,8 +1015,8 @@
 
         window.eliminaEvento = function(key) {
             if (confirm("Eliminare definitivamente questo spettacolo dalla vetrina pubblica?")) {
-                const specificoRef = ref(db, 'eventi/' + key);
-                remove(specificoRef)
+                constSilicon = ref(db, 'eventi/' + key);
+                remove(ref(db, 'eventi/' + key))
                     .then(() => {
                         alert("Evento rimosso con successo.");
                     })
@@ -1077,11 +1031,7 @@
 
             const hashIniziale = window.location.hash.substring(1);
             if (hashIniziale && eventi[hashIniziale]) {
-                if (eventi[hashIniziale].comingSoon && !modalitaAdmin) {
-                    history.replaceState(null, null, ' ');
-                } else {
-                    apriModal(hashIniziale);
-                }
+                apriModal(hashIniziale);
             }
         });
     </script>
