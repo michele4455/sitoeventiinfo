@@ -107,7 +107,6 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        /* Badge Sold out sulla locandina */
         .soldout-badge {
             position: absolute;
             top: 15px;
@@ -235,7 +234,7 @@
             gap: 10px;
             margin-bottom: 10px;
         }
-        .price-input-row input {
+        .price-input-row input[type="text"] {
             background: #f8fafc;
             border: 1px solid var(--border-color);
             border-radius: 10px;
@@ -244,7 +243,16 @@
             font-size: 0.95rem;
         }
         .input-settore { flex: 2; }
-        .input-cifra { flex: 1; }
+        .input-cifra { flex: 1; text-align: right; }
+        .input-colore {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 0;
+            background: transparent;
+        }
         .check-esaurito-settore {
             display: inline-flex;
             align-items: center;
@@ -306,7 +314,6 @@
             border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; font-size: 0.85rem;
         }
 
-        /* Finestra Modale Bianca */
         .modal {
             display: none;
             position: fixed;
@@ -400,8 +407,10 @@
         .detail-badge strong { color: var(--text-main); margin-right: 4px; }
 
         .price-list { background: #f8fafc; padding: 15px 20px; border-radius: 14px; margin-bottom: 25px; border: 1px solid var(--border-color); }
-        .price-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+        .price-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
         .price-item:last-child { border-bottom: none; }
+        .price-sector-wrapper { display: flex; align-items: center; gap: 8px; }
+        .color-indicator { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); display: inline-block; }
         .price-sector { font-weight: 600; color: var(--text-main); }
         .price-amount { color: var(--whatsapp-color); font-weight: 700; }
         .price-amount.esaurito { color: var(--danger-color); text-transform: uppercase; font-size: 0.85rem;}
@@ -496,8 +505,16 @@
             </div>
         </div>
 
-        <label for="form-location">Posto / Location dell'Evento:</label>
-        <input type="text" id="form-location" placeholder="Es: Teatro Olimpico, Piazza Navona, Stadio...">
+        <div class="form-row-grid">
+            <div>
+                <label for="form-city">Città:</label>
+                <input type="text" id="form-city" placeholder="Es: Bari, Roma...">
+            </div>
+            <div>
+                <label for="form-location">Via / Location dell'Evento:</label>
+                <input type="text" id="form-location" placeholder="Es: Teatro Olimpico, Stadio...">
+            </div>
+        </div>
 
         <div class="form-row-grid" style="margin-top:0;">
             <div>
@@ -510,7 +527,7 @@
             </div>
         </div>
 
-        <label for="form-link">Link Esterno Mappa Ufficiale (Opzionale):</label>
+        <label for="form-link">Link Externo Mappa Ufficiale (Opzionale):</label>
         <input type="text" id="form-link" placeholder="Es: https://link-biglietteria.com">
         
         <label>Listino Prezzi per Settori (Spunta "Esaurito" se terminati):</label>
@@ -567,7 +584,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Configurazione puntata esplicitamente al tuo endpoint europeo
         const firebaseConfig = {
             databaseURL: "https://vetrina-eventi-default-rtdb.europe-west1.firebasedatabase.app/"
         };
@@ -609,10 +625,22 @@
         function svuotaERinizializzaPrezzi() {
             const container = document.getElementById('dynamic-price-container');
             container.innerHTML = '';
-            aggiungiRigaPrezzo("", "", false);
+            aggiungiRigaPrezzo("", "", false, "#0ea5e9");
         }
 
-        window.aggiungiRigaPrezzo = function(settore = "", cifra = "", esaurito = false) {
+        window.gestisciInputPrezzo = function(input) {
+            let valore = input.value.replace(/[^\d]/g, "");
+            if (valore === "") {
+                input.value = "";
+                return;
+            }
+            let intero = valore.slice(0, -2) || "0";
+            let decimali = valore.slice(-2);
+            if (decimali.length === 1) decimali = "0" + decimali;
+            input.value = "€ " + parseInt(intero, 10) + "," + decimali;
+        }
+
+        window.aggiungiRigaPrezzo = function(settore = "", cifra = "", esaurito = false, colore = "#0ea5e9") {
             const container = document.getElementById('dynamic-price-container');
             const row = document.createElement('div');
             row.className = 'price-input-row';
@@ -621,7 +649,8 @@
             
             row.innerHTML = `
                 <input type="text" class="input-settore" placeholder="Es: Platea" value="${settore}">
-                <input type="text" class="input-cifra" placeholder="Es: 40€" value="${cifra}">
+                <input type="text" class="input-cifra" placeholder="Es: 40,00" value="${cifra}" oninput="gestisciInputPrezzo(this)">
+                <input type="color" class="input-colore" value="${colore}">
                 <label class="check-esaurito-settore" for="${rId}">
                     <input type="checkbox" id="${rId}" class="input-esaurito" ${esaurito ? 'checked' : ''}> Esaurito
                 </label>
@@ -648,6 +677,13 @@
                     dataFormattata = new Date(ev.data).toLocaleDateString('it-IT', opzioni);
                 }
 
+                let luogoUnito = "";
+                if (ev.citta && ev.posto) {
+                    luogoUnito = ev.citta + " · " + ev.posto;
+                } else {
+                    luogoUnito = ev.citta || ev.posto || "In attesa di conferma";
+                }
+
                 const card = document.createElement('div');
                 card.className = 'movie-card';
                 card.innerHTML = `
@@ -657,6 +693,7 @@
                         <div>
                             <div class="movie-title">${ev.titolo}</div>
                             <div class="movie-meta-preview">📅 ${dataFormattata} ${ev.ora ? 'ore ' + ev.ora : ''}</div>
+                            <div class="movie-meta-preview" style="font-size:0.85rem; font-weight:600;">📍 ${luogoUnito}</div>
                         </div>
                         ${modalitaAdmin ? `
                             <div class="action-card-btns">
@@ -676,6 +713,7 @@
             document.getElementById('form-title').value = ev.titolo;
             document.getElementById('form-date').value = ev.data || '';
             document.getElementById('form-time').value = ev.ora || '';
+            document.getElementById('form-city').value = ev.citta || '';
             document.getElementById('form-location').value = ev.posto || '';
             document.getElementById('form-link').value = ev.linkSite || '';
             document.getElementById('form-soldout').checked = ev.soldOut || false;
@@ -686,9 +724,9 @@
             const container = document.getElementById('dynamic-price-container');
             container.innerHTML = '';
             if (ev.prezzi && ev.prezzi.length > 0) {
-                ev.prezzi.forEach(p => aggiungiRigaPrezzo(p.settore, p.prezzo, p.esaurito || false));
+                ev.prezzi.forEach(p => aggiungiRigaPrezzo(p.settore, p.prezzo, p.esaurito || false, p.colore || "#0ea5e9"));
             } else {
-                aggiungiRigaPrezzo("", "", false);
+                aggiungiRigaPrezzo("", "", false, "#0ea5e9");
             }
 
             document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
@@ -723,6 +761,7 @@
             const titolo = document.getElementById('form-title').value.trim();
             const dataEv = document.getElementById('form-date').value;
             const oraEv = document.getElementById('form-time').value;
+            const cittaEv = document.getElementById('form-city').value.trim();
             const postoEv = document.getElementById('form-location').value.trim();
             const fLocandina = document.getElementById('form-locandina').files[0];
             const fMappa = document.getElementById('form-mappa').files[0];
@@ -740,17 +779,19 @@
             righPrezzo.forEach(row => {
                 const sett = row.querySelector('.input-settore').value.trim();
                 const cifr = row.querySelector('.input-cifra').value.trim();
+                const colr = row.querySelector('.input-colore').value;
                 const esauritoSingolo = row.querySelector('.input-esaurito').checked;
                 if(sett || cifr) {
                     listinoPrezzi.push({ 
                         settore: sett || 'Intero', 
                         prezzo: cifr || 'N.D.',
+                        colore: colr,
                         esaurito: esauritoSingolo
                     });
                 }
             });
 
-            if(listinoPrezzi.length === 0) listinoPrezzi.push({ settore: 'Posto Unico', prezzo: 'N.D.', esaurito: false });
+            if(listinoPrezzi.length === 0) listinoPrezzi.push({ settore: 'Posto Unico', prezzo: 'N.D.', colore: '#0ea5e9', esaurito: false });
 
             let locandinaRes = currentId ? eventi[currentId].locandina : "";
             let mappaRes = currentId ? eventi[currentId].mappa : "";
@@ -772,7 +813,7 @@
 
             const oggettoSpettacolo = {
                 titolo: titolo, data: dataEv, ora: oraEv,
-                posto: postoEv || "In attesa di conferma", locandina: locandinaRes,
+                citta: cittaEv || "", posto: postoEv || "In attesa di conferma", locandina: locandinaRes,
                 mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
                 prezzi: listinoPrezzi, soldOut: soldOutGenerale
             };
@@ -799,6 +840,7 @@
             document.getElementById('form-title').value = '';
             document.getElementById('form-date').value = '';
             document.getElementById('form-time').value = '';
+            document.getElementById('form-city').value = '';
             document.getElementById('form-location').value = '';
             document.getElementById('form-locandina').value = '';
             document.getElementById('form-mappa').value = '';
@@ -827,7 +869,14 @@
             }
             
             document.getElementById('modal-detail-time').innerHTML = `🕒 <strong>Ora:</strong> ${ev.ora || 'Da definire'}`;
-            document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Posto:</strong> ${ev.posto || 'Non specificato'}`;
+            
+            let luogoUnito = "";
+            if (ev.citta && ev.posto) {
+                luogoUnito = ev.citta + " · " + ev.posto;
+            } else {
+                luogoUnito = ev.citta || ev.posto || 'Non specificato';
+            }
+            document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Posto:</strong> ${luogoUnito}`;
 
             const containerPrezzi = document.getElementById('modal-prices');
             containerPrezzi.innerHTML = '';
@@ -835,9 +884,13 @@
                 ev.prezzi.forEach(p => {
                     const classeEsaurito = p.esaurito ? 'esaurito' : '';
                     const testoPrezzo = p.esaurito ? '[Esaurito]' : p.prezzo;
+                    const coloreSettore = p.colore || '#0ea5e9';
                     containerPrezzi.innerHTML += `
                         <div class="price-item">
-                            <span class="price-sector">${p.settore}</span>
+                            <span class="price-sector-wrapper">
+                                <span class="color-indicator" style="background-color: ${coloreSettore};"></span>
+                                <span class="price-sector">${p.settore}</span>
+                            </span>
                             <span class="price-amount ${classeEsaurito}">${testoPrezzo}</span>
                         </div>
                     `;
@@ -901,13 +954,11 @@
             }
         }
 
-        // Ascolta le modifiche su Firebase in tempo reale
         onValue(eventiRef, (snapshot) => {
             const data = snapshot.val();
             eventi = data || {}; 
             renderEventi();
 
-            // Gestione dell'Hash URL all'avvio o al ricaricamento
             const hashIniziale = window.location.hash.substring(1);
             if (hashIniziale && eventi[hashIniziale]) {
                 apriModal(hashIniziale);
