@@ -123,6 +123,22 @@
             z-index: 5;
         }
 
+        .bozza-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #f59e0b;
+            color: white;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+            z-index: 5;
+        }
+
         .movie-card img {
             width: 100%;
             height: 380px;
@@ -216,12 +232,18 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin: 15px 0;
+            margin: 10px 0;
             background: #fef2f2;
             padding: 12px;
             border-radius: 10px;
             border: 1px dashed rgba(239, 68, 68, 0.3);
         }
+        
+        .checkbox-container.bozza-container {
+            background: #fef3c7;
+            border: 1px dashed rgba(245, 158, 11, 0.4);
+        }
+
         .checkbox-container input[type="checkbox"] {
             width: 18px;
             height: 18px;
@@ -508,6 +530,11 @@
         <label for="form-title">Titolo Evento:</label>
         <input type="text" id="form-title" placeholder="Es: Nome del concerto o dello spettacolo">
 
+        <div class="checkbox-container bozza-container">
+            <input type="checkbox" id="form-bozza">
+            <label for="form-bozza" style="margin:0; color:var(--text-main); cursor:pointer;">⚠️ Nascondi ai clienti (Mantieni in Bozza / A breve in vendita)</label>
+        </div>
+
         <div class="checkbox-container">
             <input type="checkbox" id="form-soldout">
             <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE)</label>
@@ -631,6 +658,7 @@
             document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
             document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
             document.getElementById('form-soldout').checked = false;
+            document.getElementById('form-bozza').checked = false;
             modalitaAdmin = false;
             renderEventi();
         }
@@ -697,12 +725,20 @@
 
             const keys = Object.keys(eventi);
 
-            if (keys.length === 0) {
+            // Filtro visibilità bozze: se NON sono admin, nascondo gli eventi che hanno inBozza === true
+            const chiaviFiltrate = keys.filter(key => {
+                if (!modalitaAdmin && eventi[key].inBozza) {
+                    return false; 
+                }
+                return true;
+            });
+
+            if (chiaviFiltrate.length === 0) {
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento disponibile in vetrina.</p>';
                 return;
             }
 
-            keys.forEach((key) => {
+            chiaviFiltrate.forEach((key) => {
                 const ev = eventi[key];
                 
                 let dataAnteprima = "Data non specificata";
@@ -727,6 +763,7 @@
                 card.className = 'movie-card';
                 card.innerHTML = `
                     ${ev.soldOut ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
+                    ${ev.inBozza ? `<div class="bozza-badge">⚠️ A Breve / Bozza</div>` : ''}
                     <img src="${ev.locandina}" alt="${ev.titolo}" onclick="apriModal('${key}')">
                     <div class="movie-info">
                         <div>
@@ -754,6 +791,7 @@
             document.getElementById('form-location').value = ev.posto || '';
             document.getElementById('form-link').value = ev.linkSite || '';
             document.getElementById('form-soldout').checked = ev.soldOut || false;
+            document.getElementById('form-bozza').checked = ev.inBozza || false;
             
             document.getElementById('admin-panel-title').innerText = "✏️ Modifica Spettacolo: " + ev.titolo;
             document.getElementById('btn-salva-evento').innerText = "Salva Modifiche";
@@ -814,6 +852,7 @@
             const fMappa = document.getElementById('form-mappa').files[0];
             const linkEsterno = document.getElementById('form-link').value.trim() || "#";
             const soldOutGenerale = document.getElementById('form-soldout').checked;
+            const mantieniInBozza = document.getElementById('form-bozza').checked;
 
             if (!titolo) { alert("Inserisci il titolo!"); return; }
             if (!currentId && (!fLocandina || !fMappa)) {
@@ -872,7 +911,7 @@
             const oggettoSpettacolo = {
                 titolo: titolo, citta: cittaEv || "", posto: postoEv || "In attesa di conferma", 
                 locandina: locandinaRes, mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
-                prezzi: listinoPrezzi, soldOut: soldOutGenerale, dateList: elencoDate
+                prezzi: listinoPrezzi, soldOut: soldOutGenerale, inBozza: mantieniInBozza, dateList: elencoDate
             };
 
             if (!currentId) {
@@ -901,6 +940,7 @@
             document.getElementById('form-mappa').value = '';
             document.getElementById('form-link').value = '';
             document.getElementById('form-soldout').checked = false;
+            document.getElementById('form-bozza').checked = false;
             svuotaERinizializzaForm();
             alert("Operazione completata con successo!");
         }
@@ -1014,9 +1054,9 @@
         }
 
         window.eliminaEvento = function(key) {
-            if (confirm("Eliminare definitivamente questo spettacolo dalla vetrina pubblica?")) {
-                constSilicon = ref(db, 'eventi/' + key);
-                remove(ref(db, 'eventi/' + key))
+            if (confirm("Eliminare definitivamento questo spettacolo dalla vetrina pubblica?")) {
+                const specificoRef = ref(db, 'eventi/' + key);
+                remove(specificoRef)
                     .then(() => {
                         alert("Evento rimosso con successo.");
                     })
