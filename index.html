@@ -19,6 +19,7 @@
             --share-hover: #0891b2;
             --border-color: #e2e8f0;
             --dark-overlay: rgba(15, 23, 42, 0.6);
+            --warning-color: #f59e0b;
         }
 
         * {
@@ -120,6 +121,22 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+            z-index: 5;
+        }
+
+        .comingsoon-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--accent-color);
+            color: white;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
             z-index: 5;
         }
 
@@ -226,6 +243,11 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
+        }
+
+        .checkbox-container.comingsoon-box {
+            background: #f0f9ff;
+            border-color: rgba(14, 165, 233, 0.3);
         }
 
         .price-input-row {
@@ -493,6 +515,11 @@
             <input type="checkbox" id="form-soldout">
             <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE)</label>
         </div>
+
+        <div class="checkbox-container comingsoon-box">
+            <input type="checkbox" id="form-comingsoon">
+            <label for="form-comingsoon" style="margin:0; color:var(--text-main); cursor:pointer;">🕒 Contrassegna come A BREVE IN VENDITA</label>
+        </div>
         
         <div class="form-row-grid">
             <div>
@@ -618,6 +645,7 @@
             document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
             document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
             document.getElementById('form-soldout').checked = false;
+            document.getElementById('form-comingsoon').checked = false;
             modalitaAdmin = false;
             renderEventi();
         }
@@ -684,11 +712,25 @@
                     luogoUnito = ev.citta || ev.posto || "In attesa di conferma";
                 }
 
+                let badgeHTML = '';
+                if (ev.soldOut) {
+                    badgeHTML = `<div class="soldout-badge">🔴 Sold Out</div>`;
+                } else if (ev.comingSoon) {
+                    badgeHTML = `<div class="comingsoon-badge">🕒 A Breve in Vendita</div>`;
+                }
+
+                let clickHandler = `onclick="apriModal('${key}')"`;
+                let stileCursore = '';
+                if (ev.comingSoon && !modalitaAdmin) {
+                    clickHandler = '';
+                    stileCursore = 'style="cursor: default;"';
+                }
+
                 const card = document.createElement('div');
                 card.className = 'movie-card';
                 card.innerHTML = `
-                    ${ev.soldOut ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
-                    <img src="${ev.locandina}" alt="${ev.titolo}" onclick="apriModal('${key}')">
+                    ${badgeHTML}
+                    <img src="${ev.locandina}" alt="${ev.titolo}" ${clickHandler} ${stileCursore}>
                     <div class="movie-info">
                         <div>
                             <div class="movie-title">${ev.titolo}</div>
@@ -717,6 +759,7 @@
             document.getElementById('form-location').value = ev.posto || '';
             document.getElementById('form-link').value = ev.linkSite || '';
             document.getElementById('form-soldout').checked = ev.soldOut || false;
+            document.getElementById('form-comingsoon').checked = ev.comingSoon || false;
             
             document.getElementById('admin-panel-title').innerText = "✏️ Modifica Spettacolo: " + ev.titolo;
             document.getElementById('btn-salva-evento').innerText = "Salva Modifiche";
@@ -767,6 +810,7 @@
             const fMappa = document.getElementById('form-mappa').files[0];
             const linkEsterno = document.getElementById('form-link').value.trim() || "#";
             const soldOutGenerale = document.getElementById('form-soldout').checked;
+            const comingSoonGenerale = document.getElementById('form-comingsoon').checked;
 
             if (!titolo) { alert("Inserisci il titolo!"); return; }
             if (!currentId && (!fLocandina || !fMappa)) {
@@ -815,7 +859,7 @@
                 titolo: titolo, data: dataEv, ora: oraEv,
                 citta: cittaEv || "", posto: postoEv || "In attesa di conferma", locandina: locandinaRes,
                 mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
-                prezzi: listinoPrezzi, soldOut: soldOutGenerale
+                prezzi: listinoPrezzi, soldOut: soldOutGenerale, comingSoon: comingSoonGenerale
             };
 
             if (!currentId) {
@@ -846,6 +890,7 @@
             document.getElementById('form-mappa').value = '';
             document.getElementById('form-link').value = '';
             document.getElementById('form-soldout').checked = false;
+            document.getElementById('form-comingsoon').checked = false;
             svuotaERinizializzaPrezzi();
             alert("Operazione completata con successo!");
         }
@@ -961,7 +1006,12 @@
 
             const hashIniziale = window.location.hash.substring(1);
             if (hashIniziale && eventi[hashIniziale]) {
-                apriModal(hashIniziale);
+                // Se l'evento è in comingSoon ed è aperto da un link diretto esterno senza modalità admin attiva, non lo mostra.
+                if (eventi[hashIniziale].comingSoon && !modalitaAdmin) {
+                    history.replaceState(null, null, ' ');
+                } else {
+                    apriModal(hashIniziale);
+                }
             }
         });
     </script>
