@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vetrina Eventi Esclusivi</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -108,6 +107,7 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
+        /* Badge Sold out sulla locandina */
         .soldout-badge {
             position: absolute;
             top: 15px;
@@ -306,6 +306,7 @@
             border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; font-size: 0.85rem;
         }
 
+        /* Finestra Modale Bianca */
         .modal {
             display: none;
             position: fixed;
@@ -472,8 +473,7 @@
 
     <div id="admin-panel">
         <h3 id="admin-panel-title">Aggiungi Nuovo Spettacolo</h3>
-        <input type="hidden" id="edit-index" value="-1">
-        <input type="hidden" id="edit-db-id" value="">
+        <input type="hidden" id="edit-id" value="">
         
         <label for="form-title">Titolo Evento:</label>
         <input type="text" id="form-title" placeholder="Es: Nome del concerto o dello spettacolo">
@@ -516,7 +516,7 @@
         <button type="button" class="btn-add-price" onclick="aggiungiRigaPrezzo()">➕ Aggiungi Settore Prezzo</button>
         
         <div class="admin-actions">
-            <button class="btn-pubblica" id="btn-salva-evento" onclick="salvaInVetrina()">Pubblica sul Cloud</button>
+            <button class="btn-pubblica" id="btn-salva-evento" onclick="salvaInVetrina()">Pubblica Evento</button>
             <button class="btn-esci" onclick="chiudiSessioneAdmin()">Chiudi Sessione</button>
         </div>
     </div>
@@ -561,17 +561,48 @@
         <img id="zoomed-map-img" src="" alt="Mappa Ingrandita">
     </div>
 
-    <script>
-        const SUPABASE_URL = "INSERISCI_QUI_IL_TUO_SUPABASE_URL"; 
-        const SUPABASE_KEY = "INSERISCI_QUI_LA_TUA_SUPABASE_ANON_KEY"; 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Configurazione puntata esplicitamente al tuo endpoint europeo
+        const firebaseConfig = {
+            databaseURL: "https://vetrina-eventi-default-rtdb.europe-west1.firebasedatabase.app/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const eventiRef = ref(db, 'eventi');
+
         const TUO_NUMERO_WHATSAPP = "393487326468"; 
 
-        // Inizializzazione client cloud Supabase
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        let eventi = [];
+        let eventi = {}; 
         let modalitaAdmin = false;
         let idEventoCorrenteAperto = null;
+
+        window.richiediAccesso = function() {
+            const pw = prompt("Inserisci la password amministratore:");
+            if (!pw) return;
+            if (btoa(JSON.stringify(pw)) === "IjIwMjYi") {
+                modalitaAdmin = true;
+                document.getElementById('admin-panel').style.display = 'block';
+                svuotaERinizializzaPrezzi();
+                renderEventi();
+                alert("Identità verificata correttamente.");
+            } else {
+                alert("Password errata!");
+            }
+        }
+
+        window.chiudiSessioneAdmin = function() {
+            document.getElementById('admin-panel').style.display = 'none';
+            document.getElementById('edit-id').value = "";
+            document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
+            document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
+            document.getElementById('form-soldout').checked = false;
+            modalitaAdmin = false;
+            renderEventi();
+        }
 
         function svuotaERinizializzaPrezzi() {
             const container = document.getElementById('dynamic-price-container');
@@ -579,11 +610,13 @@
             aggiungiRigaPrezzo("", "", false);
         }
 
-        function aggiungiRigaPrezzo(settore = "", cifra = "", esaurito = false) {
+        window.aggiungiRigaPrezzo = function(settore = "", cifra = "", esaurito = false) {
             const container = document.getElementById('dynamic-price-container');
             const row = document.createElement('div');
             row.className = 'price-input-row';
+            
             const rId = "chk_" + Math.random().toString(36).substring(2, 7);
+            
             row.innerHTML = `
                 <input type="text" class="input-settore" placeholder="Es: Platea" value="${settore}">
                 <input type="text" class="input-cifra" placeholder="Es: 40€" value="${cifra}">
@@ -594,53 +627,19 @@
             container.appendChild(row);
         }
 
-        function richiediAccesso() {
-            const pw = prompt("Inserisci la password amministratore:");
-            if (!pw) return;
-            if (btoa(JSON.stringify(pw)) === "IjIwMjYi") {
-                modalitaAdmin = true;
-                document.getElementById('admin-panel').style.display = 'block';
-                svuotaERinizializzaPrezzi();
-                renderEventi();
-                alert("Identità verificata. Modalità Cloud Admin Attiva.");
-            } else {
-                alert("Password errata!");
-            }
-        }
-
-        function chiudiSessioneAdmin() {
-            document.getElementById('admin-panel').style.display = 'none';
-            document.getElementById('edit-index').value = "-1";
-            document.getElementById('edit-db-id').value = "";
-            document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
-            document.getElementById('btn-salva-evento').innerText = "Pubblica sul Cloud";
-            document.getElementById('form-soldout').checked = false;
-            modalitaAdmin = false;
-            renderEventi();
-        }
-
-        // CARICA I DATI IN TEMPO REALE DAL CLOUD SUPABASE
-        async function scaricaEventiDalCloud() {
-            try {
-                let { data, error } = await supabase.from('eventi').select('*').order('created_at', { ascending: true });
-                if (error) throw error;
-                eventi = data || [];
-                renderEventi();
-            } catch (err) {
-                console.error("Errore nel recupero dati dal database cloud:", err.message);
-            }
-        }
-
         function renderEventi() {
             const grid = document.getElementById('event-grid');
             grid.innerHTML = '';
 
-            if (eventi.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento attivo nel database cloud.</p>';
+            const keys = Object.keys(eventi);
+
+            if (keys.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento disponibile in vetrina.</p>';
                 return;
             }
 
-            eventi.forEach((ev, index) => {
+            keys.forEach((key) => {
+                const ev = eventi[key];
                 let dataFormattata = "Data non specificata";
                 if(ev.data) {
                     const opzioni = { day: '2-digit', month: 'short', year: 'numeric' };
@@ -651,7 +650,7 @@
                 card.className = 'movie-card';
                 card.innerHTML = `
                     ${ev.soldOut ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
-                    <img src="${ev.locandina}" alt="${ev.titolo}" onclick="apriModal('${ev.id}')">
+                    <img src="${ev.locandina}" alt="${ev.titolo}" onclick="apriModal('${key}')">
                     <div class="movie-info">
                         <div>
                             <div class="movie-title">${ev.titolo}</div>
@@ -659,8 +658,8 @@
                         </div>
                         ${modalitaAdmin ? `
                             <div class="action-card-btns">
-                                <button class="edit-btn" onclick="avviaModifica(${index})">✏️ Modifica</button>
-                                <button class="del-btn" onclick="eliminaEventoCloud('${ev.id}')">❌ Rimuovi</button>
+                                <button class="edit-btn" onclick="avviaModifica('${key}')">✏️ Modifica</button>
+                                <button class="del-btn" onclick="eliminaEvento('${key}')">❌ Rimuovi</button>
                             </div>
                         ` : ''}
                     </div>
@@ -669,10 +668,9 @@
             });
         }
 
-        function avviaModifica(index) {
-            const ev = eventi[index];
-            document.getElementById('edit-index').value = index;
-            document.getElementById('edit-db-id').value = ev.id;
+        window.avviaModifica = function(key) {
+            const ev = eventi[key];
+            document.getElementById('edit-id').value = key;
             document.getElementById('form-title').value = ev.titolo;
             document.getElementById('form-date').value = ev.data || '';
             document.getElementById('form-time').value = ev.ora || '';
@@ -680,16 +678,13 @@
             document.getElementById('form-link').value = ev.linkSite || '';
             document.getElementById('form-soldout').checked = ev.soldOut || false;
             
-            document.getElementById('admin-panel-title').innerText = "✏️ Modifica Spettacolo Cloud: " + ev.titolo;
-            document.getElementById('btn-salva-evento').innerText = "Aggiorna nel Cloud";
+            document.getElementById('admin-panel-title').innerText = "✏️ Modifica Spettacolo: " + ev.titolo;
+            document.getElementById('btn-salva-evento').innerText = "Salva Modifiche";
 
             const container = document.getElementById('dynamic-price-container');
             container.innerHTML = '';
-            
-            let listino = (typeof ev.prezzi === 'string') ? JSON.parse(ev.prezzi) : ev.prezzi;
-            
-            if (listino && listino.length > 0) {
-                listino.forEach(p => aggiungiRigaPrezzo(p.settore, p.prezzo, p.esaurito || false));
+            if (ev.prezzi && ev.prezzi.length > 0) {
+                ev.prezzi.forEach(p => aggiungiRigaPrezzo(p.settore, p.prezzo, p.esaurito || false));
             } else {
                 aggiungiRigaPrezzo("", "", false);
             }
@@ -715,14 +710,14 @@
                         canvas.width = w; canvas.height = h;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, w, h);
-                        resolve(canvas.toDataURL('image/jpeg', 0.70)); // Compresso a 0.70 per stare leggeri sul db
+                        resolve(canvas.toDataURL('image/jpeg', 0.75));
                     };
                 };
             });
         }
 
-        async function salvaInVetrina() {
-            const dbId = document.getElementById('edit-db-id').value;
+        window.salvaInVetrina = async function() {
+            const currentId = document.getElementById('edit-id').value;
             const titolo = document.getElementById('form-title').value.trim();
             const dataEv = document.getElementById('form-date').value;
             const oraEv = document.getElementById('form-time').value;
@@ -733,8 +728,8 @@
             const soldOutGenerale = document.getElementById('form-soldout').checked;
 
             if (!titolo) { alert("Inserisci il titolo!"); return; }
-            if (!dbId && (!fLocandina || !fMappa)) {
-                alert("Locandina e mappa sono obbligatorie per i nuovi inserimenti cloud!");
+            if (!currentId && (!fLocandina || !fMappa)) {
+                alert("Locandina e mappa sono obbligatorie per i nuovi inserimenti!");
                 return;
             }
 
@@ -755,57 +750,67 @@
 
             if(listinoPrezzi.length === 0) listinoPrezzi.push({ settore: 'Posto Unico', prezzo: 'N.D.', esaurito: false });
 
-            let locandinaRes = "";
-            let mappaRes = "";
-            let timestampString = "";
+            let locandinaRes = currentId ? eventi[currentId].locandina : "";
+            let mappaRes = currentId ? eventi[currentId].mappa : "";
+            let timestampString = currentId ? eventi[currentId].timestamp : "";
 
-            if (dbId) {
-                const vecchio = eventi.find(e => e.id === dbId);
-                locandinaRes = vecchio.locandina;
-                mappaRes = vecchio.mappa;
-                timestampString = vecchio.timestamp;
-            }
-
-            if (fLocandina) locandinaRes = await elaboraImmagine(fLocandina, 500);
+            if (fLocandina) locandinaRes = await elaboraImmagine(fLocandina, 600);
             if (fMappa) {
-                mappaRes = await elaboraImmagine(fMappa, 800);
+                mappaRes = await elaboraImmagine(fMappa, 1000);
+                const oraCorrente = new Date();
+                timestampString = oraCorrente.toLocaleDateString('it-IT', {
+                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+            } else if (!currentId) {
                 const oraCorrente = new Date();
                 timestampString = oraCorrente.toLocaleDateString('it-IT', {
                     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
             }
 
-            const rigaDatabase = {
+            const oggettoSpettacolo = {
                 titolo: titolo, data: dataEv, ora: oraEv,
                 posto: postoEv || "In attesa di conferma", locandina: locandinaRes,
                 mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
                 prezzi: listinoPrezzi, soldOut: soldOutGenerale
             };
 
-            try {
-                if (!dbId) {
-                    // INSERIMENTO NUOVO EVENTO
-                    const { error } = await supabase.from('eventi').insert([rigaDatabase]);
-                    if (error) throw error;
-                } else {
-                    // AGGIORNAMENTO DI UN EVENTO ESISTENTE
-                    const { error } = await supabase.from('eventi').update(rigaDatabase).eq('id', dbId);
-                    if (error) throw error;
-                }
-                
-                alert("Sincronizzazione Cloud completata!");
-                chiudiSessioneAdmin();
-                scaricaEventiDalCloud();
-            } catch (err) {
-                alert("Errore nel salvataggio Cloud: " + err.message);
+            if (!currentId) {
+                const nuovoPostRef = push(eventiRef);
+                set(nuovoPostRef, oggettoSpettacolo)
+                    .then(() => resetFormEAvvisa())
+                    .catch(err => alert("Errore nel salvataggio: " + err.message));
+            } else {
+                const specificoRef = ref(db, 'eventi/' + currentId);
+                set(specificoRef, oggettoSpettacolo)
+                    .then(() => {
+                        document.getElementById('edit-id').value = "";
+                        document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
+                        document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
+                        resetFormEAvvisa();
+                    })
+                    .catch(err => alert("Errore nella modifica: " + err.message));
             }
         }
 
-        function apriModal(idUnico) {
-            const ev = eventi.find(e => e.id == idUnico);
+        function resetFormEAvvisa() {
+            document.getElementById('form-title').value = '';
+            document.getElementById('form-date').value = '';
+            document.getElementById('form-time').value = '';
+            document.getElementById('form-location').value = '';
+            document.getElementById('form-locandina').value = '';
+            document.getElementById('form-mappa').value = '';
+            document.getElementById('form-link').value = '';
+            document.getElementById('form-soldout').checked = false;
+            svuotaERinizializzaPrezzi();
+            alert("Operazione completata con successo!");
+        }
+
+        window.apriModal = function(key) {
+            const ev = eventi[key];
             if(!ev) return;
 
-            idEventoCorrenteAperto = idUnico;
+            idEventoCorrenteAperto = key;
 
             document.getElementById('modal-title').innerText = ev.titolo;
             document.getElementById('modal-map-img').src = ev.mappa;
@@ -824,19 +829,18 @@
 
             const containerPrezzi = document.getElementById('modal-prices');
             containerPrezzi.innerHTML = '';
-            
-            let listino = (typeof ev.prezzi === 'string') ? JSON.parse(ev.prezzi) : ev.prezzi;
-
-            listino.forEach(p => {
-                const classeEsaurito = p.esaurito ? 'esaurito' : '';
-                const testoPrezzo = p.esaurito ? '[Esaurito]' : p.prezzo;
-                containerPrezzi.innerHTML += `
-                    <div class="price-item">
-                        <span class="price-sector">${p.settore}</span>
-                        <span class="price-amount ${classeEsaurito}">${testoPrezzo}</span>
-                    </div>
-                `;
-            });
+            if (ev.prezzi) {
+                ev.prezzi.forEach(p => {
+                    const classeEsaurito = p.esaurito ? 'esaurito' : '';
+                    const testoPrezzo = p.esaurito ? '[Esaurito]' : p.prezzo;
+                    containerPrezzi.innerHTML += `
+                        <div class="price-item">
+                            <span class="price-sector">${p.settore}</span>
+                            <span class="price-amount ${classeEsaurito}">${testoPrezzo}</span>
+                        </div>
+                    `;
+                });
+            }
 
             const wrapperWa = document.getElementById('whatsapp-action-wrapper');
             if (ev.soldOut) {
@@ -846,17 +850,17 @@
                 wrapperWa.innerHTML = `<a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${messaggioWa}" target="_blank" class="whatsapp-btn">💬 Richiedi Prenotazione su WhatsApp</a>`;
             }
             
-            window.location.hash = idUnico;
+            window.location.hash = key;
             document.getElementById('event-modal').style.display = 'flex';
         }
 
-        function chiudiModal() { 
+        window.chiudiModal = function() { 
             document.getElementById('event-modal').style.display = 'none';
             idEventoCorrenteAperto = null;
             history.replaceState(null, null, ' ');
         }
 
-        function copiaLinkEventoCorrente() {
+        window.copiaLinkEventoCorrente = function() {
             if (!idEventoCorrenteAperto) return;
             const linkCompletoCondivisibile = window.location.origin + window.location.pathname + "#" + idEventoCorrenteAperto;
             
@@ -875,34 +879,36 @@
             });
         }
 
-        function apriMappaIngrandita(src) {
+        window.apriMappaIngrandita = function(src) {
             document.getElementById('zoomed-map-img').src = src;
             document.getElementById('map-zoom-container').style.display = 'flex';
         }
-        function chiudiMappaIngrandita() {
+        
+        window.chiudiMappaIngrandita = function() {
             document.getElementById('map-zoom-container').style.display = 'none';
         }
 
-        async function eliminaEventoCloud(idUnico) {
-            if (confirm("Eliminare definitivamente questo spettacolo dal cloud pubblico?")) {
-                try {
-                    const { error } = await supabase.from('eventi').delete().eq('id', idUnico);
-                    if (error) throw error;
-                    alert("Evento rimosso con successo dal cloud.");
-                    scaricaEventiDalCloud();
-                } catch(err) {
-                    alert("Errore durante l'eliminazione: " + err.message);
-                }
+        window.eliminaEvento = function(key) {
+            if (confirm("Eliminare definitivamente questo spettacolo dalla vetrina pubblica?")) {
+                const specificoRef = ref(db, 'eventi/' + key);
+                remove(specificoRef)
+                    .then(() => {
+                        alert("Evento rimosso con successo.");
+                    })
+                    .catch(err => alert("Errore durante la rimozione: " + err.message));
             }
         }
 
-        window.addEventListener('load', () => {
-            scaricaEventiDalCloud(); // Avvia lo scaricamento cloud all'apertura del sito
+        // Ascolta le modifiche su Firebase in tempo reale
+        onValue(eventiRef, (snapshot) => {
+            const data = snapshot.val();
+            eventi = data || {}; 
+            renderEventi();
+
+            // Gestione dell'Hash URL all'avvio o al ricaricamento
             const hashIniziale = window.location.hash.substring(1);
-            if (hashIniziale) {
-                setTimeout(() => {
-                    apriModal(hashIniziale);
-                }, 800); // Ritardo per permettere al cloud di scaricare i dati prima di aprire la modale via link
+            if (hashIniziale && eventi[hashIniziale]) {
+                apriModal(hashIniziale);
             }
         });
     </script>
