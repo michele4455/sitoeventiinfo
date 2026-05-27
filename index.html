@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vetrina Eventi Esclusivi</title>
+    <title>Biglietteria Eventi Centro Posta@ Anaclerio</title>
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -254,13 +254,13 @@
             cursor: pointer;
         }
 
-        .price-input-row {
+        .price-input-row, .date-input-row {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 10px;
         }
-        .price-input-row input[type="text"] {
+        .price-input-row input[type="text"], .date-input-row input {
             background: #f8fafc;
             border: 1px solid var(--border-color);
             border-radius: 10px;
@@ -290,7 +290,7 @@
             white-space: nowrap;
         }
         
-        .btn-add-price {
+        .btn-add-price, .btn-add-date {
             background: transparent;
             color: var(--accent-color);
             border: 1px solid var(--accent-color);
@@ -303,7 +303,18 @@
             font-size: 0.85rem;
             transition: background 0.2s;
         }
-        .btn-add-price:hover { background: #f0f9ff; }
+        .btn-add-price:hover, .btn-add-date:hover { background: #f0f9ff; }
+
+        .btn-remove-row {
+            background: transparent;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-remove-row:hover { background: #fef2f2; }
 
         .admin-actions {
             display: flex;
@@ -379,13 +390,16 @@
         .modal-left {
             flex: 1.1; background: #f8fafc;
             display: flex; flex-direction: column;
-            align-items: center; justify-content: center; padding: 30px;
+            align-items: center; justify-content: flex-start; padding: 30px;
             border-right: 1px solid #f1f5f9;
+            gap: 20px;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .modal-left img {
             max-width: 100%;
-            max-height: 40vh;
+            max-height: 35vh;
             object-fit: contain;
             border-radius: 14px;
             cursor: zoom-in;
@@ -394,7 +408,7 @@
 
         .info-box {
             background: #ffffff; width: 100%; padding: 16px;
-            border-radius: 14px; margin-top: 20px; text-align: center;
+            border-radius: 14px; text-align: center;
             border: 1px solid var(--border-color);
         }
 
@@ -410,7 +424,7 @@
         }
         .link-mappa:hover { background: var(--accent-color); color: white; }
 
-        .modal-right { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+        .modal-right { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; max-height: 85vh; overflow-y: auto; }
         .modal-right h2 { color: var(--text-main); font-size: 2rem; font-weight: 800; margin-bottom: 15px; line-height: 1.2; }
         
         .subtitle { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.5px; }
@@ -525,16 +539,9 @@
             <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE)</label>
         </div>
         
-        <div class="form-row-grid">
-            <div>
-                <label for="form-date">Data Evento:</label>
-                <input type="date" id="form-date">
-            </div>
-            <div>
-                <label for="form-time">Ora Evento:</label>
-                <input type="time" id="form-time">
-            </div>
-        </div>
+        <label>Date e Orari Evento:</label>
+        <div id="dynamic-dates-container"></div>
+        <button type="button" class="btn-add-date" onclick="aggiungiRigaData()">➕ Aggiungi un'altra Data</button>
 
         <div class="form-row-grid">
             <div>
@@ -578,6 +585,10 @@
             <span class="close-btn" onclick="chiudiModal()">&times;</span>
             
             <div class="modal-left">
+                <span class="subtitle">Locandina Evento</span>
+                <img id="modal-locandina-img" src="" alt="Locandina Evento" onclick="apriMappaIngrandita(this.src)">
+                
+                <span class="subtitle" style="margin-top: 10px;">Pianta dei Posti</span>
                 <img id="modal-map-img" src="" alt="Mappa Posti" onclick="apriMappaIngrandita(this.src)">
                 
                 <div class="info-box">
@@ -590,9 +601,10 @@
             <div class="modal-right">
                 <h2 id="modal-title">Titolo Evento</h2>
                 
+                <div class="subtitle">Date e Orari Spettacolo</div>
+                <div class="event-details-badge-box" id="modal-dates-list"></div>
+
                 <div class="event-details-badge-box">
-                    <div class="detail-badge" id="modal-detail-date">📅 <strong>Data:</strong> --/--/----</div>
-                    <div class="detail-badge" id="modal-detail-time">🕒 <strong>Ora:</strong> --:--</div>
                     <div class="detail-badge" id="modal-detail-location">📍 <strong>Luogo:</strong> ---</div>
                 </div>
 
@@ -636,6 +648,7 @@
                 modalitaAdmin = true;
                 document.getElementById('admin-panel').style.display = 'block';
                 svuotaERinizializzaPrezzi();
+                svuotaERinizializzaDate();
                 renderEventi();
                 alert("Identità verificata correttamente.");
             } else {
@@ -658,6 +671,12 @@
             const container = document.getElementById('dynamic-price-container');
             container.innerHTML = '';
             aggiungiRigaPrezzo("", "", false, "#0ea5e9");
+        }
+
+        function svuotaERinizializzaDate() {
+            const container = document.getElementById('dynamic-dates-container');
+            container.innerHTML = '';
+            aggiungiRigaData("", "");
         }
 
         window.gestisciInputPrezzo = function(input) {
@@ -686,6 +705,19 @@
                 <label class="check-esaurito-settore" for="${rId}">
                     <input type="checkbox" id="${rId}" class="input-esaurito" ${esaurito ? 'checked' : ''}> Esaurito
                 </label>
+                <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">❌</button>
+            `;
+            container.appendChild(row);
+        }
+
+        window.aggiungiRigaData = function(dataVal = "", oraVal = "") {
+            const container = document.getElementById('dynamic-dates-container');
+            const row = document.createElement('div');
+            row.className = 'date-input-row';
+            row.innerHTML = `
+                <input type="date" class="input-data-singola" value="${dataVal}" style="flex: 2;">
+                <input type="time" class="input-ora-singola" value="${oraVal}" style="flex: 1;">
+                <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">❌</button>
             `;
             container.appendChild(row);
         }
@@ -703,10 +735,20 @@
 
             keys.forEach((key) => {
                 const ev = eventi[key];
-                let dataFormattata = "Data non specificata";
-                if(ev.data) {
+                
+                let stringaDatePreview = "Data non specificata";
+                if (ev.dateElenco && ev.dateElenco.length > 0) {
                     const opzioni = { day: '2-digit', month: 'short', year: 'numeric' };
-                    dataFormattata = new Date(ev.data).toLocaleDateString('it-IT', opzioni);
+                    const d1 = ev.dateElenco[0];
+                    let testoData = d1.data ? new Date(d1.data).toLocaleDateString('it-IT', opzioni) : 'Da definire';
+                    let testoOra = d1.ora ? ' ore ' + d1.ora : '';
+                    stringaDatePreview = `📅 ${testoData}${testoOra}`;
+                    if(ev.dateElenco.length > 1) {
+                        stringaDatePreview += ` (+${ev.dateElenco.length - 1} date)`;
+                    }
+                } else if(ev.data) {
+                    const opzioni = { day: '2-digit', month: 'short', year: 'numeric' };
+                    stringaDatePreview = `📅 ${new Date(ev.data).toLocaleDateString('it-IT', opzioni)} ${ev.ora ? 'ore ' + ev.ora : ''}`;
                 }
 
                 let luogoUnito = "";
@@ -727,7 +769,7 @@
                     <div class="movie-info">
                         <div>
                             <div class="movie-title">${ev.titolo}</div>
-                            <div class="movie-meta-preview">📅 ${dataFormattata} ${ev.ora ? 'ore ' + ev.ora : ''}</div>
+                            <div class="movie-meta-preview">${stringaDatePreview}</div>
                             <div class="movie-meta-preview" style="font-size:0.85rem; font-weight:600;">📍 ${luogoUnito}</div>
                         </div>
                         ${modalitaAdmin ? `
@@ -757,8 +799,6 @@
             const ev = eventi[key];
             document.getElementById('edit-id').value = key;
             document.getElementById('form-title').value = ev.titolo;
-            document.getElementById('form-date').value = ev.data || '';
-            document.getElementById('form-time').value = ev.ora || '';
             document.getElementById('form-city').value = ev.citta || '';
             document.getElementById('form-location').value = ev.posto || '';
             document.getElementById('form-link').value = ev.linkSite || '';
@@ -767,6 +807,16 @@
             
             document.getElementById('admin-panel-title').innerText = "✏️ Modifica Spettacolo: " + ev.titolo;
             document.getElementById('btn-salva-evento').innerText = "Salva Modifiche";
+
+            const datesContainer = document.getElementById('dynamic-dates-container');
+            datesContainer.innerHTML = '';
+            if (ev.dateElenco && ev.dateElenco.length > 0) {
+                ev.dateElenco.forEach(d => aggiungiRigaData(d.data, d.ora));
+            } else if (ev.data) {
+                aggiungiRigaData(ev.data, ev.ora || '');
+            } else {
+                aggiungiRigaData("", "");
+            }
 
             const container = document.getElementById('dynamic-price-container');
             container.innerHTML = '';
@@ -806,8 +856,6 @@
         window.salvaInVetrina = async function() {
             const currentId = document.getElementById('edit-id').value;
             const titolo = document.getElementById('form-title').value.trim();
-            const dataEv = document.getElementById('form-date').value;
-            const oraEv = document.getElementById('form-time').value;
             const cittaEv = document.getElementById('form-city').value.trim();
             const postoEv = document.getElementById('form-location').value.trim();
             const fLocandina = document.getElementById('form-locandina').files[0];
@@ -821,6 +869,16 @@
                 alert("Locandina e mappa sono obbligatorie per i nuovi inserimenti!");
                 return;
             }
+
+            let elencoDateInserite = [];
+            const righeDate = document.querySelectorAll('.date-input-row');
+            righeDate.forEach(row => {
+                const dVal = row.querySelector('.input-data-singola').value;
+                const oVal = row.querySelector('.input-ora-singola').value;
+                if(dVal) {
+                    elencoDateInserite.push({ data: dVal, ora: oVal });
+                }
+            });
 
             const righPrezzo = document.querySelectorAll('.price-input-row');
             let listinoPrezzi = [];
@@ -860,7 +918,10 @@
             }
 
             const oggettoSpettacolo = {
-                titolo: titolo, data: dataEv, ora: oraEv,
+                titolo: titolo, 
+                data: elencoDateInserite.length > 0 ? elencoDateInserite[0].data : "", 
+                ora: elencoDateInserite.length > 0 ? elencoDateInserite[0].ora : "",
+                dateElenco: elencoDateInserite,
                 citta: cittaEv || "", posto: postoEv || "In attesa di conferma", locandina: locandinaRes,
                 mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
                 prezzi: listinoPrezzi, soldOut: soldOutGenerale, aBreve: impostaABreve
@@ -886,8 +947,6 @@
 
         function resetFormEAvvisa() {
             document.getElementById('form-title').value = '';
-            document.getElementById('form-date').value = '';
-            document.getElementById('form-time').value = '';
             document.getElementById('form-city').value = '';
             document.getElementById('form-location').value = '';
             document.getElementById('form-locandina').value = '';
@@ -896,6 +955,7 @@
             document.getElementById('form-soldout').checked = false;
             document.getElementById('form-abreve').checked = false;
             svuotaERinizializzaPrezzi();
+            svuotaERinizializzaDate();
             alert("Operazione completata con successo!");
         }
 
@@ -906,18 +966,26 @@
             idEventoCorrenteAperto = key;
 
             document.getElementById('modal-title').innerText = ev.titolo;
+            document.getElementById('modal-locandina-img').src = ev.locandina || '';
             document.getElementById('modal-map-img').src = ev.mappa;
             document.getElementById('modal-map-timestamp').innerText = ev.timestamp || 'Recentemente';
             document.getElementById('link-mappa-btn').href = ev.linkSite || '#';
 
-            if(ev.data) {
-                const d = new Date(ev.data);
-                document.getElementById('modal-detail-date').innerHTML = `📅 <strong>Data:</strong> ${d.toLocaleDateString('it-IT')}`;
-            } else {
-                document.getElementById('modal-detail-date').innerHTML = `📅 <strong>Data:</strong> Non specificata`;
-            }
+            const containerDate = document.getElementById('modal-dates-list');
+            containerDate.innerHTML = '';
             
-            document.getElementById('modal-detail-time').innerHTML = `🕒 <strong>Ora:</strong> ${ev.ora || 'Da definire'}`;
+            if(ev.dateElenco && ev.dateElenco.length > 0) {
+                ev.dateElenco.forEach(d => {
+                    const dataObj = new Date(d.data);
+                    const oraString = d.ora ? ` ore ${d.ora}` : '';
+                    containerDate.innerHTML += `<div class="detail-badge">📅 <strong>Data:</strong> ${dataObj.toLocaleDateString('it-IT')}${oraString}</div>`;
+                });
+            } else if(ev.data) {
+                const d = new Date(ev.data);
+                containerDate.innerHTML = `<div class="detail-badge">📅 <strong>Data:</strong> ${d.toLocaleDateString('it-IT')} ore ${ev.ora || 'Da definire'}</div>`;
+            } else {
+                containerDate.innerHTML = `<div class="detail-badge">📅 <strong>Data:</strong> Non specificata</div>`;
+            }
             
             let luogoUnito = "";
             if (ev.citta && ev.posto) {
@@ -950,7 +1018,13 @@
             if (ev.soldOut) {
                 wrapperWa.innerHTML = `<div class="soldout-notice-btn">❌ Tutti i Biglietti sono Esauriti</div>`;
             } else {
-                const messaggioWa = encodeURIComponent(`Salve! Vorrei ricevere informazioni e riservare un posto per l'evento: ${ev.titolo} del ${ev.data ? new Date(ev.data).toLocaleDateString('it-IT') : ''}`);
+                let testoDateMessaggio = "";
+                if(ev.dateElenco && ev.dateElenco.length > 0) {
+                    testoDateMessaggio = ev.dateElenco.map(d => new Date(d.data).toLocaleDateString('it-IT')).join(', ');
+                } else if(ev.data) {
+                    testoDateMessaggio = new Date(ev.data).toLocaleDateString('it-IT');
+                }
+                const messaggioWa = encodeURIComponent(`Salve! Vorrei ricevere informazioni e riservare un posto per l'evento: ${ev.titolo} (Date disponibili: ${testoDateMessaggio})`);
                 wrapperWa.innerHTML = `<a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${messaggioWa}" target="_blank" class="whatsapp-btn">💬 Richiedi Prenotazione su WhatsApp</a>`;
             }
             
