@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biglietteria Eventi Centro Posta@ Anaclerio</title>
+    <title>Vetrina Eventi Esclusivi</title>
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -246,6 +246,11 @@
         .checkbox-container.abreve-container {
             background: #fef3c7;
             border: 1px dashed rgba(245, 158, 11, 0.4);
+        }
+
+        .checkbox-container.maintenance-container {
+            background: #cbd5e1;
+            border: 1px solid #94a3b8;
         }
 
         .checkbox-container input[type="checkbox"] {
@@ -507,6 +512,27 @@
             object-fit: contain; border-radius: 12px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
+
+        #maintenance-screen {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+        #maintenance-screen h2 {
+            font-size: 2rem;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        #maintenance-screen p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
@@ -515,17 +541,27 @@
         <button class="admin-trigger-btn" onclick="richiediAccesso()">Area Riservata</button>
     </div>
 
-    <header>
+    <header id="main-header">
         <h1>CentroPost@ Anaclerio Bari</h1>
         <h2>Via Don Giovanni Bosco 19 70123 Bari</h2>
         <h2>Punto Autorizzato: TicketOne - Vivaticket - CiaoTicket</h2>
         <p>Seleziona uno spettacolo, controlla la pianta dei posti ed effettua la prenotazione diretta.</p>
     </header>
 
+    <div id="maintenance-screen">
+        <h2>⚠️ Sito in Manutenzione</h2>
+        <p>Stiamo aggiornando la vetrina con i nuovi eventi. Torneremo online tra pochissimo!</p>
+    </div>
+
     <div id="admin-panel">
         <h3 id="admin-panel-title">Aggiungi Nuovo Spettacolo</h3>
         <input type="hidden" id="edit-id" value="">
         
+        <div class="checkbox-container maintenance-container">
+            <input type="checkbox" id="system-maintenance-toggle" onchange="cambiaStatoManutenzione(this.checked)">
+            <label for="system-maintenance-toggle" style="margin:0; color:#1e293b; cursor:pointer; font-weight: bold;">🔧 MODALITÀ MANUTENZIONE SITO (Scomparirà tutto al cliente)</label>
+        </div>
+
         <label for="form-title">Titolo Evento:</label>
         <input type="text" id="form-title" placeholder="Es: Nome del concerto o dello spettacolo">
 
@@ -634,12 +670,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const eventiRef = ref(db, 'eventi');
+        const configRef = ref(db, 'configurazione_sito');
 
         const TUO_NUMERO_WHATSAPP = "393487326468"; 
 
         let eventi = {}; 
         let modalitaAdmin = false;
         let idEventoCorrenteAperto = null;
+        let inManutenzione = false;
 
         window.richiediAccesso = function() {
             const pw = prompt("Inserisci la password amministratore:");
@@ -649,7 +687,7 @@
                 document.getElementById('admin-panel').style.display = 'block';
                 svuotaERinizializzaPrezzi();
                 svuotaERinizializzaDate();
-                renderEventi();
+                aggiornaVisibilitaSito();
                 alert("Identità verificata correttamente.");
             } else {
                 alert("Password errata!");
@@ -664,7 +702,29 @@
             document.getElementById('form-soldout').checked = false;
             document.getElementById('form-abreve').checked = false;
             modalitaAdmin = false;
-            renderEventi();
+            aggiornaVisibilitaSito();
+        }
+
+        window.cambiaStatoManutenzione = function(stato) {
+            set(configRef, { manutenzione: stato })
+                .catch(err => alert("Impossibile salvare lo stato di manutenzione: " + err.message));
+        }
+
+        function aggiornaVisibilitaSito() {
+            const grid = document.getElementById('event-grid');
+            const maintenanceScreen = document.getElementById('maintenance-screen');
+            const header = document.getElementById('main-header');
+
+            if (inManutenzione && !modalitaAdmin) {
+                grid.style.display = 'none';
+                header.style.display = 'none';
+                maintenanceScreen.style.display = 'block';
+            } else {
+                grid.style.display = 'grid';
+                header.style.display = 'block';
+                maintenanceScreen.style.display = 'none';
+                renderEventi();
+            }
         }
 
         function svuotaERinizializzaPrezzi() {
@@ -1067,7 +1127,7 @@
         }
 
         window.eliminaEvento = function(key) {
-            if (confirm("Eliminare definitivamente questo spettacolo dalla vetrina pubblica?")) {
+            if (confirm("Eliminare definitivamento questo spettacolo dalla vetrina pubblica?")) {
                 const specificoRef = ref(db, 'eventi/' + key);
                 remove(specificoRef)
                     .then(() => {
@@ -1077,14 +1137,22 @@
             }
         }
 
+        onValue(configRef, (snapshot) => {
+            const config = snapshot.val();
+            inManutenzione = config ? !!config.manutenzione : false;
+            document.getElementById('system-maintenance-toggle').checked = inManutenzione;
+            aggiornaVisibilitaSito();
+        });
+
         onValue(eventiRef, (snapshot) => {
             const data = snapshot.val();
             eventi = data || {}; 
-            renderEventi();
-
-            const hashIniziale = window.location.hash.substring(1);
-            if (hashIniziale && eventi[hashIniziale]) {
-                gestisciAperturaModal(hashIniziale);
+            if (!inManutenzione || modalitaAdmin) {
+                renderEventi();
+                const hashIniziale = window.location.hash.substring(1);
+                if (hashIniziale && eventi[hashIniziale]) {
+                    gestisciAperturaModal(hashIniziale);
+                }
             }
         });
     </script>
