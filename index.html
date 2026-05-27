@@ -371,7 +371,7 @@
         .modal-content {
             background: #ffffff;
             display: flex;
-            max-width: 1000px;
+            max-width: 1200px;
             width: 100%;
             border-radius: 24px;
             overflow: hidden;
@@ -380,7 +380,7 @@
             border: 1px solid var(--border-color);
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 950px) {
             .modal-content { flex-direction: column; max-height: 90vh; overflow-y: auto; }
         }
 
@@ -392,19 +392,48 @@
         }
         .close-btn:hover { opacity: 1; color: var(--text-main); }
 
-        .modal-left {
-            flex: 1.1; background: #f8fafc;
+        /* Struttura a 3 colonne per schermi grandi */
+        .modal-col-locandina {
+            flex: 1; background: #f8fafc;
             display: flex; flex-direction: column;
-            align-items: center; justify-content: flex-start; padding: 30px;
+            align-items: center; justify-content: flex-start; padding: 30px 20px;
             border-right: 1px solid #f1f5f9;
-            gap: 20px;
+            gap: 15px;
             max-height: 85vh;
             overflow-y: auto;
         }
 
-        .modal-left img {
+        .modal-col-mappa {
+            flex: 1.2; background: #f8fafc;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start; padding: 30px 20px;
+            border-right: 1px solid #f1f5f9;
+            gap: 15px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-col-dettagli {
+            flex: 1.2; padding: 30px; 
+            display: flex; flex-direction: column; 
+            justify-content: flex-start; 
+            max-height: 85vh; 
+            overflow-y: auto; 
+        }
+
+        @media (max-width: 950px) {
+            .modal-col-locandina, .modal-col-mappa, .modal-col-dettagli {
+                max-height: none;
+                overflow-y: visible;
+                border-right: none;
+                border-bottom: 1px solid #f1f5f9;
+                padding: 20px;
+            }
+        }
+
+        .modal-col-locandina img, .modal-col-mappa img {
             max-width: 100%;
-            max-height: 35vh;
+            max-height: 45vh;
             object-fit: contain;
             border-radius: 14px;
             cursor: zoom-in;
@@ -412,7 +441,7 @@
         }
 
         .info-box {
-            background: #ffffff; width: 100%; padding: 16px;
+            background: #ffffff; width: 100%; padding: 14px;
             border-radius: 14px; text-align: center;
             border: 1px solid var(--border-color);
         }
@@ -429,8 +458,7 @@
         }
         .link-mappa:hover { background: var(--accent-color); color: white; }
 
-        .modal-right { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; max-height: 85vh; overflow-y: auto; }
-        .modal-right h2 { color: var(--text-main); font-size: 2rem; font-weight: 800; margin-bottom: 15px; line-height: 1.2; }
+        .modal-col-dettagli h2 { color: var(--text-main); font-size: 1.8rem; font-weight: 800; margin-bottom: 15px; line-height: 1.2; }
         
         .subtitle { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.5px; }
 
@@ -620,11 +648,13 @@
         <div class="modal-content">
             <span class="close-btn" onclick="chiudiModal()">&times;</span>
             
-            <div class="modal-left">
+            <div class="modal-col-locandina">
                 <span class="subtitle">Locandina Evento</span>
                 <img id="modal-locandina-img" src="" alt="Locandina Evento" onclick="apriMappaIngrandita(this.src)">
-                
-                <span class="subtitle" style="margin-top: 10px;">Pianta dei Posti</span>
+            </div>
+
+            <div class="modal-col-mappa">
+                <span class="subtitle">Pianta dei Posti</span>
                 <img id="modal-map-img" src="" alt="Mappa Posti" onclick="apriMappaIngrandita(this.src)">
                 
                 <div class="info-box">
@@ -634,7 +664,7 @@
                 </div>
             </div>
 
-            <div class="modal-right">
+            <div class="modal-col-dettagli">
                 <h2 id="modal-title">Titolo Evento</h2>
                 
                 <div class="subtitle">Date e Orari Spettacolo</div>
@@ -1127,7 +1157,7 @@
         }
 
         window.eliminaEvento = function(key) {
-            if (confirm("Eliminare definitivamento questo spettacolo dalla vetrina pubblica?")) {
+            if (confirm("Eliminare definitivamente questo spettacolo dalla vetrina pubblica?")) {
                 const specificoRef = ref(db, 'eventi/' + key);
                 remove(specificoRef)
                     .then(() => {
