@@ -63,7 +63,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
         }
 
         header h1 {
@@ -75,11 +75,53 @@
             text-transform: uppercase;
         }
 
+        header h2 {
+            font-size: 1.2rem;
+            color: var(--text-main);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
         header p {
             font-size: 1.15rem;
             color: var(--text-muted);
             max-width: 650px;
-            margin: 0 auto;
+            margin: 15px auto 0 auto;
+        }
+
+        /* Nuova sezione filtri */
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            max-width: 1300px;
+            margin: 0 auto 40px auto;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #ffffff;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .filter-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
         }
 
         .cinema-grid {
@@ -136,6 +178,21 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+            z-index: 5;
+        }
+
+        /* Badge evidenza fuoco */
+        .evidenza-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4500;
+            color: white;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 10px rgba(255, 69, 0, 0.4);
             z-index: 5;
         }
 
@@ -214,7 +271,8 @@
 
         #admin-panel input[type="text"], 
         #admin-panel input[type="date"], 
-        #admin-panel input[type="time"] {
+        #admin-panel input[type="time"],
+        #admin-panel select {
             width: 100%;
             padding: 10px 14px;
             margin: 6px 0;
@@ -227,7 +285,7 @@
             transition: border-color 0.2s;
         }
 
-        #admin-panel input:focus {
+        #admin-panel input:focus, #admin-panel select:focus {
             border-color: var(--accent-color);
             background: #fff;
         }
@@ -246,6 +304,11 @@
         .checkbox-container.abreve-container {
             background: #fef3c7;
             border: 1px dashed rgba(245, 158, 11, 0.4);
+        }
+
+        .checkbox-container.evidenza-container {
+            background: #fff7ed;
+            border: 1px dashed rgba(251, 146, 60, 0.5);
         }
 
         .checkbox-container.maintenance-container {
@@ -392,7 +455,6 @@
         }
         .close-btn:hover { opacity: 1; color: var(--text-main); }
 
-        /* Struttura a 3 colonne per schermi grandi */
         .modal-col-locandina {
             flex: 1; background: #f8fafc;
             display: flex; flex-direction: column;
@@ -576,6 +638,14 @@
         <p>Seleziona uno spettacolo, controlla la pianta dei posti ed effettua la prenotazione diretta.</p>
     </header>
 
+    <div class="filter-container" id="category-filter-bar">
+        <button class="filter-btn active" onclick="filtraCategoria('tutti', this)">Tutti</button>
+        <button class="filter-btn" onclick="filtraCategoria('concerti', this)">🎫 Concerti</button>
+        <button class="filter-btn" onclick="filtraCategoria('teatro', this)">🎭 Teatro</button>
+        <button class="filter-btn" onclick="filtraCategoria('sport', this)">⚽ Sport</button>
+        <button class="filter-btn" onclick="filtraCategoria('fiere', this)">🎪 Fiere</button>
+    </div>
+
     <div id="maintenance-screen">
         <h2>⚠️ Sito in Manutenzione</h2>
         <p>Stiamo aggiornando la vetrina con i nuovi eventi. Torneremo online tra pochissimo!</p>
@@ -593,7 +663,20 @@
         <label for="form-title">Titolo Evento:</label>
         <input type="text" id="form-title" placeholder="Es: Nome del concerto o dello spettacolo">
 
-        <div class="checkbox-container abreve-container">
+        <label for="form-category">Categoria Evento:</label>
+        <select id="form-category">
+            <option value="concerti">🎫 Concerti</option>
+            <option value="teatro">🎭 Teatro</option>
+            <option value="sport">⚽ Sport</option>
+            <option value="fiere">🎪 Fiere</option>
+        </select>
+
+        <div class="checkbox-container evidenza-container">
+            <input type="checkbox" id="form-evidenza">
+            <label for="form-evidenza" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">🔥 Metti in evidenza (Sposta in cima alla lista con 🔥)</label>
+        </div>
+
+        <div class="checkbox-container">
             <input type="checkbox" id="form-abreve">
             <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer;">⚠️ Imposta come "A BREVE IN VENDITA" (Blocca dettagli per i clienti)</label>
         </div>
@@ -708,6 +791,7 @@
         let modalitaAdmin = false;
         let idEventoCorrenteAperto = null;
         let inManutenzione = false;
+        let categoriaSelezionata = 'tutti'; // Variabile globale filtro corrente
 
         window.richiediAccesso = function() {
             const pw = prompt("Inserisci la password amministratore:");
@@ -731,6 +815,8 @@
             document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
             document.getElementById('form-soldout').checked = false;
             document.getElementById('form-abreve').checked = false;
+            document.getElementById('form-evidenza').checked = false;
+            document.getElementById('form-category').value = "concerti";
             modalitaAdmin = false;
             aggiornaVisibilitaSito();
         }
@@ -740,18 +826,30 @@
                 .catch(err => alert("Impossibile salvare lo stato di manutenzione: " + err.message));
         }
 
+        // Funzione per gestire il click sui pulsanti filtro
+        window.filtraCategoria = function(categoria, bottone) {
+            categoriaSelezionata = categoria;
+            const bottoni = document.querySelectorAll('.filter-btn');
+            bottoni.forEach(b => b.classList.remove('active'));
+            bottone.classList.add('active');
+            renderEventi();
+        }
+
         function aggiornaVisibilitaSito() {
             const grid = document.getElementById('event-grid');
             const maintenanceScreen = document.getElementById('maintenance-screen');
             const header = document.getElementById('main-header');
+            const filterBar = document.getElementById('category-filter-bar');
 
             if (inManutenzione && !modalitaAdmin) {
                 grid.style.display = 'none';
                 header.style.display = 'none';
+                filterBar.style.display = 'none';
                 maintenanceScreen.style.display = 'block';
             } else {
                 grid.style.display = 'grid';
                 header.style.display = 'block';
+                filterBar.style.display = 'flex';
                 maintenanceScreen.style.display = 'none';
                 renderEventi();
             }
@@ -816,15 +914,37 @@
             const grid = document.getElementById('event-grid');
             grid.innerHTML = '';
 
-            const keys = Object.keys(eventi);
+            let keys = Object.keys(eventi);
 
             if (keys.length === 0) {
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento disponibile in vetrina.</p>';
                 return;
             }
 
-            keys.forEach((key) => {
-                const ev = eventi[key];
+            // Mappatura delle chiavi con i relativi oggetti per consentire il riordinamento
+            let listaEventi = keys.map(key => {
+                return { id: key, ...eventi[key] };
+            });
+
+            // 1. Filtraggio per Categoria
+            if (categoriaSelezionata !== 'tutti') {
+                listaEventi = listaEventi.filter(ev => ev.categoria === categoriaSelezionata);
+            }
+
+            // 2. Ordinamento: gli eventi in Evidenza vanno in cima (true prima di false)
+            listaEventi.sort((a, b) => {
+                const eVizA = a.inEvidenza ? 1 : 0;
+                const eVizB = b.inEvidenza ? 1 : 0;
+                return eVizB - eVizA; 
+            });
+
+            if (listaEventi.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento presente in questa categoria.</p>';
+                return;
+            }
+
+            listaEventi.forEach((ev) => {
+                const key = ev.id;
                 
                 let stringaDatePreview = "Data non specificata";
                 if (ev.dateElenco && ev.dateElenco.length > 0) {
@@ -850,15 +970,19 @@
 
                 const classeNonCliccabile = (ev.aBreve && !modalitaAdmin) ? 'non-cliccabile' : '';
 
+                // Aggiunta del fuoco 🔥 se in evidenza
+                const titoloVisualizzato = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
+
                 const card = document.createElement('div');
                 card.className = `movie-card ${classeNonCliccabile}`;
                 card.innerHTML = `
                     ${ev.soldOut ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
                     ${ev.aBreve ? `<div class="abreve-badge">⚠️ A Breve in Vendita</div>` : ''}
+                    ${ev.inEvidenza ? `<div class="evidenza-badge">🔥 In Evidenza</div>` : ''}
                     <img src="${ev.locandina}" alt="${ev.titolo}" onclick="gestisciAperturaModal('${key}')">
                     <div class="movie-info">
                         <div>
-                            <div class="movie-title">${ev.titolo}</div>
+                            <div class="movie-title">${titoloVisualizzato}</div>
                             <div class="movie-meta-preview">${stringaDatePreview}</div>
                             <div class="movie-meta-preview" style="font-size:0.85rem; font-weight:600;">📍 ${luogoUnito}</div>
                         </div>
@@ -894,6 +1018,8 @@
             document.getElementById('form-link').value = ev.linkSite || '';
             document.getElementById('form-soldout').checked = ev.soldOut || false;
             document.getElementById('form-abreve').checked = ev.aBreve || false;
+            document.getElementById('form-evidenza').checked = ev.inEvidenza || false;
+            document.getElementById('form-category').value = ev.categoria || 'concerti';
             
             document.getElementById('admin-panel-title').innerText = "✏️ Modifica Spettacolo: " + ev.titolo;
             document.getElementById('btn-salva-evento').innerText = "Salva Modifiche";
@@ -953,6 +1079,8 @@
             const linkEsterno = document.getElementById('form-link').value.trim() || "#";
             const soldOutGenerale = document.getElementById('form-soldout').checked;
             const impostaABreve = document.getElementById('form-abreve').checked;
+            const inEvidenzaImpostato = document.getElementById('form-evidenza').checked;
+            const categoriaImpostata = document.getElementById('form-category').value;
 
             if (!titolo) { alert("Inserisci il titolo!"); return; }
             if (!currentId && (!fLocandina || !fMappa)) {
@@ -1014,12 +1142,13 @@
                 dateElenco: elencoDateInserite,
                 citta: cittaEv || "", posto: postoEv || "In attesa di conferma", locandina: locandinaRes,
                 mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
-                prezzi: listinoPrezzi, soldOut: soldOutGenerale, aBreve: impostaABreve
+                prezzi: listinoPrezzi, soldOut: soldOutGenerale, aBreve: impostaABreve,
+                inEvidenza: inEvidenzaImpostato, categoria: categoriaImpostata
             };
 
             if (!currentId) {
                 const nuovoPostRef = push(eventiRef);
-                set(nuovoPostRef, oggettoSpettacolo)
+                set(nuovoPostRef, objetoSpettacolo)
                     .then(() => resetFormEAvvisa())
                     .catch(err => alert("Errore nel salvataggio: " + err.message));
             } else {
@@ -1044,6 +1173,8 @@
             document.getElementById('form-link').value = '';
             document.getElementById('form-soldout').checked = false;
             document.getElementById('form-abreve').checked = false;
+            document.getElementById('form-evidenza').checked = false;
+            document.getElementById('form-category').value = "concerti";
             svuotaERinizializzaPrezzi();
             svuotaERinizializzaDate();
             alert("Operazione completata con successo!");
@@ -1055,7 +1186,8 @@
 
             idEventoCorrenteAperto = key;
 
-            document.getElementById('modal-title').innerText = ev.titolo;
+            // Nel titolo del modal aggiunge il fuoco se in evidenza
+            document.getElementById('modal-title').innerText = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
             document.getElementById('modal-locandina-img').src = ev.locandina || '';
             document.getElementById('modal-map-img').src = ev.mappa;
             document.getElementById('modal-map-timestamp').innerText = ev.timestamp || 'Recentemente';
