@@ -807,9 +807,8 @@
         let modalitaAdmin = false;
         let idEventoCorrenteAperto = null;
         let inManutenzione = false;
-        let categoriaSelezionata = 'tutti'; // Variabile globale filtro corrente
+        let categoriaSelezionata = 'tutti'; 
 
-        // Mappatura per ricavare solo l'emoji corrispondente alla tipologia
         const emojiCategorie = {
             'concerti': '🎤',
             'teatro': '🎭',
@@ -850,7 +849,6 @@
                 .catch(err => alert("Impossibile salvare lo stato di manutenzione: " + err.message));
         }
 
-        // Funzione per gestire il click sui pulsanti filtro
         window.filtraCategoria = function(categoria, bottone) {
             categoriaSelezionata = categoria;
             const bottoni = document.querySelectorAll('.filter-btn');
@@ -945,17 +943,14 @@
                 return;
             }
 
-            // Mappatura delle chiavi con i relativi oggetti per consentire il riordinamento
             let listaEventi = keys.map(key => {
                 return { id: key, ...eventi[key] };
             });
 
-            // 1. Filtraggio per Categoria
             if (categoriaSelezionata !== 'tutti') {
                 listaEventi = listaEventi.filter(ev => ev.categoria === categoriaSelezionata);
             }
 
-            // 2. Ordinamento: gli eventi in Evidenza vanno in cima (true prima di false)
             listaEventi.sort((a, b) => {
                 const eVizA = a.inEvidenza ? 1 : 0;
                 const eVizB = b.inEvidenza ? 1 : 0;
@@ -993,11 +988,7 @@
                 }
 
                 const classeNonCliccabile = (ev.aBreve && !modalitaAdmin) ? 'non-cliccabile' : '';
-
-                // Aggiunta del fuoco 🔥 se in evidenza
                 const titoloVisualizzato = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
-
-                // Estrazione dell'emoji corretta in base alla categoria salvata
                 const emojiDaMostrare = emojiCategorie[ev.categoria] || '🎫';
 
                 const card = document.createElement('div');
@@ -1029,11 +1020,7 @@
         window.gestisciAperturaModal = function(key) {
             const ev = eventi[key];
             if (!ev) return;
-
-            if (ev.aBreve && !modalitaAdmin) {
-                return; 
-            }
-
+            if (ev.aBreve && !modalitaAdmin) return; 
             apriModal(key);
         }
 
@@ -1214,7 +1201,6 @@
 
             idEventoCorrenteAperto = key;
 
-            // Nel titolo del modal aggiunge il fuoco se in evidenza
             document.getElementById('modal-title').innerText = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
             document.getElementById('modal-locandina-img').src = ev.locandina || '';
             document.getElementById('modal-map-img').src = ev.mappa;
