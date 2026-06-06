@@ -3,27 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vetrina Eventi Esclusivi | CentroPost@ Anaclerio Bari</title>
+    <title>Vetrina Eventi Esclusivi</title>
     <style>
         :root {
-            --bg-color: #f1f5f9;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --accent-color: #2563eb;
-            --accent-hover: #1d4ed8;
+            --accent-color: #0ea5e9;
+            --accent-hover: #0284c7;
             --whatsapp-color: #22c55e;
             --whatsapp-hover: #16a34a;
             --danger-color: #ef4444;
             --share-color: #06b6d4;
             --share-hover: #0891b2;
             --border-color: #e2e8f0;
-            --dark-overlay: rgba(15, 23, 42, 0.75);
-            --radius-lg: 16px;
-            --radius-md: 12px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --dark-overlay: rgba(15, 23, 42, 0.6);
         }
 
         * {
@@ -36,37 +31,20 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 20px;
+            padding: 30px 20px;
             font-size: 16px;
             line-height: 1.5;
-            transition: background-color 0.3s;
         }
 
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-
-        /* Top Bar & Utility */
         .top-bar {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            background: white;
-            padding: 12px 20px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .stats-counter {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-muted);
+            justify-content: flex-end;
+            max-width: 1300px;
+            margin: 0 auto 30px auto;
         }
 
         .admin-trigger-btn {
-            background: #f8fafc;
+            background: #ffffff;
             color: var(--text-main);
             border: 1px solid var(--border-color);
             padding: 10px 20px;
@@ -74,105 +52,55 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .admin-trigger-btn:hover {
-            background: #e2e8f0;
+            background: #f1f5f9;
             border-color: #cbd5e1;
         }
 
-        /* Header */
         header {
             text-align: center;
-            margin-bottom: 40px;
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            padding: 40px 20px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid white;
+            margin-bottom: 30px;
         }
 
         header h1 {
-            font-size: 2.6rem;
+            font-size: 2.8rem;
             font-weight: 800;
-            letter-spacing: -1px;
-            color: var(--accent-color);
+            letter-spacing: -0.5px;
+            color: var(--text-main);
             margin-bottom: 12px;
+            text-transform: uppercase;
         }
 
         header h2 {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: var(--text-main);
             font-weight: 600;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            margin-bottom: 5px;
         }
 
         header p {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             color: var(--text-muted);
             max-width: 650px;
-            margin: 20px auto 0 auto;
+            margin: 15px auto 0 auto;
         }
 
-        /* Toolbar Ricerca e Filtri */
-        .toolbar {
-            background: white;
-            padding: 20px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .search-wrapper {
-            position: relative;
-            width: 100%;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 14px 16px 14px 45px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            background: #f8fafc;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent-color);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            pointer-events: none;
-        }
-
+        /* Nuova sezione filtri */
         .filter-container {
             display: flex;
+            justify-content: center;
             gap: 10px;
+            max-width: 1300px;
+            margin: 0 auto 40px auto;
             flex-wrap: wrap;
         }
 
         .filter-btn {
-            background: #f8fafc;
+            background: #ffffff;
             color: var(--text-main);
             border: 1px solid var(--border-color);
             padding: 10px 20px;
@@ -180,103 +108,115 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 0.95rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             transition: all 0.2s ease;
         }
 
         .filter-btn:hover {
             background: #f1f5f9;
+            border-color: #cbd5e1;
         }
 
         .filter-btn.active {
             background: var(--accent-color);
             color: white;
             border-color: var(--accent-color);
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
         }
 
-        /* Grid Eventi */
         .cinema-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 30px;
+            max-width: 1300px;
+            margin: 0 auto;
         }
 
-        /* Card Evento */
         .movie-card {
             background: var(--card-bg);
-            border-radius: var(--radius-lg);
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
             position: relative;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.4s forwards ease-out;
-        }
-
-        @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .movie-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        /* Badge di stato */
-        .badge {
+        .soldout-badge {
             position: absolute;
             top: 15px;
+            left: 15px;
+            background: var(--danger-color);
+            color: white;
             font-weight: 700;
             padding: 6px 14px;
             border-radius: 9999px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
             z-index: 5;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .badge-left { left: 15px; }
-        .badge-right { right: 15px; }
-        .badge-soldout { background: var(--danger-color); color: white; }
-        .badge-abreve { background: #f59e0b; color: white; }
-        .badge-evidenza { background: #ff4500; color: white; }
+        .abreve-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #f59e0b;
+            color: white;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+            z-index: 5;
+        }
 
+        /* Badge evidenza fuoco */
+        .evidenza-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4500;
+            color: white;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 10px rgba(255, 69, 0, 0.4);
+            z-index: 5;
+        }
+
+        /* Badge emoji tipologia in basso a destra della locandina */
         .tipo-emoji-badge {
             position: absolute;
-            top: 325px;
+            top: 335px;
             right: 15px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(4px);
+            background: rgba(255, 255, 255, 0.9);
             font-size: 1.2rem;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 50px;
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             z-index: 5;
+            line-height: 1;
             border: 1px solid var(--border-color);
-        }
-
-        .img-container {
-            position: relative;
-            width: 100%;
-            height: 360px;
-            overflow: hidden;
-            background: #e2e8f0;
         }
 
         .movie-card img {
             width: 100%;
-            height: 100%;
+            height: 380px;
             object-fit: cover;
             cursor: pointer;
-            transition: transform 0.5s ease;
-        }
-
-        .movie-card:hover .img-container img {
-            transform: scale(1.05);
+            background: #f1f5f9;
         }
 
         .movie-card.non-cliccabile img {
@@ -285,69 +225,60 @@
 
         .movie-info {
             padding: 20px;
+            text-align: center;
             background: #ffffff;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            gap: 15px;
+            border-top: 1px solid #f1f5f9;
         }
 
         .movie-title {
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-weight: 700;
-            color: var(--text-main);
-            line-height: 1.3;
-            margin-bottom: 8px;
-        }
-
-        .meta-line {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
             margin-bottom: 6px;
+            color: var(--text-main);
         }
 
-        /* Admin Panel */
+        .movie-meta-preview {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
         #admin-panel {
             display: none;
             background: #ffffff;
-            padding: 30px;
-            border-radius: var(--radius-lg);
-            max-width: 800px;
-            margin: 0 auto 40px auto;
+            padding: 35px;
+            border-radius: 24px;
+            max-width: 720px;
+            margin: 0 auto 50px auto;
             border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         }
 
         #admin-panel h3 {
-            font-size: 1.6rem;
-            margin-bottom: 25px;
-            color: var(--text-main);
-            font-weight: 700;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-
-        .form-group {
+            font-size: 1.5rem;
             margin-bottom: 20px;
+            color: var(--text-main);
+            text-align: center;
+            font-weight: 700;
         }
 
         .form-row-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 15px;
         }
 
-        @media (max-width: 650px) {
-            .form-row-grid { grid-template-columns: 1fr; gap: 0; }
+        @media (max-width: 600px) {
+            .form-row-grid { grid-template-columns: 1fr; }
         }
 
         #admin-panel label {
             display: block;
-            margin-bottom: 6px;
+            margin-top: 15px;
             font-weight: 600;
             color: var(--text-main);
             font-size: 0.9rem;
@@ -356,97 +287,122 @@
         #admin-panel input[type="text"], 
         #admin-panel input[type="date"], 
         #admin-panel input[type="time"],
-        #admin-panel select,
-        #admin-panel input[type="file"] {
+        #admin-panel select {
             width: 100%;
-            padding: 12px;
+            padding: 10px 14px;
+            margin: 6px 0;
             background: #f8fafc;
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
+            border-radius: 10px;
             color: var(--text-main);
             font-size: 0.95rem;
             outline: none;
-            transition: all 0.2s;
+            transition: border-color 0.2s;
         }
 
         #admin-panel input:focus, #admin-panel select:focus {
             border-color: var(--accent-color);
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .checkbox-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             margin: 15px 0;
-            padding: 14px;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
-            background: #f8fafc;
+            background: #fef2f2;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px dashed rgba(239, 68, 68, 0.3);
         }
         
-        .checkbox-container input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--accent-color);
-            cursor: pointer;
+        .checkbox-container.abreve-container {
+            background: #fef3c7;
+            border: 1px dashed rgba(245, 158, 11, 0.4);
         }
 
-        .checkbox-container label { margin: 0 !important; cursor: pointer; }
+        .checkbox-container.evidenza-container {
+            background: #fff7ed;
+            border: 1px dashed rgba(251, 146, 60, 0.5);
+        }
+
+        .checkbox-container.maintenance-container {
+            background: #cbd5e1;
+            border: 1px solid #94a3b8;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
 
         .price-input-row, .date-input-row {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-            animation: fadeIn 0.2s ease;
+            gap: 10px;
+            margin-bottom: 10px;
         }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+        .price-input-row input[type="text"], .date-input-row input {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
         .input-settore { flex: 2; }
         .input-cifra { flex: 1; text-align: right; }
-        
         .input-colore {
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             cursor: pointer;
             padding: 0;
+            background: transparent;
         }
-
-        .btn-add-row {
-            background: #eff6ff;
+        .check-esaurito-settore {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            color: var(--danger-color);
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .btn-add-price, .btn-add-date {
+            background: transparent;
             color: var(--accent-color);
-            border: 1px dashed var(--accent-color);
-            padding: 10px 16px;
-            border-radius: var(--radius-md);
+            border: 1px solid var(--accent-color);
+            padding: 8px 14px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            margin-bottom: 20px;
-            width: 100%;
-            transition: all 0.2s;
+            margin-bottom: 15px;
+            display: inline-block;
+            font-size: 0.85rem;
+            transition: background 0.2s;
         }
-        .btn-add-row:hover { background: var(--accent-color); color: white; border-style: solid; }
+        .btn-add-price:hover, .btn-add-date:hover { background: #f0f9ff; }
 
         .btn-remove-row {
-            background: #fef2f2;
+            background: transparent;
             color: var(--danger-color);
-            border: 1px solid #fee2e2;
-            border-radius: var(--radius-md);
-            padding: 11px 14px;
+            border: 1px solid var(--danger-color);
+            border-radius: 8px;
+            padding: 8px 12px;
             cursor: pointer;
+            font-weight: bold;
         }
-        .btn-remove-row:hover { background: var(--danger-color); color: white; }
+        .btn-remove-row:hover { background: #fef2f2; }
 
         .admin-actions {
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 20px;
+            gap: 12px;
+            margin-top: 25px;
         }
 
         .admin-actions button {
@@ -454,10 +410,9 @@
             padding: 14px;
             font-size: 1rem;
             font-weight: bold;
-            border-radius: var(--radius-md);
+            border-radius: 10px;
             cursor: pointer;
             border: none;
-            transition: all 0.2s;
         }
 
         .btn-pubblica { background: var(--accent-color); color: white; }
@@ -468,17 +423,17 @@
         .action-card-btns {
             display: flex;
             gap: 8px;
-            margin-top: 10px;
+            margin-top: 12px;
         }
-        .edit-btn, .del-btn {
-            border: none; padding: 10px; border-radius: var(--radius-md);
-            cursor: pointer; flex: 1; font-weight: 600; font-size: 0.85rem; transition: opacity 0.2s;
+        .edit-btn {
+            background: #f59e0b; color: white; border: none; padding: 8px;
+            border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; font-size: 0.85rem;
         }
-        .edit-btn { background: #f59e0b; color: white; }
-        .del-btn { background: var(--danger-color); color: white; }
-        .edit-btn:hover, .del-btn:hover { opacity: 0.9; }
+        .del-btn {
+            background: var(--danger-color); color: white; border: none; padding: 8px;
+            border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600; font-size: 0.85rem;
+        }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -494,282 +449,299 @@
         .modal-content {
             background: #ffffff;
             display: flex;
-            max-width: 1150px;
+            max-width: 1200px;
             width: 100%;
             border-radius: 24px;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
         }
-
-        @keyframes modalScale { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         @media (max-width: 950px) {
             .modal-content { flex-direction: column; max-height: 90vh; overflow-y: auto; }
-            .tipo-emoji-badge { top: 295px; }
+            .tipo-emoji-badge { top: 315px; } /* Aggiustamento per responsive */
         }
 
         .close-btn {
             position: absolute;
-            top: 15px; right: 20px; font-size: 35px;
-            color: var(--text-muted); cursor: pointer; transition: color 0.2s; z-index: 100;
+            top: 15px; right: 20px; font-size: 38px;
+            color: var(--text-muted); cursor: pointer; opacity: 0.7; z-index: 100;
+            line-height: 1;
         }
-        .close-btn:hover { color: var(--text-main); }
+        .close-btn:hover { opacity: 1; color: var(--text-main); }
 
-        .modal-col-locandina, .modal-col-mappa {
+        .modal-col-locandina {
             flex: 1; background: #f8fafc;
             display: flex; flex-direction: column;
-            align-items: center; padding: 30px 20px;
-            border-right: 1px solid var(--border-color);
+            align-items: center; justify-content: flex-start; padding: 30px 20px;
+            border-right: 1px solid #f1f5f9;
+            gap: 15px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-col-mappa {
+            flex: 1.2; background: #f8fafc;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start; padding: 30px 20px;
+            border-right: 1px solid #f1f5f9;
             gap: 15px;
             max-height: 85vh;
             overflow-y: auto;
         }
 
         .modal-col-dettagli {
-            flex: 1.3; padding: 35px; 
+            flex: 1.2; padding: 30px; 
             display: flex; flex-direction: column; 
+            justify-content: flex-start; 
             max-height: 85vh; 
             overflow-y: auto; 
         }
 
         @media (max-width: 950px) {
             .modal-col-locandina, .modal-col-mappa, .modal-col-dettagli {
-                max-height: none; overflow-y: visible; border-right: none;
-                border-bottom: 1px solid var(--border-color); padding: 20px;
+                max-height: none;
+                overflow-y: visible;
+                border-right: none;
+                border-bottom: 1px solid #f1f5f9;
+                padding: 20px;
             }
         }
 
         .modal-col-locandina img, .modal-col-mappa img {
             max-width: 100%;
-            max-height: 40vh;
+            max-height: 45vh;
             object-fit: contain;
-            border-radius: var(--radius-md);
+            border-radius: 14px;
             cursor: zoom-in;
-            box-shadow: var(--shadow-md);
-            transition: transform 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
-        .modal-col-locandina img:hover, .modal-col-mappa img:hover { transform: scale(1.02); }
 
         .info-box {
-            background: #ffffff; width: 100%; padding: 16px;
-            border-radius: var(--radius-md); text-align: center;
+            background: #ffffff; width: 100%; padding: 14px;
+            border-radius: 14px; text-align: center;
             border: 1px solid var(--border-color);
         }
 
-        .data-label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 700; letter-spacing: 0.5px;}
-        .data-valore { font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px; }
+        .data-label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 700; letter-spacing: 0.5px;}
+        .data-valore { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px; }
 
         .link-mappa {
             display: inline-flex; align-items: center; justify-content: center;
-            padding: 12px; background: transparent; color: var(--accent-color);
+            padding: 12px 20px; background: transparent; color: var(--accent-color);
             border: 1px solid var(--accent-color); text-decoration: none;
-            border-radius: var(--radius-md); font-weight: 700; font-size: 0.9rem; width: 100%;
+            border-radius: 10px; font-weight: 700; font-size: 0.95rem; width: 100%;
             transition: all 0.2s;
         }
         .link-mappa:hover { background: var(--accent-color); color: white; }
 
-        .modal-col-dettagli h2 { color: var(--text-main); font-size: 1.9rem; font-weight: 800; margin-bottom: 20px; line-height: 1.2; }
+        .modal-col-dettagli h2 { color: var(--text-main); font-size: 1.8rem; font-weight: 800; margin-bottom: 15px; line-height: 1.2; }
         
-        .subtitle { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.5px; }
+        .subtitle { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.5px; }
 
         .event-details-badge-box {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 25px;
         }
 
         .detail-badge {
-            background: #f8fafc;
+            background: #f1f5f9;
             border-left: 4px solid var(--accent-color);
-            padding: 12px 16px;
-            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            padding: 10px 14px;
+            border-radius: 0 8px 8px 0;
             font-size: 0.95rem;
             color: var(--text-main);
-            border-top: 1px solid var(--border-color);
-            border-right: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
         }
+        .detail-badge strong { color: var(--text-main); margin-right: 4px; }
 
-        .price-list { background: #f8fafc; padding: 5px 20px; border-radius: var(--radius-md); margin-bottom: 25px; border: 1px solid var(--border-color); }
-        .price-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
+        .price-list { background: #f8fafc; padding: 15px 20px; border-radius: 14px; margin-bottom: 25px; border: 1px solid var(--border-color); }
+        .price-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
         .price-item:last-child { border-bottom: none; }
-        .price-sector-wrapper { display: flex; align-items: center; gap: 10px; }
-        .color-indicator { width: 16px; height: 16px; border-radius: 4px; display: inline-block; }
+        .price-sector-wrapper { display: flex; align-items: center; gap: 8px; }
+        .color-indicator { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); display: inline-block; }
         .price-sector { font-weight: 600; color: var(--text-main); }
         .price-amount { color: var(--whatsapp-color); font-weight: 700; }
         .price-amount.esaurito { color: var(--danger-color); text-transform: uppercase; font-size: 0.85rem;}
 
-        .modal-actions-container { display: flex; flex-direction: column; gap: 12px; }
-
-        .whatsapp-btn, .share-link-btn {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            padding: 14px; border-radius: var(--radius-md); font-weight: 700; font-size: 1.05rem;
-            cursor: pointer; border: none; text-decoration: none; transition: all 0.2s;
+        .modal-actions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .whatsapp-btn { background-color: var(--whatsapp-color); color: white; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.2); }
+
+        .whatsapp-btn {
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--whatsapp-color); color: white; text-decoration: none;
+            padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(34, 197, 94, 0.2);
+            transition: all 0.2s;
+        }
         .whatsapp-btn:hover { background-color: var(--whatsapp-hover); transform: translateY(-1px); }
-        .share-link-btn { background-color: var(--share-color); color: white; box-shadow: 0 4px 10px rgba(6, 182, 212, 0.15); }
-        .share-link-btn:hover { background-color: var(--share-hover); transform: translateY(-1px); }
 
         .soldout-notice-btn {
-            background: #fef2f2; color: var(--danger-color); border: 1px solid var(--danger-color);
-            padding: 14px; text-align: center; font-weight: 700; border-radius: var(--radius-md); text-transform: uppercase;
+            background: #fef2f2;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            padding: 14px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 12px;
+            text-transform: uppercase;
         }
 
-        /* Zoom Overlay */
+        .share-link-btn {
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--share-color); color: white; border: none;
+            padding: 12px; border-radius: 12px; font-weight: 700; font-size: 1rem;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(6, 182, 212, 0.15);
+            transition: all 0.2s;
+        }
+        .share-link-btn:hover { background-color: var(--share-hover); transform: translateY(-1px); }
+
         .zoom-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark-overlay); z-index: 2000; justify-content: center; align-items: center;
-            cursor: zoom-out; backdrop-filter: blur(10px);
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+            backdrop-filter: blur(5px);
         }
-        .zoom-overlay img { max-width: 95%; max-height: 92vh; object-fit: contain; border-radius: var(--radius-md); }
+        .zoom-overlay img {
+            max-width: 90%; max-height: 90vh;
+            object-fit: contain; border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
 
-        /* Maintenance Screen */
         #maintenance-screen {
-            display: none; text-align: center; padding: 60px 20px; max-width: 600px;
-            margin: 40px auto; background: #ffffff; border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md); border: 1px solid var(--border-color);
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
         }
-        #maintenance-screen h2 { font-size: 2rem; color: #1e293b; margin-bottom: 15px; }
-
-        /* Loader */
-        .loader-container {
-            display: flex; justify-content: center; align-items: center; padding: 60px; grid-column: 1/-1;
+        #maintenance-screen h2 {
+            font-size: 2rem;
+            color: #1e293b;
+            margin-bottom: 15px;
         }
-        .spinner {
-            width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid var(--accent-color);
-            border-radius: 50%; animation: spin 1s linear infinite;
+        #maintenance-screen p {
+            color: #64748b;
+            font-size: 1.1rem;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="top-bar">
-            <div class="stats-counter" id="active-events-counter">Caricamento eventi...</div>
-            <button class="admin-trigger-btn" onclick="richiediAccesso()">🔒 Area Riservata</button>
+    <div class="top-bar">
+        <button class="admin-trigger-btn" onclick="richiediAccesso()">Area Riservata</button>
+    </div>
+
+    <header id="main-header">
+        <h1>CentroPost@ Anaclerio Bari</h1>
+        <h2>Via Don Giovanni Bosco 19 70123 Bari</h2>
+        <h2>Punto Autorizzato: TicketOne - Vivaticket - CiaoTicket</h2>
+        <p>Seleziona uno spettacolo, controlla la pianta dei posti ed effettua la prenotazione diretta.</p>
+    </header>
+
+    <div class="filter-container" id="category-filter-bar">
+        <button class="filter-btn active" onclick="filtraCategoria('tutti', this)">Tutti</button>
+        <button class="filter-btn" onclick="filtraCategoria('concerti', this)">🎤 Concerti</button>
+        <button class="filter-btn" onclick="filtraCategoria('teatro', this)">🎭 Teatro</button>
+        <button class="filter-btn" onclick="filtraCategoria('sport', this)">⚽ Sport</button>
+        <button class="filter-btn" onclick="filtraCategoria('fiere', this)">🎪 Fiere</button>
+    </div>
+
+    <div id="maintenance-screen">
+        <h2>⚠️ Sito in Manutenzione</h2>
+        <p>Stiamo aggiornando la vetrina con i nuovi eventi. Torneremo online tra pochissimo!</p>
+    </div>
+
+    <div id="admin-panel">
+        <h3 id="admin-panel-title">Aggiungi Nuovo Spettacolo</h3>
+        <input type="hidden" id="edit-id" value="">
+        
+        <div class="checkbox-container maintenance-container">
+            <input type="checkbox" id="system-maintenance-toggle" onchange="cambiaStatoManutenzione(this.checked)">
+            <label for="system-maintenance-toggle" style="margin:0; color:#1e293b; cursor:pointer; font-weight: bold;">🔧 MODALITÀ MANUTENZIONE SITO (Scomparirà tutto al cliente)</label>
         </div>
 
-        <header id="main-header">
-            <h1>CentroPost@ Anaclerio Bari</h1>
-            <h2>📍 Via Don Giovanni Bosco 19 70123 Bari</h2>
-            <h2>🎟️ Punto Autorizzato: TicketOne - Vivaticket - CiaoTicket</h2>
-            <p>Seleziona uno spettacolo, controlla la pianta dei posti ed effettua la prenotazione diretta in pochi clic.</p>
-        </header>
+        <label for="form-title">Titolo Evento:</label>
+        <input type="text" id="form-title" placeholder="Es: Nome del concerto o dello spettacolo">
 
-        <div class="toolbar" id="search-filter-toolbar">
-            <div class="search-wrapper">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="global-search" class="search-input" placeholder="Cerca per titolo, artista, città o location..." oninput="eseguiFiltri()">
-            </div>
-            <div class="filter-container" id="category-filter-bar">
-                <button class="filter-btn active" data-cat="tutti" onclick="cambiaCategoria('tutti', this)">Tutti gli eventi</button>
-                <button class="filter-btn" data-cat="concerti" onclick="cambiaCategoria('concerti', this)">🎤 Concerti</button>
-                <button class="filter-btn" data-cat="teatro" onclick="cambiaCategoria('teatro', this)">🎭 Teatro</button>
-                <button class="filter-btn" data-cat="sport" onclick="cambiaCategoria('sport', this)">⚽ Sport</button>
-                <button class="filter-btn" data-cat="fiere" onclick="cambiaCategoria('fiere', this)">🎪 Fiere</button>
-            </div>
+        <label for="form-category">Categoria Evento:</label>
+        <select id="form-category">
+            <option value="concerti">🎤 Concerti</option>
+            <option value="teatro">🎭 Teatro</option>
+            <option value="sport">⚽ Sport</option>
+            <option value="fiere">🎪 Fiere</option>
+        </select>
+
+        <div class="checkbox-container evidenza-container">
+            <input type="checkbox" id="form-evidenza">
+            <label for="form-evidenza" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">🔥 Metti in evidenza (Sposta in cima alla lista con 🔥)</label>
         </div>
 
-        <div id="maintenance-screen">
-            <h2>⚠️ Sito in Manutenzione</h2>
-            <p>Stiamo aggiornando la vetrina con i nuovi eventi. Torneremo online tra pochissimo!</p>
+        <div class="checkbox-container">
+            <input type="checkbox" id="form-abreve">
+            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer;">⚠️ Imposta come "A BREVE IN VENDITA" (Blocca dettagli per i clienti)</label>
         </div>
 
-        <div id="admin-panel">
-            <h3 id="admin-panel-title">Aggiungi Nuovo Spettacolo</h3>
-            <input type="hidden" id="edit-id" value="">
-            
-            <div class="checkbox-container" style="background: #cbd5e1; border-color: #94a3b8;">
-                <input type="checkbox" id="system-maintenance-toggle" onchange="cambiaStatoManutenzione(this.checked)">
-                <label for="system-maintenance-toggle" style="color:#1e293b; font-weight: bold;">🔧 ABILITA MODALITÀ MANUTENZIONE (Nasconde il sito ai clienti)</label>
-            </div>
+        <div class="checkbox-container">
+            <input type="checkbox" id="form-soldout">
+            <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE)</label>
+        </div>
+        
+        <label>Date e Orari Evento:</label>
+        <div id="dynamic-dates-container"></div>
+        <button type="button" class="btn-add-date" onclick="aggiungiRigaData()">➕ Aggiungi un'altra Data</button>
 
-            <div class="form-group">
-                <label for="form-title">Titolo Evento / Artista:</label>
-                <input type="text" id="form-title" placeholder="Es: Vasco Rossi Live 2026">
+        <div class="form-row-grid">
+            <div>
+                <label for="form-city">Città:</label>
+                <input type="text" id="form-city" placeholder="Es: Bari, Roma...">
             </div>
-
-            <div class="form-group">
-                <label for="form-category">Categoria Evento:</label>
-                <select id="form-category">
-                    <option value="concerti">🎤 Concerti</option>
-                    <option value="teatro">🎭 Teatro</option>
-                    <option value="sport">⚽ Sport</option>
-                    <option value="fiere">🎪 Fiere</option>
-                </select>
-            </div>
-
-            <div class="form-row-grid">
-                <div class="checkbox-container" style="background: #fff7ed; border-color: #fdba74;">
-                    <input type="checkbox" id="form-evidenza">
-                    <label for="form-evidenza" style="font-weight: bold; color: #c2410c;">🔥 Metti in evidenza</label>
-                </div>
-
-                <div class="checkbox-container" style="background: #fef3c7; border-color: #fde68a;">
-                    <input type="checkbox" id="form-abreve">
-                    <label for="form-abreve" style="font-weight: bold; color: #b45309;">⚠️ A breve in vendita</label>
-                </div>
-            </div>
-
-            <div class="checkbox-container" style="background: #fef2f2; border-color: #fca5a5; margin-top: 0;">
-                <input type="checkbox" id="form-soldout">
-                <label for="form-soldout" style="font-weight: bold; color: #b91c1c;">🔴 Evento Sold Out Totale</label>
-            </div>
-            
-            <div class="form-group">
-                <label>Date e Orari Spettacolo:</label>
-                <div id="dynamic-dates-container"></div>
-                <button type="button" class="btn-add-row" onclick="aggiungiRigaData()">➕ Aggiungi un'altra data / orario</button>
-            </div>
-
-            <div class="form-row-grid">
-                <div class="form-group">
-                    <label for="form-city">Città:</label>
-                    <input type="text" id="form-city" placeholder="Es: Bari">
-                </div>
-                <div class="form-group">
-                    <label for="form-location">Location / Struttura:</label>
-                    <input type="text" id="form-location" placeholder="Es: Stadio San Nicola">
-                </div>
-            </div>
-
-            <div class="form-row-grid">
-                <div class="form-group">
-                    <label for="form-locandina">Locandina Spettacolo:</label>
-                    <input type="file" id="form-locandina" accept="image/*">
-                </div>
-                <div class="form-group">
-                    <label for="form-mappa">Pianta Settori / Posti:</label>
-                    <input type="file" id="form-mappa" accept="image/*">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="form-link">Link Esterno Mappa Interattiva (Opzionale):</label>
-                <input type="text" id="form-link" placeholder="Es: https://www.ticketone.it/...">
-            </div>
-            
-            <div class="form-group">
-                <label>Listino Tariffe per Settori:</label>
-                <div id="dynamic-price-container"></div>
-                <button type="button" class="btn-add-row" onclick="aggiungiRigaPrezzo()">➕ Aggiungi settore e prezzo</button>
-            </div>
-            
-            <div class="admin-actions">
-                <button class="btn-pubblica" id="btn-salva-evento" onclick="salvaInVetrina()">Pubblica Evento</button>
-                <button class="btn-esci" onclick="chiudiSessioneAdmin()">Esci Area Admin</button>
+            <div>
+                <label for="form-location">Via / Location dell'Evento:</label>
+                <input type="text" id="form-location" placeholder="Es: Teatro Olimpico, Stadio...">
             </div>
         </div>
 
-        <div class="cinema-grid" id="event-grid">
-            <div class="loader-container"><div class="spinner"></div></div>
+        <div class="form-row-grid" style="margin-top:0;">
+            <div>
+                <label for="form-locandina">Immagine Locandina:</label>
+                <input type="file" id="form-locandina" accept="image/*">
+            </div>
+            <div>
+                <label for="form-mappa">Immagine Pianta dei Posti:</label>
+                <input type="file" id="form-mappa" accept="image/*">
+            </div>
+        </div>
+
+        <label for="form-link">Link Externo Mappa Ufficiale (Opzionale):</label>
+        <input type="text" id="form-link" placeholder="Es: https://link-biglietteria.com">
+        
+        <label>Listino Prezzi per Settori (Spunta "Esaurito" se terminati):</label>
+        <div id="dynamic-price-container"></div>
+        <button type="button" class="btn-add-price" onclick="aggiungiRigaPrezzo()">➕ Aggiungi Settore Prezzo</button>
+        
+        <div class="admin-actions">
+            <button class="btn-pubblica" id="btn-salva-evento" onclick="salvaInVetrina()">Pubblica Evento</button>
+            <button class="btn-esci" onclick="chiudiSessioneAdmin()">Chiudi Sessione</button>
         </div>
     </div>
+
+    <div class="cinema-grid" id="event-grid"></div>
 
     <div class="modal" id="event-modal">
         <div class="modal-content">
@@ -777,42 +749,43 @@
             
             <div class="modal-col-locandina">
                 <span class="subtitle">Locandina Evento</span>
-                <img id="modal-locandina-img" src="" alt="Locandina" onclick="apriMappaIngrandita(this.src)">
+                <img id="modal-locandina-img" src="" alt="Locandina Evento" onclick="apriMappaIngrandita(this.src)">
             </div>
 
             <div class="modal-col-mappa">
                 <span class="subtitle">Pianta dei Posti</span>
-                <img id="modal-map-img" src="" alt="Mappa dei posti" onclick="apriMappaIngrandita(this.src)">
+                <img id="modal-map-img" src="" alt="Mappa Posti" onclick="apriMappaIngrandita(this.src)">
+                
                 <div class="info-box">
-                    <span class="data-label">Ultimo Aggiornamento Pianta:</span>
+                    <span class="data-label">MAPPA AGGIORNATA IL:</span>
                     <div id="modal-map-timestamp" class="data-valore">--/--/---- --:--</div>
-                    <a href="#" id="link-mappa-btn" class="link-mappa" target="_blank">🗺️ Apri Link Esterno Ufficiale</a>
+                    <a href="#" id="link-mappa-btn" class="link-mappa" target="_blank">🗺️ VEDI MAPPA AGGIORNATA</a>
                 </div>
             </div>
 
             <div class="modal-col-dettagli">
-                <h2 id="modal-title">---</h2>
+                <h2 id="modal-title">Titolo Evento</h2>
                 
-                <div class="subtitle">Calendario Date dello Spettacolo</div>
+                <div class="subtitle">Date e Orari Spettacolo</div>
                 <div class="event-details-badge-box" id="modal-dates-list"></div>
 
                 <div class="event-details-badge-box">
-                    <div class="detail-badge" id="modal-detail-location">📍 ---</div>
+                    <div class="detail-badge" id="modal-detail-location">📍 <strong>Luogo:</strong> ---</div>
                 </div>
 
-                <div class="subtitle">Disponibilità Posti e Tariffe</div>
+                <div class="subtitle">Tariffe e Settori</div>
                 <div class="price-list" id="modal-prices"></div>
                 
                 <div class="modal-actions-container">
                     <div id="whatsapp-action-wrapper"></div>
-                    <button class="share-link-btn" id="share-link-btn" onclick="copiaLinkEventoCorrente()">🔗 Condividi Evento / Copia Link</button>
+                    <button class="share-link-btn" id="share-link-btn" onclick="copiaLinkEventoCorrente()">🔗 Copia Link Evento</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="zoom-overlay" id="map-zoom-container" onclick="chiudiMappaIngrandita()">
-        <img id="zoomed-map-img" src="" alt="Ingrandimento">
+        <img id="zoomed-map-img" src="" alt="Mappa Ingrandita">
     </div>
 
     <script type="module">
@@ -836,10 +809,15 @@
         let inManutenzione = false;
         let categoriaSelezionata = 'tutti'; 
 
-        const emojiCategorie = { 'concerti': '🎤', 'teatro': '🎭', 'sport': '⚽', 'fiere': '🎪' };
+        const emojiCategorie = {
+            'concerti': '🎤',
+            'teatro': '🎭',
+            'sport': '⚽',
+            'fiere': '🎪'
+        };
 
         window.richiediAccesso = function() {
-            const pw = prompt("Inserisci la chiave d'accesso amministratore:");
+            const pw = prompt("Inserisci la password amministratore:");
             if (!pw) return;
             if (btoa(JSON.stringify(pw)) === "IjIwMjYi") {
                 modalitaAdmin = true;
@@ -847,9 +825,9 @@
                 svuotaERinizializzaPrezzi();
                 svuotaERinizializzaDate();
                 aggiornaVisibilitaSito();
-                document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
+                alert("Identità verificata correttamente.");
             } else {
-                alert("Chiave d'accesso non valida.");
+                alert("Password errata!");
             }
         }
 
@@ -867,66 +845,74 @@
         }
 
         window.cambiaStatoManutenzione = function(stato) {
-            set(configRef, { manutenzione: stato }).catch(err => alert("Errore di rete: " + err.message));
+            set(configRef, { manutenzione: stato })
+                .catch(err => alert("Impossibile salvare lo stato di manutenzione: " + err.message));
         }
 
-        window.cambiaCategoria = function(categoria, bottone) {
+        window.filtraCategoria = function(categoria, bottone) {
             categoriaSelezionata = categoria;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            const bottoni = document.querySelectorAll('.filter-btn');
+            bottoni.forEach(b => b.classList.remove('active'));
             bottone.classList.add('active');
-            eseguiFiltri();
+            renderEventi();
         }
 
         function aggiornaVisibilitaSito() {
             const grid = document.getElementById('event-grid');
             const maintenanceScreen = document.getElementById('maintenance-screen');
             const header = document.getElementById('main-header');
-            const toolbar = document.getElementById('search-filter-toolbar');
+            const filterBar = document.getElementById('category-filter-bar');
 
             if (inManutenzione && !modalitaAdmin) {
                 grid.style.display = 'none';
                 header.style.display = 'none';
-                toolbar.style.display = 'none';
+                filterBar.style.display = 'none';
                 maintenanceScreen.style.display = 'block';
             } else {
                 grid.style.display = 'grid';
                 header.style.display = 'block';
-                toolbar.style.display = 'flex';
+                filterBar.style.display = 'flex';
                 maintenanceScreen.style.display = 'none';
-                eseguiFiltri();
+                renderEventi();
             }
         }
 
         function svuotaERinizializzaPrezzi() {
-            document.getElementById('dynamic-price-container').innerHTML = '';
-            aggiungiRigaPrezzo("", "", false, "#2563eb");
+            const container = document.getElementById('dynamic-price-container');
+            container.innerHTML = '';
+            aggiungiRigaPrezzo("", "", false, "#0ea5e9");
         }
 
         function svuotaERinizializzaDate() {
-            document.getElementById('dynamic-dates-container').innerHTML = '';
+            const container = document.getElementById('dynamic-dates-container');
+            container.innerHTML = '';
             aggiungiRigaData("", "");
         }
 
         window.gestisciInputPrezzo = function(input) {
             let valore = input.value.replace(/[^\d]/g, "");
-            if (valore === "") { input.value = ""; return; }
+            if (valore === "") {
+                input.value = "";
+                return;
+            }
             let intero = valore.slice(0, -2) || "0";
             let decimali = valore.slice(-2);
             if (decimali.length === 1) decimali = "0" + decimali;
             input.value = "€ " + parseInt(intero, 10) + "," + decimali;
         }
 
-        window.aggiungiRigaPrezzo = function(settore = "", cifra = "", esaurito = false, colore = "#2563eb") {
+        window.aggiungiRigaPrezzo = function(settore = "", cifra = "", esaurito = false, colore = "#0ea5e9") {
             const container = document.getElementById('dynamic-price-container');
             const row = document.createElement('div');
             row.className = 'price-input-row';
+            
             const rId = "chk_" + Math.random().toString(36).substring(2, 7);
             
             row.innerHTML = `
-                <input type="text" class="input-settore" placeholder="Es: Tribuna Numerata" value="${settore}">
-                <input type="text" class="input-cifra" placeholder="Es: 50,00" value="${cifra}" oninput="gestisciInputPrezzo(this)">
+                <input type="text" class="input-settore" placeholder="Es: Platea" value="${settore}">
+                <input type="text" class="input-cifra" placeholder="Es: 40,00" value="${cifra}" oninput="gestisciInputPrezzo(this)">
                 <input type="color" class="input-colore" value="${colore}">
-                <label style="display:inline-flex; align-items:center; gap:5px; color:var(--danger-color); font-weight:bold; font-size:0.85rem;" for="${rId}">
+                <label class="check-esaurito-settore" for="${rId}">
                     <input type="checkbox" id="${rId}" class="input-esaurito" ${esaurito ? 'checked' : ''}> Esaurito
                 </label>
                 <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">❌</button>
@@ -946,83 +932,83 @@
             container.appendChild(row);
         }
 
-        // Sistema di Ricerca & Filtraggio Unificato
-        window.eseguiFiltri = function() {
-            const termineRicerca = document.getElementById('global-search').value.toLowerCase().trim();
+        function renderEventi() {
             const grid = document.getElementById('event-grid');
             grid.innerHTML = '';
 
-            let chiavi = Object.keys(eventi);
-            if (chiavi.length === 0) {
-                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">Nessun evento in vetrina al momento.</p>';
-                document.getElementById('active-events-counter').innerText = "Nessun evento attivo";
+            let keys = Object.keys(eventi);
+
+            if (keys.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento disponibile in vetrina.</p>';
                 return;
             }
 
-            let filtrati = chiavi.map(k => ({ id: k, ...eventi[k] }));
+            let listaEventi = keys.map(key => {
+                return { id: key, ...eventi[key] };
+            });
 
-            // 1. Filtro Categoria
             if (categoriaSelezionata !== 'tutti') {
-                filtrati = filtrati.filter(ev => ev.categoria === categoriaSelezionata);
+                listaEventi = listaEventi.filter(ev => ev.categoria === categoriaSelezionata);
             }
 
-            // 2. Filtro Barra di Ricerca Globale
-            if (termineRicerca !== '') {
-                filtrati = filtrati.filter(ev => {
-                    return ev.titolo.toLowerCase().includes(termineRicerca) || 
-                           (ev.citta && ev.citta.toLowerCase().includes(termineRicerca)) || 
-                           (ev.posto && ev.posto.toLowerCase().includes(termineRicerca));
-                });
-            }
+            listaEventi.sort((a, b) => {
+                const eVizA = a.inEvidenza ? 1 : 0;
+                const eVizB = b.inEvidenza ? 1 : 0;
+                return eVizB - eVizA; 
+            });
 
-            // 3. Ordinamento (In evidenza per primi)
-            filtrati.sort((a, b) => (b.inEvidenza ? 1 : 0) - (a.inEvidenza ? 1 : 0));
-
-            document.getElementById('active-events-counter').innerText = `${filtrati.length} eventi trovati`;
-
-            if (filtrati.length === 0) {
-                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">Nessun risultato corrispondente ai criteri cercati.</p>';
+            if (listaEventi.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento presente in questa categoria.</p>';
                 return;
             }
 
-            // Render delle Card con Staggered Animation Delay
-            filtrati.forEach((ev, index) => {
+            listaEventi.forEach((ev) => {
+                const key = ev.id;
+                
                 let stringaDatePreview = "Data non specificata";
                 if (ev.dateElenco && ev.dateElenco.length > 0) {
                     const opzioni = { day: '2-digit', month: 'short', year: 'numeric' };
                     const d1 = ev.dateElenco[0];
-                    let tData = d1.data ? new Date(d1.data).toLocaleDateString('it-IT', opzioni) : 'Da definire';
-                    let tOra = d1.ora ? ' ore ' + d1.ora : '';
-                    stringaDatePreview = `📅 ${tData}${tOra}`;
-                    if(ev.dateElenco.length > 1) stringaDatePreview += ` (+${ev.dateElenco.length - 1} date)`;
+                    let testoData = d1.data ? new Date(d1.data).toLocaleDateString('it-IT', opzioni) : 'Da definire';
+                    let testoOra = d1.ora ? ' ore ' + d1.ora : '';
+                    stringaDatePreview = `📅 ${testoData}${testoOra}`;
+                    if(ev.dateElenco.length > 1) {
+                        stringaDatePreview += ` (+${ev.dateElenco.length - 1} date)`;
+                    }
+                } else if(ev.data) {
+                    const opzioni = { day: '2-digit', month: 'short', year: 'numeric' };
+                    stringaDatePreview = `📅 ${new Date(ev.data).toLocaleDateString('it-IT', opzioni)} ${ev.ora ? 'ore ' + ev.ora : ''}`;
                 }
 
-                let locationText = ev.citta && ev.posto ? `${ev.citta} · ${ev.posto}` : (ev.citta || ev.posto || "Location da definire");
-                const bloccatoClienti = (ev.aBreve && !modalitaAdmin);
-                const emoji = emojiCategorie[ev.categoria] || '🎫';
+                let luogoUnito = "";
+                if (ev.citta && ev.posto) {
+                    luogoUnito = ev.citta + " · " + ev.posto;
+                } else {
+                    luogoUnito = ev.citta || ev.posto || "In attesa di conferma";
+                }
+
+                const classeNonCliccabile = (ev.aBreve && !modalitaAdmin) ? 'non-cliccabile' : '';
+                const titoloVisualizzato = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
+                const emojiDaMostrare = emojiCategorie[ev.categoria] || '🎫';
 
                 const card = document.createElement('div');
-                card.className = `movie-card ${bloccatoClienti ? 'non-cliccabile' : ''}`;
-                card.style.animationDelay = `${index * 0.05}s`;
-                
+                card.className = `movie-card ${classeNonCliccabile}`;
                 card.innerHTML = `
-                    ${ev.soldOut ? `<div class="badge badge-left badge-soldout">🔴 Sold Out</div>` : ''}
-                    ${ev.aBreve ? `<div class="badge badge-left badge-abreve">⚠️ A breve in vendita</div>` : ''}
-                    ${ev.inEvidenza ? `<div class="badge badge-right badge-evidenza">🔥 In evidenza</div>` : ''}
-                    <div class="tipo-emoji-badge">${emoji}</div>
-                    <div class="img-container">
-                        <img src="${ev.locandina}" alt="${ev.titolo}" onclick="gestisciAperturaModal('${ev.id}')">
-                    </div>
+                    ${ev.soldOut ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
+                    ${ev.aBreve ? `<div class="abreve-badge">⚠️ A Breve in Vendita</div>` : ''}
+                    ${ev.inEvidenza ? `<div class="evidenza-badge">🔥 In Evidenza</div>` : ''}
+                    <div class="tipo-emoji-badge">${emojiDaMostrare}</div>
+                    <img src="${ev.locandina}" alt="${ev.titolo}" onclick="gestisciAperturaModal('${key}')">
                     <div class="movie-info">
                         <div>
-                            <div class="movie-title">${ev.titolo}</div>
-                            <div class="meta-line">${stringaDatePreview}</div>
-                            <div class="meta-line" style="font-weight:600; color:var(--text-main);">📍 ${locationText}</div>
+                            <div class="movie-title">${titoloVisualizzato}</div>
+                            <div class="movie-meta-preview">${stringaDatePreview}</div>
+                            <div class="movie-meta-preview" style="font-size:0.85rem; font-weight:600;">📍 ${luogoUnito}</div>
                         </div>
                         ${modalitaAdmin ? `
                             <div class="action-card-btns">
-                                <button class="edit-btn" onclick="avviaModifica('${ev.id}')">✏️ Modifica</button>
-                                <button class="del-btn" onclick="eliminaEvento('${ev.id}')">❌ Elimina</button>
+                                <button class="edit-btn" onclick="avviaModifica('${key}')">✏️ Modifica</button>
+                                <button class="del-btn" onclick="eliminaEvento('${key}')">❌ Rimuovi</button>
                             </div>
                         ` : ''}
                     </div>
@@ -1033,7 +1019,8 @@
 
         window.gestisciAperturaModal = function(key) {
             const ev = eventi[key];
-            if (!ev || (ev.aBreve && !modalitaAdmin)) return; 
+            if (!ev) return;
+            if (ev.aBreve && !modalitaAdmin) return; 
             apriModal(key);
         }
 
@@ -1050,12 +1037,14 @@
             document.getElementById('form-category').value = ev.categoria || 'concerti';
             
             document.getElementById('admin-panel-title').innerText = "✏️ Modifica Spettacolo: " + ev.titolo;
-            document.getElementById('btn-salva-evento').innerText = "Applica Modifiche";
+            document.getElementById('btn-salva-evento').innerText = "Salva Modifiche";
 
             const datesContainer = document.getElementById('dynamic-dates-container');
             datesContainer.innerHTML = '';
             if (ev.dateElenco && ev.dateElenco.length > 0) {
                 ev.dateElenco.forEach(d => aggiungiRigaData(d.data, d.ora));
+            } else if (ev.data) {
+                aggiungiRigaData(ev.data, ev.ora || '');
             } else {
                 aggiungiRigaData("", "");
             }
@@ -1063,16 +1052,15 @@
             const container = document.getElementById('dynamic-price-container');
             container.innerHTML = '';
             if (ev.prezzi && ev.prezzi.length > 0) {
-                ev.prezzi.forEach(p => aggiungiRigaPrezzo(p.settore, p.prezzo, p.esaurito || false, p.colore || "#2563eb"));
+                ev.prezzi.forEach(p => aggiungiRigaPrezzo(p.settore, p.prezzo, p.esaurito || false, p.colore || "#0ea5e9"));
             } else {
-                aggiungiRigaPrezzo("", "", false, "#2563eb");
+                aggiungiRigaPrezzo("", "", false, "#0ea5e9");
             }
 
             document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Compressione Immagini Avanzata sul Client (Risoluzione e Qualità controllate)
-        function elaboraImmagine(file, maxDimension = 1000) {
+        function elaboraImmagine(file, maxDimension = 900) {
             return new Promise((resolve) => {
                 if (!file) resolve(null);
                 const reader = new FileReader();
@@ -1090,7 +1078,7 @@
                         canvas.width = w; canvas.height = h;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, w, h);
-                        resolve(canvas.toDataURL('image/jpeg', 0.80)); 
+                        resolve(canvas.toDataURL('image/jpeg', 0.75));
                     };
                 };
             });
@@ -1109,33 +1097,40 @@
             const inEvidenzaImpostato = document.getElementById('form-evidenza').checked;
             const categoriaImpostata = document.getElementById('form-category').value;
 
-            if (!titolo) { alert("Il titolo dell'evento è obbligatorio."); return; }
+            if (!titolo) { alert("Inserisci il titolo!"); return; }
             if (!currentId && (!fLocandina || !fMappa)) {
-                alert("Devi allegare sia la locandina che la pianta posti per un nuovo evento.");
+                alert("Locandina e mappa sono obbligatorie per i nuovi inserimenti!");
                 return;
             }
 
             let elencoDateInserite = [];
-            document.querySelectorAll('.date-input-row').forEach(row => {
+            const righeDate = document.querySelectorAll('.date-input-row');
+            righeDate.forEach(row => {
                 const dVal = row.querySelector('.input-data-singola').value;
                 const oVal = row.querySelector('.input-ora-singola').value;
-                if(dVal) elencoDateInserite.push({ data: dVal, ora: oVal });
+                if(dVal) {
+                    elencoDateInserite.push({ data: dVal, ora: oVal });
+                }
             });
 
+            const righPrezzo = document.querySelectorAll('.price-input-row');
             let listinoPrezzi = [];
-            document.querySelectorAll('.price-input-row').forEach(row => {
+            righPrezzo.forEach(row => {
                 const sett = row.querySelector('.input-settore').value.trim();
                 const cifr = row.querySelector('.input-cifra').value.trim();
                 const colr = row.querySelector('.input-colore').value;
                 const esauritoSingolo = row.querySelector('.input-esaurito').checked;
                 if(sett || cifr) {
                     listinoPrezzi.push({ 
-                        settore: sett || 'Intero', prezzo: cifr || 'N.D.', colore: colr, esaurito: esauritoSingolo
+                        settore: sett || 'Intero', 
+                        prezzo: cifr || 'N.D.',
+                        colore: colr,
+                        esaurito: esauritoSingolo
                     });
                 }
             });
 
-            if(listinoPrezzi.length === 0) listinoPrezzi.push({ settore: 'Posto Unico', prezzo: 'N.D.', colore: '#2563eb', esaurito: false });
+            if(listinoPrezzi.length === 0) listinoPrezzi.push({ settore: 'Posto Unico', prezzo: 'N.D.', colore: '#0ea5e9', esaurito: false });
 
             let locandinaRes = currentId ? eventi[currentId].locandina : "";
             let mappaRes = currentId ? eventi[currentId].mappa : "";
@@ -1144,75 +1139,112 @@
             if (fLocandina) locandinaRes = await elaboraImmagine(fLocandina, 600);
             if (fMappa) {
                 mappaRes = await elaboraImmagine(fMappa, 1000);
-                timestampString = new Date().toLocaleDateString('it-IT', {
+                const oraCorrente = new Date();
+                timestampString = oraCorrente.toLocaleDateString('it-IT', {
                     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
             } else if (!currentId) {
-                timestampString = new Date().toLocaleDateString('it-IT', {
+                const oraCorrente = new Date();
+                timestampString = oraCorrente.toLocaleDateString('it-IT', {
                     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
             }
 
             const oggettoSpettacolo = {
-                titolo, dateElenco: elencoDateInserite,
-                citta: cittaEv, posto: postoEv, locandina: locandinaRes,
+                titolo: titolo, 
+                data: elencoDateInserite.length > 0 ? elencoDateInserite[0].data : "", 
+                ora: elencoDateInserite.length > 0 ? elencoDateInserite[0].ora : "",
+                dateElenco: elencoDateInserite,
+                citta: cittaEv || "", posto: postoEv || "In attesa di conferma", locandina: locandinaRes,
                 mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
                 prezzi: listinoPrezzi, soldOut: soldOutGenerale, aBreve: impostaABreve,
                 inEvidenza: inEvidenzaImpostato, categoria: categoriaImpostata
             };
 
-            const targetRef = currentId ? ref(db, 'eventi/' + currentId) : push(eventiRef);
-            
-            set(targetRef, oggettoSpettacolo)
-                .then(() => {
-                    chiudiSessioneAdmin();
-                    alert("Salvataggio ed elaborazione completati!");
-                })
-                .catch(err => alert("Errore: " + err.message));
+            if (!currentId) {
+                const nuovoPostRef = push(eventiRef);
+                set(nuovoPostRef, oggettoSpettacolo)
+                    .then(() => resetFormEAvvisa())
+                    .catch(err => alert("Errore nel salvataggio: " + err.message));
+            } else {
+                const specificoRef = ref(db, 'eventi/' + currentId);
+                set(specificoRef, oggettoSpettacolo)
+                    .then(() => {
+                        document.getElementById('edit-id').value = "";
+                        document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
+                        document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
+                        resetFormEAvvisa();
+                    })
+                    .catch(err => alert("Errore nella modifica: " + err.message));
+            }
+        }
+
+        function resetFormEAvvisa() {
+            document.getElementById('form-title').value = '';
+            document.getElementById('form-city').value = '';
+            document.getElementById('form-location').value = '';
+            document.getElementById('form-locandina').value = '';
+            document.getElementById('form-mappa').value = '';
+            document.getElementById('form-link').value = '';
+            document.getElementById('form-soldout').checked = false;
+            document.getElementById('form-abreve').checked = false;
+            document.getElementById('form-evidenza').checked = false;
+            document.getElementById('form-category').value = "concerti";
+            svuotaERinizializzaPrezzi();
+            svuotaERinizializzaDate();
+            alert("Operazione completata con successo!");
         }
 
         window.apriModal = function(key) {
             const ev = eventi[key];
             if(!ev) return;
+
             idEventoCorrenteAperto = key;
 
-            document.getElementById('modal-title').innerText = ev.titolo;
+            document.getElementById('modal-title').innerText = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
             document.getElementById('modal-locandina-img').src = ev.locandina || '';
             document.getElementById('modal-map-img').src = ev.mappa;
-            document.getElementById('modal-map-timestamp').innerText = ev.timestamp || 'Recente';
-            
-            const btnLinkEsterno = document.getElementById('link-mappa-btn');
-            if(ev.linkSite && ev.linkSite !== "#") {
-                btnLinkEsterno.href = ev.linkSite;
-                btnLinkEsterno.style.display = "inline-flex";
-            } else {
-                btnLinkEsterno.style.display = "none";
-            }
+            document.getElementById('modal-map-timestamp').innerText = ev.timestamp || 'Recentemente';
+            document.getElementById('link-mappa-btn').href = ev.linkSite || '#';
 
             const containerDate = document.getElementById('modal-dates-list');
             containerDate.innerHTML = '';
+            
             if(ev.dateElenco && ev.dateElenco.length > 0) {
                 ev.dateElenco.forEach(d => {
-                    const dataObj = new Date(d.data).toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                    const oraString = d.ora ? ` alle ore ${d.ora}` : '';
-                    containerDate.innerHTML += `<div class="detail-badge">📅 <strong>${dataObj}</strong>${oraString}</div>`;
+                    const dataObj = new Date(d.data);
+                    const oraString = d.ora ? ` ore ${d.ora}` : '';
+                    containerDate.innerHTML += `<div class="detail-badge">📅 <strong>Data:</strong> ${dataObj.toLocaleDateString('it-IT')}${oraString}</div>`;
                 });
+            } else if(ev.data) {
+                const d = new Date(ev.data);
+                containerDate.innerHTML = `<div class="detail-badge">📅 <strong>Data:</strong> ${d.toLocaleDateString('it-IT')} ore ${ev.ora || 'Da definire'}</div>`;
+            } else {
+                containerDate.innerHTML = `<div class="detail-badge">📅 <strong>Data:</strong> Non specificata</div>`;
             }
-
-            let locationText = ev.citta && ev.posto ? `${ev.citta} · ${ev.posto}` : (ev.citta || ev.posto || "Location da definire");
-            document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Luogo dell'evento:</strong> ${locationText}`;
+            
+            let luogoUnito = "";
+            if (ev.citta && ev.posto) {
+                luogoUnito = ev.citta + " · " + ev.posto;
+            } else {
+                luogoUnito = ev.citta || ev.posto || 'Non specificato';
+            }
+            document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Posto:</strong> ${luogoUnito}`;
 
             const containerPrezzi = document.getElementById('modal-prices');
             containerPrezzi.innerHTML = '';
             if (ev.prezzi) {
                 ev.prezzi.forEach(p => {
+                    const classeEsaurito = p.esaurito ? 'esaurito' : '';
+                    const testoPrezzo = p.esaurito ? '[Esaurito]' : p.prezzo;
+                    const coloreSettore = p.colore || '#0ea5e9';
                     containerPrezzi.innerHTML += `
                         <div class="price-item">
                             <span class="price-sector-wrapper">
-                                <span class="color-indicator" style="background-color: ${p.colore || '#2563eb'};"></span>
+                                <span class="color-indicator" style="background-color: ${coloreSettore};"></span>
                                 <span class="price-sector">${p.settore}</span>
                             </span>
-                            <span class="price-amount ${p.esaurito ? 'esaurito' : ''}">${p.esaurito ? 'Esaurito' : p.prezzo}</span>
+                            <span class="price-amount ${classeEsaurito}">${testoPrezzo}</span>
                         </div>
                     `;
                 });
@@ -1220,11 +1252,16 @@
 
             const wrapperWa = document.getElementById('whatsapp-action-wrapper');
             if (ev.soldOut) {
-                wrapperWa.innerHTML = `<div class="soldout-notice-btn">❌ Biglietti non disponibili (Esauriti)</div>`;
+                wrapperWa.innerHTML = `<div class="soldout-notice-btn">❌ Tutti i Biglietti sono Esauriti</div>`;
             } else {
-                let dMsg = ev.dateElenco && ev.dateElenco.length > 0 ? new Date(ev.dateElenco[0].data).toLocaleDateString('it-IT') : '';
-                const messaggioWa = encodeURIComponent(`Salve, vorrei verificare disponibilità ed acquistare biglietti per l'evento: "${ev.titolo}" per la data del ${dMsg}. Rimango in attesa per la scelta dei settori.`);
-                wrapperWa.innerHTML = `<a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${messaggioWa}" target="_blank" class="whatsapp-btn">💬 Richiedi Biglietti su WhatsApp</a>`;
+                let testoDateMessaggio = "";
+                if(ev.dateElenco && ev.dateElenco.length > 0) {
+                    testoDateMessaggio = ev.dateElenco.map(d => new Date(d.data).toLocaleDateString('it-IT')).join(', ');
+                } else if(ev.data) {
+                    testoDateMessaggio = new Date(ev.data).toLocaleDateString('it-IT');
+                }
+                const messaggioWa = encodeURIComponent(`Salve! Vorrei ricevere informazioni e riservare un posto per l'evento: ${ev.titolo} (Date disponibili: ${testoDateMessaggio})`);
+                wrapperWa.innerHTML = `<a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${messaggioWa}" target="_blank" class="whatsapp-btn">💬 Richiedi Prenotazione su WhatsApp</a>`;
             }
             
             window.location.hash = key;
@@ -1239,16 +1276,21 @@
 
         window.copiaLinkEventoCorrente = function() {
             if (!idEventoCorrenteAperto) return;
-            const urlCompleto = window.location.origin + window.location.pathname + "#" + idEventoCorrenteAperto;
-            navigator.clipboard.writeText(urlCompleto).then(() => {
+            const linkCompletoCondivisibile = window.location.origin + window.location.pathname + "#" + idEventoCorrenteAperto;
+            
+            navigator.clipboard.writeText(linkCompletoCondivisibile).then(() => {
                 const btn = document.getElementById('share-link-btn');
-                btn.innerText = "✅ Link Copiato! Incollalo dove vuoi";
-                btn.style.backgroundColor = "var(--whatsapp-color)";
+                const testoOriginale = btn.innerText;
+                btn.innerText = "✅ Link Copiato! Incollalo su WhatsApp";
+                btn.style.backgroundColor = "#22c55e";
+                
                 setTimeout(() => {
-                    btn.innerText = "🔗 Condividi Evento / Copia Link";
+                    btn.innerText = testoOriginale;
                     btn.style.backgroundColor = "var(--share-color)";
-                }, 2500);
-            }).catch(() => alert("Copia questo indirizzo: " + urlCompleto));
+                }, 3000);
+            }).catch(err => {
+                alert("Seleziona e copia questo indirizzo: " + linkCompletoCondivisibile);
+            });
         }
 
         window.apriMappaIngrandita = function(src) {
@@ -1261,8 +1303,13 @@
         }
 
         window.eliminaEvento = function(key) {
-            if (confirm("Rimuovere definitivamente questo spettacolo dalla vetrina pubblica?")) {
-                remove(ref(db, 'eventi/' + key)).then(() => alert("Evento eliminato."));
+            if (confirm("Eliminare definitivamente questo spettacolo dalla vetrina pubblica?")) {
+                const specificoRef = ref(db, 'eventi/' + key);
+                remove(specificoRef)
+                    .then(() => {
+                        alert("Evento rimosso con successo.");
+                    })
+                    .catch(err => alert("Errore durante la rimozione: " + err.message));
             }
         }
 
@@ -1277,10 +1324,10 @@
             const data = snapshot.val();
             eventi = data || {}; 
             if (!inManutenzione || modalitaAdmin) {
-                eseguiFiltri();
-                const hash = window.location.hash.substring(1);
-                if (hash && eventi[hash] && !idEventoCorrenteAperto) {
-                    gestisciAperturaModal(hash);
+                renderEventi();
+                const hashIniziale = window.location.hash.substring(1);
+                if (hashIniziale && eventi[hashIniziale]) {
+                    gestisciAperturaModal(hashIniziale);
                 }
             }
         });
