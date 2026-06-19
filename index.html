@@ -1446,9 +1446,8 @@
                     .then(() => resetFormEAvvisa())
                     .catch(err => alert("Errore nel salvataggio: " + err.message));
             } else {
-                constSilicon = ref(db, 'eventi/' + currentId);
                 const specificoRef = ref(db, 'eventi/' + currentId);
-                set(specificoRef, objetoSpettacolo)
+                set(specificoRef, oggettoSpettacolo) // <--- Corretto con la doppia 'g'
                     .then(() => {
                         document.getElementById('edit-id').value = "";
                         document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
