@@ -793,9 +793,9 @@
             <label for="form-evidenza" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">🔥 Metti in evidenza (Sposta in cima alla lista con 🔥)</label>
         </div>
 
-        <div class="checkbox-container" style="background: #fef3c7; border-color: rgba(245, 158, 11, 0.4);">
+        <div class="checkbox-container">
             <input type="checkbox" id="form-abreve">
-            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">⏳ IMPOSTA COME A BREVE IN VENDITA (Mostra al cliente ma non fa cliccare)</label>
+            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer;">⚠️ Imposta come BOZZA / NASCONDI AL CLIENTE (Visibile solo in Admin)</label>
         </div>
 
         <div class="checkbox-container">
@@ -1273,6 +1273,7 @@
 
             listaId.forEach(key => {
                 const ev = eventi[key];
+                if(ev.bozza && !modalitaAdmin) return;
                 if(categoriaSelezionata !== 'tutti' && ev.categoria !== categoriaSelezionata) return;
                 if(testoRicerca) {
                     const t = (ev.titolo || "").toLowerCase();
@@ -1286,7 +1287,7 @@
                 if(ev.esauritoTotale) {
                     card.innerHTML += `<div class="soldout-badge">SOLD OUT</div>`;
                 } else if(ev.bozza) {
-                    card.innerHTML += `<div class="abreve-badge">⏳ A BREVE IN VENDITA</div>`;
+                    card.innerHTML += `<div class="abreve-badge">BOZZA</div>`;
                 }
                 if(ev.inEvidenza) {
                     card.innerHTML += `<div class="evidenza-badge">IN EVIDENZA 🔥</div>`;
@@ -1300,12 +1301,7 @@
                 const imgEl = document.createElement('img');
                 imgEl.src = srcImg;
                 imgEl.alt = ev.titolo;
-                
-                // Se è in modalità admin può sempre cliccare per aprire il dettaglio, se è cliente e l'evento ha l'opzione "A breve" attiva NON si apre il click.
-                imgEl.onclick = () => {
-                    if (ev.bozza && !modalitaAdmin) return;
-                    gestisciAperturaModal(key);
-                };
+                imgEl.onclick = () => gestisciAperturaModal(key);
                 card.appendChild(imgEl);
 
                 const info = document.createElement('div');
@@ -1492,8 +1488,6 @@
                 renderEventi();
                 const hashIniziale = window.location.hash.substring(1);
                 if (hashIniziale && eventi[hashIniziale]) {
-                    // Impedisce l'apertura automatica da link diretto se è contrassegnato come "A breve"
-                    if(eventi[hashIniziale].bozza && !modalitaAdmin) return;
                     gestisciAperturaModal(hashIniziale);
                 }
             }
