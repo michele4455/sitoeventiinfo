@@ -845,7 +845,7 @@
         <label>Listino Prezzi per Settori (Generale):</label>
         <div id="dynamic-price-container"></div>
         <button type="button" class="btn-add-price" onclick="aggiungiRigaPrezzo()">➕ Aggiungi Settore Prezzo</button>
-        
+
         <label style="margin-top:20px;">Date, Orari Evento e Pianta dei Posti / Disponibilità Settori per Data:</label>
         <div id="dynamic-dates-container"></div>
         <button type="button" class="btn-add-date" onclick="aggiungiRigaData()">➕ Aggiungi un'altra Data</button>
@@ -947,8 +947,14 @@
         let inManutenzione = false;
         let categoriaSelezionata = 'tutti';
         let testoRicerca = '';
+        let dataIndiceSelezionatoCorrente = 0;
 
-        const emojiCategorie = { 'concerti': '🎤', 'teatro': '🎭', 'sport': '⚽', 'fiere': '🎪' };
+        const emojiCategorie = {
+            'concerti': '🎤',
+            'teatro': '🎭',
+            'sport': '⚽',
+            'fiere': '🎪'
+        };
 
         window.apriLoginAdmin = function() {
             document.getElementById('login-password-field').value = '';
@@ -985,8 +991,18 @@
             document.getElementById('form-abreve').checked = false;
             document.getElementById('form-evidenza').checked = false;
             document.getElementById('form-category').value = "concerti";
+            resettaCampiForm();
             modalitaAdmin = false;
             aggiornaVisibilitaSito();
+        }
+
+        function resettaCampiForm() {
+            document.getElementById('form-title').value = '';
+            document.getElementById('form-city').value = '';
+            document.getElementById('form-location').value = '';
+            document.getElementById('form-link').value = '';
+            document.getElementById('form-locandina').value = '';
+            document.getElementById('form-mappa').value = '';
         }
 
         window.cambiaStatoManutenzione = function(stato) {
@@ -1057,159 +1073,166 @@
 
         window.aggiungiRigaPrezzo = function(settore = "", cifra = "", colore = "#0ea5e9") {
             const container = document.getElementById('dynamic-price-container');
-            const row = document.createElement('div');
-            row.className = 'price-input-row';
-            row.innerHTML = `
-                <input type="text" class="input-settore" placeholder="Es: Platea" value="${settore}" oninput="aggiornaSettoriNelleDate()">
-                <input type="text" class="input-cifra" placeholder="Es: 40,00" value="${cifra}" oninput="gestisciInputPrezzo(this)">
+            const div = document.createElement('div');
+            div.className = "price-input-row";
+            div.innerHTML = `
+                <input type="text" class="input-settore" placeholder="Nome Settore (es: Poltronissima)" value="${settore}" oninput="aggiornaSettoriNelleDate()">
+                <input type="text" class="input-cifra" placeholder="€ 0,00" value="${cifra}" oninput="gestisciInputPrezzo(this)">
                 <input type="color" class="input-colore" value="${colore}" onchange="aggiornaSettoriNelleDate()">
-                <button type="button" class="btn-remove-row" onclick="this.parentElement.remove(); aggiornaSettoriNelleDate();">❌</button>
+                <button type="button" class="btn-remove-row" onclick="this.parentElement.remove(); aggiornaSettoriNelleDate();">🗑️</button>
             `;
-            container.appendChild(row);
+            container.appendChild(div);
             aggiornaSettoriNelleDate();
         }
 
-        function recuperaListaSettoriAttuali() {
-            const righPrezzo = document.querySelectorAll('#dynamic-price-container .price-input-row');
-            let settori = [];
-            righPrezzo.forEach((row, index) => {
-                const sett = row.querySelector('.input-settore').value.trim();
-                if(sett) {
-                    settori.push({ id: 's_' + index, nome: sett });
+        window.aggiornaSettoriNelleDate = function() {
+            const settoriDefiniti = leggiSettoriDaPrezziGenerali();
+            const dateRows = document.querySelectorAll('.date-input-row');
+            
+            dateRows.forEach(row => {
+                const availabilityContainer = row.querySelector('.date-sectors-availability');
+                const statoSalvaPrecedente = {};
+                availabilityContainer.querySelectorAll('.sector-toggle-item').forEach(item => {
+                    const name = item.querySelector('span').innerText;
+                    const chk = item.querySelector('.check-esaurito-settore input').checked;
+                    statoSalvaPrecedente[name] = chk;
+                });
+
+                availabilityContainer.innerHTML = '';
+                if (settoriDefiniti.length === 0) {
+                    availabilityContainer.innerHTML = '<span style="font-size:0.85rem; color:var(--text-muted);">Definisci prima almeno un settore prezzo sopra.</span>';
+                    return;
+                }
+
+                settoriDefiniti.forEach(sect => {
+                    const eraEsaurito = statoSalvaPrecedente[sect.nome] || false;
+                    const item = document.createElement('div');
+                    item.className = "sector-toggle-item";
+                    item.innerHTML = `
+                        <span style="font-weight:600;">${sect.nome}</span>
+                        <label class="check-esaurito-settore">
+                            <input type="checkbox" ${eraEsaurito ? 'checked' : ''}> Esaurito
+                        </label>
+                    `;
+                    availabilityContainer.appendChild(item);
+                });
+            });
+        }
+
+        function leggiSettoriDaPrezziGenerali() {
+            const rows = document.querySelectorAll('#dynamic-price-container .price-input-row');
+            const list = [];
+            rows.forEach(r => {
+                const nome = r.querySelector('.input-settore').value.trim();
+                const cifra = r.querySelector('.input-cifra').value.trim();
+                const colore = r.querySelector('.input-colore').value;
+                if (nome) {
+                    list.push({ nome, cifra, colore });
                 }
             });
-            return settori;
+            return list;
         }
 
-        window.aggiornaSettoriNelleDate = function() {
-            const settori = recuperaListaSettoriAttuali();
-            const righeDate = document.querySelectorAll('.date-input-row');
-            righeDate.forEach(row => {
-                const containerDispo = row.querySelector('.date-sectors-availability');
-                let statiPrecedenti = {};
-                containerDispo.querySelectorAll('input[type="checkbox"]').forEach(chk => {
-                    statiPrecedenti[chk.dataset.nomeSettore] = chk.checked;
-                });
-
-                containerDispo.innerHTML = '<div style="font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Spunta i settori ESAURITI in QUESTA DATA:</div>';
-                settori.forEach(s => {
-                    const eraEsaurito = statiPrecedenti[s.nome] || false;
-                    const item = document.createElement('label');
-                    item.className = 'sector-toggle-item';
-                    item.innerHTML = `
-                        <input type="checkbox" data-nome-settore="${s.nome}" ${eraEsaurito ? 'checked' : ''}>
-                        <span style="color:var(--danger-color); font-weight:600;">${s.nome} Esaurito</span>
-                    `;
-                    containerDispo.appendChild(item);
-                });
-            });
-        }
-
-        window.aggiungiRigaData = function(dataVal = "", oraVal = "", mappaDataSrc = "", dateSoldOut = false, settoriEsauriti = []) {
+        window.aggiungiRigaData = function(dataStr = "", orarioStr = "", mappaSpecificaSrc = "", dataEsaurita = false, settoriSpecificiAvail = []) {
             const container = document.getElementById('dynamic-dates-container');
-            const row = document.createElement('div');
-            row.className = 'date-input-row';
+            const div = document.createElement('div');
+            div.className = "date-input-row";
             
-            row.innerHTML = `
+            div.innerHTML = `
                 <div class="date-input-main-fields">
-                    <input type="date" class="input-data-giorno" value="${dataVal}" style="width:140px; margin:0;">
-                    <input type="time" class="input-data-ora" value="${oraVal}" style="width:100px; margin:0;">
-                    <div style="flex:1; min-width:180px;">
-                        <span style="font-size:0.75rem; font-weight:bold; display:block; color:var(--text-muted);">Mappa specifica per questa data (opzionale):</span>
-                        <input type="file" class="input-data-mappa" accept="image/*" style="margin:2px 0; padding:4px;">
-                        <input type="hidden" class="input-data-mappa-current-src" value="${mappaDataSrc}">
+                    <input type="date" class="input-data-giorno" value="${dataStr}" style="width:140px; margin:0;">
+                    <input type="time" class="input-data-orario" value="${orarioStr}" style="width:100px; margin:0;">
+                    <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+                        <label style="margin:0; font-size:0.75rem; color:var(--text-muted);">Mappa per questa data (opzionale):</label>
+                        <input type="file" class="input-data-mappa" accept="image/*" style="margin:0; padding:5px; font-size:0.8rem;">
+                        <input type="hidden" class="input-data-mappa-vecchia" value="${mappaSpecificaSrc}">
                     </div>
-                    <label class="check-esaurito-settore" style="margin:0;">
-                        <input type="checkbox" class="input-data-soldout" ${dateSoldOut ? 'checked' : ''}> Data Esaurita
+                    <label style="display:inline-flex; align-items:center; gap:5px; font-size:0.85rem; font-weight:bold; color:var(--danger-color); cursor:pointer;">
+                        <input type="checkbox" class="input-data-esaurita" ${dataEsaurita ? 'checked' : ''}> Data Sold Out
                     </label>
-                    <button type="button" class="btn-remove-row" onclick="this.parentElement.parentElement.remove();">❌</button>
+                    <button type="button" class="btn-remove-row" onclick="this.parentElement.parentElement.remove();">🗑️</button>
                 </div>
                 <div class="date-sectors-availability"></div>
             `;
-            container.appendChild(row);
-
-            const settori = recuperaListaSettoriAttuali();
-            const containerDispo = row.querySelector('.date-sectors-availability');
-            containerDispo.innerHTML = '<div style="font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Spunta i settori ESAURITI in QUESTA DATA:</div>';
-            settori.forEach(s => {
-                const eraEsaurito = settoriEsauriti.includes(s.nome);
-                const item = document.createElement('label');
-                item.className = 'sector-toggle-item';
-                item.innerHTML = `
-                    <input type="checkbox" data-nome-settore="${s.nome}" ${eraEsaurito ? 'checked' : ''}>
-                    <span style="color:var(--danger-color); font-weight:600;">${s.nome} Esaurito</span>
-                `;
-                containerDispo.appendChild(item);
-            });
-        }
-
-        function convertiFileInBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
+            
+            container.appendChild(div);
+            
+            if (settoriSpecificiAvail && settoriSpecificiAvail.length > 0) {
+                const availabilityContainer = div.querySelector('.date-sectors-availability');
+                settoriSpecificiAvail.forEach(sect => {
+                    const item = document.createElement('div');
+                    item.className = "sector-toggle-item";
+                    item.innerHTML = `
+                        <span style="font-weight:600;">${sect.nome}</span>
+                        <label class="check-esaurito-settore">
+                            <input type="checkbox" ${sect.esaurito ? 'checked' : ''}> Esaurito
+                        </label>
+                    `;
+                    availabilityContainer.appendChild(item);
+                });
+            } else {
+                aggiornaSettoriNelleDate();
+            }
         }
 
         window.salvaInVetinra = async function() {
-            const idEdizione = document.getElementById('edit-id').value;
             const titolo = document.getElementById('form-title').value.trim();
             const categoria = document.getElementById('form-category').value;
             const inEvidenza = document.getElementById('form-evidenza').checked;
             const aBreve = document.getElementById('form-abreve').checked;
-            const totaleSoldout = document.getElementById('form-soldout').checked;
+            const esauritoTotale = document.getElementById('form-soldout').checked;
             const citta = document.getElementById('form-city').value.trim();
             const location = document.getElementById('form-location').value.trim();
-            const linkEsterno = document.getElementById('form-link').value.trim();
+            const linkMappaUfficiale = document.getElementById('form-link').value.trim();
+            const editId = document.getElementById('edit-id').value;
 
             if (!titolo || !citta || !location) {
-                alert("Compila almeno i campi Titolo, Città e Luogo dell'evento.");
+                alert("Compila i campi obbligatori: Titolo, Città e Location.");
                 return;
             }
 
-            const righePrezzo = document.querySelectorAll('#dynamic-price-container .price-input-row');
-            let listinoPrezzi = [];
-            righePrezzo.forEach((row, idx) => {
-                const sett = row.querySelector('.input-settore').value.trim();
-                const cifra = row.querySelector('.input-cifra').value.trim();
-                const col = row.querySelector('.input-colore').value;
-                if(sett && cifra) {
-                    listinoPrezzi.push({ id: 's_' + idx, settore: sett, prezzo: cifra, colore: col });
-                }
-            });
+            const listinoPrezziBase = leggiSettoriDaPrezziGenerali();
 
-            const righeDate = document.querySelectorAll('#dynamic-dates-container .date-input-row');
-            let listaDate = [];
+            const dateRows = document.querySelectorAll('#dynamic-dates-container .date-input-row');
+            const listaDateSalvataggio = [];
+
+            for (let i = 0; i < dateRows.forEach; i++) {} 
             
-            for (let row of righeDate) {
-                const g = row.querySelector('.input-data-giorno').value;
-                const o = row.querySelector('.input-data-ora').value;
-                const fileMappaData = row.querySelector('.input-data-mappa').files[0];
-                let srcMappaData = row.querySelector('.input-data-mappa-current-src').value;
-                const dataEsaurita = row.querySelector('.input-data-soldout').checked;
+            for (const row of Array.from(dateRows)) {
+                const giorno = row.querySelector('.input-data-giorno').value;
+                const orario = row.querySelector('.input-data-orario').value;
+                const dataEsaurita = row.querySelector('.input-data-esaurita').checked;
+                const vecchiaMappa = row.querySelector('.input-data-mappa-vecchia').value;
+                const inputFileMappa = row.querySelector('.input-data-mappa').files[0];
 
-                if(!g || !o) continue;
+                if (!giorno || !orario) continue;
 
-                if (fileMappaData) {
-                    try { srcMappaData = await convertiFileInBase64(fileMappaData); } catch(e) { console.error(e); }
+                let mappaDataSrc = vecchiaMappa || "";
+                if (inputFileMappa) {
+                    try {
+                        mappaDataSrc = await trasformaInBase64(inputFileMappa);
+                    } catch (e) {
+                        alert("Errore caricamento mappa data: " + e);
+                    }
                 }
 
-                let settoriEsauritiQui = [];
-                row.querySelectorAll('.date-sectors-availability input[type="checkbox"]').forEach(chk => {
-                    if(chk.checked) settoriEsauritiQui.push(chk.dataset.nomeSettore);
+                const settoriSpecificiAvail = [];
+                row.querySelectorAll('.date-sectors-availability .sector-toggle-item').forEach(item => {
+                    const nomeSect = item.querySelector('span').innerText;
+                    const chkEsaurito = item.querySelector('.check-esaurito-settore input').checked;
+                    settoriSpecificiAvail.push({ nome: nomeSect, esaurito: chkEsaurito });
                 });
 
-                listaDate.push({
-                    giorno: g,
-                    ora: o,
-                    mappaSpecifica: srcMappaData || "",
-                    soldout: dataEsaurita,
-                    settoriEsauriti: settoriEsauritiQui
+                listaDateSalvataggio.push({
+                    giorno,
+                    orario,
+                    dataEsaurita,
+                    mappaDataSrc,
+                    settoriStato: settoriSpecificiAvail
                 });
             }
 
-            if(listaDate.length === 0) {
+            if (listaDateSalvataggio.length === 0) {
                 alert("Inserisci almeno una data e un orario validi per l'evento.");
                 return;
             }
@@ -1217,251 +1240,162 @@
             let locandinaSrc = "";
             const fileLocandina = document.getElementById('form-locandina').files[0];
             if (fileLocandina) {
-                try { locandinaSrc = await convertiFileInBase64(fileLocandina); } catch(e) { console.error(e); }
-            } else if(idEdizione && eventi[idEdizione]) {
-                locandinaSrc = eventi[idEdizione].locandina || "";
+                locandinaSrc = await trasformaInBase64(fileLocandina);
+            } else if (editId && eventi[editId]) {
+                locandinaSrc = eventi[editId].locandina || "";
             }
 
             let mappaGeneraleSrc = "";
             const fileMappaGen = document.getElementById('form-mappa').files[0];
             if (fileMappaGen) {
-                try { mappaGeneraleSrc = await convertiFileInBase64(fileMappaGen); } catch(e) { console.error(e); }
-            } else if(idEdizione && eventi[idEdizione]) {
-                mappaGeneraleSrc = eventi[idEdizione].mappaGenerale || "";
+                mappaGeneraleSrc = await trasformaInBase64(fileMappaGen);
+            } else if (editId && eventi[editId]) {
+                mappaGeneraleSrc = eventi[editId].mappaGenerale || "";
             }
 
-            const timestampMappa = new Date().toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-            // Manteniamo lo stato scaduto precedentemente se stiamo modificando
-            const giaScaduto = (idEdizione && eventi[idEdizione]) ? !!eventi[idEdizione].scaduto : false;
+            const oraAttuale = new Date().toLocaleDateString('it-IT') + ' ' + new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
 
             const payload = {
-                titolo, categoria, evidenza: inEvidenza, abreve: aBreve, soldout: totaleSoldout, scaduto: giaScaduto,
-                citta, location, linkEsterno, prezzi: listinoPrezzi, date: listaDate,
-                locandina: locandinaSrc, mappaGenerale: mappaGeneraleSrc, timestampMappa
+                titolo,
+                categoria,
+                inEvidenza,
+                aBreve,
+                esauritoTotale,
+                citta,
+                location,
+                linkMappaUfficiale,
+                prezziListino: listinoPrezziBase,
+                dateSpettacolo: listaDateSalvataggio,
+                locandina: locandinaSrc,
+                mappaGenerale: mappaGeneraleSrc,
+                timestampUltimaModificaMappa: oraAttuale
             };
 
-           if (idEdizione) {
-                set(ref(db, 'eventi/' + idEdizione), payload)
+            if (editId) {
+                set(ref(db, `eventi/${editId}`), payload)
                     .then(() => {
-                        alert("Spettacolo aggiornato con successo!");
-                        
-                        // Svuota tutti i campi di testo del pannello
-                        document.querySelectorAll('#admin-panel input, #admin-panel textarea, #admin-panel select').forEach(input => {
-                            if (input.type !== 'button' && input.type !== 'submit') {
-                                input.value = '';
-                            }
-                        });
-                        
-                    }).catch(err => alert("Errore durante il salvataggio: " + err.message));
+                        alert("Spettacolo modificato correttamente!");
+                        chiudiSessioneAdmin();
+                    }).catch(err => alert("Errore: " + err.message));
             } else {
                 push(eventiRef, payload)
                     .then(() => {
                         alert("Nuovo spettacolo pubblicato con successo!");
-                        
-                        // Svuota tutti i campi di testo del pannello
-                        document.querySelectorAll('#admin-panel input, #admin-panel textarea, #admin-panel select').forEach(input => {
-                            if (input.type !== 'button' && input.type !== 'submit') {
-                                input.value = '';
-                            }
-                        });
-                        
-                    }).catch(err => alert("Errore durante l'inserimento: " + err.message));
+                        chiudiSessioneAdmin();
+                    }).catch(err => alert("Errore: " + err.message));
             }
         }
 
-        window.avviaModifica = function(key) {
-            const ev = eventi[key];
-            if (!ev) return;
-
-            document.getElementById('edit-id').value = key;
-            document.getElementById('admin-panel-title').innerText = "Modifica Spettacolo: " + ev.titolo;
-            document.getElementById('btn-salva-evento').innerText = "Save Modifiche";
-
-            document.getElementById('form-title').value = ev.titolo;
-            document.getElementById('form-category').value = ev.categoria || "concerti";
-            document.getElementById('form-evidenza').checked = !!ev.evidenza;
-            document.getElementById('form-abreve').checked = !!ev.abreve;
-            document.getElementById('form-soldout').checked = !!ev.soldout;
-            document.getElementById('form-city').value = ev.citta || "";
-            document.getElementById('form-location').value = ev.location || "";
-            document.getElementById('form-link').value = ev.linkEsterno || "";
-
-            document.getElementById('dynamic-price-container').innerHTML = '';
-            if (ev.prezzi && ev.prezzi.length > 0) {
-                ev.prezzi.forEach(p => aggiungiRigaPrezzo(p.settore, p.prezzo, p.colore));
-            } else {
-                svuotaERinizializzaPrezzi();
-            }
-
-            document.getElementById('dynamic-dates-container').innerHTML = '';
-            if (ev.date && ev.date.length > 0) {
-                ev.date.forEach(d => aggiungiRigaData(d.giorno, d.ora, d.mappaSpecifica || "", !!d.soldout, d.settoriEsauriti || []));
-            } else {
-                svuotaERinizializzaDate();
-            }
-
-            document.getElementById('form-locandina').value = "";
-            document.getElementById('form-mappa').value = "";
-
-            document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        window.rimuoviEvento = function(key) {
-            if (confirm("Sei sicuro di voler eliminare definitivamente questo spettacolo dalla vetrina pubblica?")) {
-                const specificoRef = ref(db, 'eventi/' + key);
-                remove(specificoRef)
-                    .then(() => {
-                        alert("Evento rimosso con successo.");
-                    })
-                    .catch(err => alert("Errore durante la rimozione: " + err.message));
-            }
+        function trasformaInBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
         }
 
         onValue(configRef, (snapshot) => {
-            const config = snapshot.val();
-            inManutenzione = config ? !!config.manutenzione : false;
+            const data = snapshot.val();
+            inManutenzione = data ? !!data.manutenzione : false;
             document.getElementById('system-maintenance-toggle').checked = inManutenzione;
             aggiornaVisibilitaSito();
         });
 
-        // NUOVA LOGICA: Se le date passano, imposta 'scaduto' su Firebase (Invece di toccare il campo 'abreve')
-        function verificaERimuoviDateScadute(key, ev) {
-            if (!ev || !ev.date || ev.date.length === 0) return false;
-            
-            const oggi = new Date();
-            let tutteScadute = true;
-
-            ev.date.forEach(d => {
-                const dataSpettacolo = new Date(d.giorno + 'T' + d.ora);
-                if (dataSpettacolo >= oggi) {
-                    tutteScadute = false;
-                }
-            });
-
-            // Se tutte le date sono passate e l'evento non è ancora marcato come scaduto, lo aggiorniamo su DB
-            if (tutteScadute && !ev.scaduto) {
-                set(ref(db, 'eventi/' + key + '/scaduto'), true)
-                    .catch(e => console.error("Errore aggiornamento scaduto automatico:", e));
-                return true; 
-            }
-            return false;
-        }
-
         onValue(eventiRef, (snapshot) => {
-            const data = snapshot.val();
-            eventi = data || {}; 
-
-            let aggiornamentoRichiesto = false;
-            Object.keys(eventi).forEach(key => {
-                const haCambiato = verificaERimuoviDateScadute(key, eventi[key]);
-                if (haCambiato) aggiornamentoRichiesto = true;
-            });
-
-            if (aggiornamentoRichiesto) return;
-
-            if (!inManutenzione || modalitaAdmin) {
-                renderEventi();
-                const hashIniziale = window.location.hash.substring(1);
-                if (hashIniziale && eventi[hashIniziale]) {
-                    gestisciAperturaModal(hashIniziale);
-                }
-            }
+            eventi = snapshot.val() || {};
+            renderEventi();
+            controlloHashUrlAperturaModal();
         });
 
         function renderEventi() {
             const grid = document.getElementById('event-grid');
             grid.innerHTML = '';
 
-            let chiaviOrdinate = Object.keys(eventi);
+            let chiaviEventi = Object.keys(eventi);
 
-            chiaviOrdinate.sort((a, b) => {
-                const evA = eventi[a];
-                const evB = eventi[b];
-                const evAEvidenza = evA.evidenza ? 1 : 0;
-                const evBEvidenza = evB.evidenza ? 1 : 0;
-                return evBEvidenza - evAEvidenza;
+            let eventiOrdinati = chiaviEventi.map(id => ({ id, ...eventi[id] }));
+
+            eventiOrdinati.sort((a, b) => {
+                const evidenzaA = a.inEvidenza ? 1 : 0;
+                const evidenzaB = b.inEvidenza ? 1 : 0;
+                return evidenzaB - evidenzaA;
             });
 
             let contatoreVisibili = 0;
 
-            chiaviOrdinate.forEach(key => {
-                const ev = eventi[key];
-                
-                // SE L'EVENTO È SCADUTO, scompare dalla Home Page pubblica dei clienti. Resta visibile solo se sei Admin loggato.
-                if (ev.scaduto && !modalitaAdmin) return; 
-
+            eventiOrdinati.forEach(ev => {
                 if (categoriaSelezionata !== 'tutti' && ev.categoria !== categoriaSelezionata) return;
-
+                
                 if (testoRicerca) {
-                    const titoloOk = ev.titolo && ev.titolo.toLowerCase().includes(testoRicerca);
-                    const cittaOk = ev.citta && ev.citta.toLowerCase().includes(testoRicerca);
-                    const luogoOk = ev.location && ev.location.toLowerCase().includes(testoRicerca);
-                    if (!titoloOk && !cittaOk && !luogoOk) return;
+                    const t = ev.titolo.toLowerCase();
+                    const c = ev.citta.toLowerCase();
+                    const loc = ev.location.toLowerCase();
+                    if (!t.includes(testoRicerca) && !c.includes(testoRicerca) && !loc.includes(testoRicerca)) return;
                 }
 
                 contatoreVisibili++;
 
                 const card = document.createElement('div');
-                card.className = 'movie-card';
-                if(ev.scaduto && modalitaAdmin) {
-                    card.style.border = "2px dashed #64748b";
-                    card.style.opacity = "0.7";
+                card.className = "movie-card";
+
+                let badgeHtml = "";
+                if (ev.esauritoTotale) {
+                    badgeHtml = `<div class="soldout-badge">SOLD OUT</div>`;
+                } else if (ev.aBreve) {
+                    badgeHtml = `<div class="abreve-badge">A Breve in Vendita</div>`;
+                } else {
+                    let tutteDateEsaurite = true;
+                    if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+                        ev.dateSpettacolo.forEach(d => { if (!d.dataEsaurita) tutteDateEsaurite = false; });
+                    } else {
+                        tutteDateEsaurite = false;
+                    }
+                    if (tutteDateEsaurite) {
+                        badgeHtml = `<div class="soldout-badge">SOLD OUT</div>`;
+                    }
                 }
 
-                let badgeHtml = '';
-                if (ev.soldout) {
-                    badgeHtml += `<div class="soldout-badge">Esaurito</div>`;
-                } else if (ev.scaduto) {
-                    badgeHtml += `<div class="scaduto-badge">Scaduto / Solo Admin</div>`;
-                } else if (ev.abreve) {
-                    // "A breve in vendita" esce regolarmente nell'elenco pubblico
-                    badgeHtml += `<div class="abreve-badge">A breve in vendita</div>`;
+                const evidenzaBadge = ev.inEvidenza ? `<div class="evidenza-badge">🔥 IN EVIDENZA</div>` : "";
+                const emojiTipo = emojiCategorie[ev.categoria] || '🎟️';
+
+                let dataMostrataAnteprima = "Nessuna data impostata";
+                if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+                    const primaData = ev.dateSpettacolo[0];
+                    dataMostrataAnteprima = formattaDataLeggibile(primaData.giorno) + " ore " + primaData.orario;
+                    if (ev.dateSpettacolo.length > 1) {
+                        dataMostrataAnteprima += ` (+${ev.dateSpettacolo.length - 1} date)`;
+                    }
                 }
 
-                if (ev.evidenza) {
-                    badgeHtml += `<div class="evidenza-badge">🔥 In Evidenza</div>`;
-                }
+                const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
 
-                const emoji = emojiCategorie[ev.categoria] || '🎟️';
-                badgeHtml += `<div class="tipo-emoji-badge">${emoji}</div>`;
-
-                let stringaDateAnteprima = "Nessuna data definita";
-                if(ev.date && ev.date.length > 0) {
-                    const opzioni = { day: '2-digit', month: '2-digit' };
-                    const d1 = new Date(ev.date[0].giorno);
-                    const formattata = isNaN(d1) ? ev.date[0].giorno : d1.toLocaleDateString('it-IT', opzioni);
-                    stringaDateAnteprima = formattata + " alle " + ev.date[0].ora;
-                    if(ev.date.length > 1) stringaDateAnteprima += ` (+${ev.date.length - 1} date)`;
-                }
-
-                const locandinaUrl = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23e2e8f0%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
-
-                let adminBtnsHtml = '';
+                let adminBtns = "";
                 if (modalitaAdmin) {
-                    adminBtnsHtml = `
+                    adminBtns = `
                         <div class="action-card-btns">
-                            <button class="edit-btn" onclick="avviaModifica('${key}')">✏️ Modifica</button>
-                            <button class="del-btn" onclick="rimuoviEvento('${key}')">🗑️ Rimuovi</button>
+                            <button class="edit-btn" onclick="event.stopPropagation(); avviaModificaSpettacolo('${ev.id}')">📝 Modifica</button>
+                            <button class="del-btn" onclick="event.stopPropagation(); eliminaSpettacolo('${ev.id}')">🗑️ Elimina</button>
                         </div>
                     `;
                 }
 
                 card.innerHTML = `
                     ${badgeHtml}
-                    <img src="${locandinaUrl}" alt="Locandina" onclick="gestisciAperturaModal('${key}')">
-                    <div class="movie-info" style="display: flex; flex-direction: column; justify-content: space-between; gap: 10px; padding: 15px; text-align: left;">
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <div class="movie-title" style="font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px; text-transform: uppercase;">${ev.titolo}</div>
-                            <div class="movie-meta-preview" style="font-size: 0.9rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin: 0;">
-                                📍 <span>${ev.citta || 'BARI'} - ${ev.location || 'LOCATION'}</span>
-                            </div>
-                            <div class="movie-meta-preview" style="font-size: 0.9rem; font-weight: 700; color: var(--accent-color); display: flex; align-items: center; gap: 4px; margin: 0;">
-                                📅 <span>${stringaDateAnteprima}</span>
-                            </div>
+                    ${evidenzaBadge}
+                    <div class="tipo-emoji-badge">${emojiTipo}</div>
+                    <img src="${locandinaImgSrc}" alt="Locandina" onclick="apriDettagliSpettacolo('${ev.id}')">
+                    <div class="movie-info">
+                        <div>
+                            <div class="movie-title">${ev.titolo}</div>
+                            <div class="movie-meta-preview">📍 ${ev.citta.toUpperCase()} - ${ev.location}</div>
+                            <div class="movie-meta-preview" style="font-weight:700; color:var(--text-main);">📅 ${dataMostrataAnteprima}</div>
                         </div>
                         <div>
-                            ${adminBtnsHtml}
+                            <button class="filter-btn" style="width:100%; border-color:var(--accent-color); color:var(--accent-color); padding:8px;" onclick="apriDettagliSpettacolo('${ev.id}')">
+                                Vedi Dettagli e Pianta Posti
+                            </button>
+                            ${adminBtns}
                         </div>
                     </div>
                 `;
@@ -1469,178 +1403,196 @@
             });
 
             if (contatoreVisibili === 0) {
-                const vuoto = document.createElement('div');
-                vuoto.style.gridColumn = '1 / -1';
-                vuoto.style.textAlign = 'center';
-                vuoto.style.padding = '40px';
-                vuoto.style.color = 'var(--text-muted)';
-                vuoto.style.fontSize = '1.1rem';
-                vuoto.innerText = 'Nessuno spettacolo corrisponde ai criteri o risulta attualmente attivo.';
-                grid.appendChild(vuoto);
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted); font-weight:600;">Nessun evento trovato nella categoria selezionata.</div>`;
             }
         }
 
-        window.gestisciAperturaModal = function(key) {
-            idEventoCorrenteAperto = key;
-            window.location.hash = key;
-            
-            const ev = eventi[key];
-            if(!ev) return;
+        function formattaDataLeggibile(isoString) {
+            if (!isoString) return "";
+            const parti = isoString.split('-');
+            if (parti.length !== 3) return isoString;
+            return `${parti[2]}/${parti[1]}/${parti[0]}`;
+        }
+
+        window.avviaModificaSpettacolo = function(id) {
+            const ev = eventi[id];
+            if (!ev) return;
+
+            document.getElementById('edit-id').value = id;
+            document.getElementById('admin-panel-title').innerText = "Modifica Spettacolo Selezionato";
+            document.getElementById('btn-salva-evento').innerText = "Salva Modifiche Spettacolo";
+
+            document.getElementById('form-title').value = ev.titolo || "";
+            document.getElementById('form-category').value = ev.categoria || "concerti";
+            document.getElementById('form-evidenza').checked = !!ev.inEvidenza;
+            document.getElementById('form-abreve').checked = !!ev.aBreve;
+            document.getElementById('form-soldout').checked = !!ev.esauritoTotale;
+            document.getElementById('form-city').value = ev.citta || "";
+            document.getElementById('form-location').value = ev.location || "";
+            document.getElementById('form-link').value = ev.linkMappaUfficiale || "";
+
+            const priceContainer = document.getElementById('dynamic-price-container');
+            priceContainer.innerHTML = '';
+            if (ev.prezziListino && ev.prezziListino.length > 0) {
+                ev.prezziListino.forEach(p => {
+                    aggiungiRigaPrezzo(p.nome, p.cifra, p.colore);
+                });
+            } else {
+                svuotaERinizializzaPrezzi();
+            }
+
+            const datesContainer = document.getElementById('dynamic-dates-container');
+            datesContainer.innerHTML = '';
+            if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+                ev.dateSpettacolo.forEach(d => {
+                    aggiungiRigaData(d.giorno, d.orario, d.mappaDataSrc || "", !!d.dataEsaurita, d.settoriStato || []);
+                });
+            } else {
+                svuotaERinizializzaDate();
+            }
+
+            document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.eliminaSpettacolo = function(id) {
+            if (confirm("Sei sicuro di voler eliminare permanentemente questo evento dalla vetrina?")) {
+                remove(ref(db, `eventi/${id}`))
+                    .then(() => alert("Evento rimosso."))
+                    .catch(err => alert("Errore durante la rimozione: " + err.message));
+            }
+        }
+
+        window.apriDettagliSpettacolo = function(id) {
+            const ev = eventi[id];
+            if (!ev) return;
+
+            idEventoCorrenteAperto = id;
+            window.location.hash = id;
 
             document.getElementById('modal-title').innerText = ev.titolo;
-            document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Luogo:</strong> ${ev.citta || ''} - ${ev.location || ''}`;
-            
-            const locandinaUrl = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23e2e8f0%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
-            document.getElementById('modal-locandina-img').src = locandinaUrl;
+            document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Luogo:</strong> ${ev.citta.toUpperCase()} — ${ev.location}`;
+
+            const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
+            document.getElementById('modal-locandina-img').src = locandinaImgSrc;
 
             const datesListContainer = document.getElementById('modal-dates-list');
             datesListContainer.innerHTML = '';
 
-            if(ev.date && ev.date.length > 0) {
-                ev.date.forEach((d, index) => {
+            dataIndiceSelezionatoCorrente = 0;
+
+            if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+                ev.dateSpettacolo.forEach((d, index) => {
                     const badge = document.createElement('div');
-                    badge.className = 'detail-badge';
-                    
-                    const opzioni = { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' };
-                    const dObj = new Date(d.giorno);
-                    const giornoFormattato = isNaN(dObj) ? d.giorno : dObj.toLocaleDateString('it-IT', opzioni);
-                    
-                    if (ev.soldout || d.soldout) {
+                    badge.className = "detail-badge";
+                    if (d.dataEsaurita) {
                         badge.classList.add('date-soldout');
-                        badge.innerHTML = `📅 <strong>${giornoFormattato}</strong> alle ore ${d.ora} <span style="float:right; font-weight:bold;">🔴 ESAURITA</span>`;
+                        badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> [ESAURITA]`;
                     } else {
-                        badge.innerHTML = `📅 <strong>${giornoFormattato}</strong> alle ore ${d.ora}`;
+                        badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> (Disponibile)`;
                     }
-                    
-                    badge.onclick = () => selezionaDataInModal(index);
+
+                    badge.onclick = function() {
+                        cambiaDataSpettacoloSelezionataInModal(index);
+                    };
+
                     datesListContainer.appendChild(badge);
                 });
-
-                selezionaDataInModal(0);
-            } else {
-                document.getElementById('modal-map-img').src = ev.mappaGenerale || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23e2e8f0%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%2364748b%22>Nessuna Mappa</text></svg>";
-                renderizzaPrezziSenzaFiltri();
             }
+
+            aggiornaDettagliDataInModal();
 
             document.getElementById('event-modal').style.display = 'flex';
         }
 
-        function selezionaDataInModal(indexData) {
-            const ev = eventi[idEventoCorrenteAperto];
-    if(!ev || !ev.date || !ev.date[indexData]) return;
-
-    const dataSelezionata = ev.date[indexData];
-
-    // SE L'EVENTO O LA DATA SONO SOLD OUT, E NON SEI ADMIN, BLOCCA IL CLICK
-    if ((ev.soldout || dataSelezionata.soldout) && !modalitaAdmin) {
-        return; // Esce dalla funzione senza cambiare mappa o aggiornare i dati
-    }
-
-    const tuttiIBadge = document.querySelectorAll('#modal-dates-list .detail-badge');
-    tuttiIBadge.forEach((b, i) => {
-        if(i === indexData) b.classList.add('selected-date');
-        else b.classList.remove('selected-date');
-    });
-
-            const dataSelezionata = ev.date[indexData];
-
-            const mappaUrl = dataSelezionata.mappaSpecifica || ev.mappaGenerale || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23e2e8f0%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%2364748b%22>Nessuna Mappa</text></svg>";
-            document.getElementById('modal-map-img').src = mappaUrl;
-
-            const timestamp = ev.timestampMappa || '--/--/---- --:--';
-            document.getElementById('modal-map-timestamp').innerText = timestamp;
-
-            const linkBtn = document.getElementById('link-mappa-btn');
-            if(ev.linkEsterno) {
-                linkBtn.href = ev.linkEsterno;
-                linkBtn.style.display = 'inline-flex';
-            } else {
-                linkBtn.style.display = 'none';
-            }
-
-            const settoriEsauritiInQuestaData = dataSelezionata.settoriEsauriti || [];
-            const pricesContainer = document.getElementById('modal-prices');
-            pricesContainer.innerHTML = '';
-
-            if (ev.prezzi && ev.prezzi.length > 0) {
-                ev.prezzi.forEach(p => {
-                    const priceItem = document.createElement('div');
-                    priceItem.className = 'price-item';
-                    
-                    const isSettoreEsaurito = settoriEsauritiInQuestaData.includes(p.settore) || ev.soldout || dataSelezionata.soldout;
-                    let prezzoTestoHtml = `<span class="price-amount">${p.prezzo}</span>`;
-                    if(isSettoreEsaurito) {
-                        prezzoTestoHtml = `<span class="price-amount esaurito">🚫 Esaurito</span>`;
-                    }
-
-                    priceItem.innerHTML = `
-                        <div class="price-sector-wrapper">
-                            <span class="color-indicator" style="background-color: ${p.colore || '#0ea5e9'}"></span>
-                            <span class="price-sector" style="${isSettoreEsaurito ? 'text-decoration: line-through; opacity:0.6;' : ''}">${p.settore}</span>
-                        </div>
-                        ${prezzoTestoHtml}
-                    `;
-                    pricesContainer.appendChild(priceItem);
-                });
-            } else {
-                pricesContainer.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">Contattaci su WhatsApp per ricevere il listino prezzi.</div>';
-            }
-
-            const actionWrapper = document.getElementById('whatsapp-action-wrapper');
-            if (ev.soldout || dataSelezionata.soldout) {
-                actionWrapper.innerHTML = `<div class="soldout-notice-btn">🔴 Spettacolo Esaurito</div>`;
-            } else {
-                const opzioni = { day: '2-digit', month: '2-digit', year: 'numeric' };
-                const dObj = new Date(dataSelezionata.giorno);
-                const giornoF = isNaN(dObj) ? dataSelezionata.giorno : dObj.toLocaleDateString('it-IT', opzioni);
-                
-                const testoMessaggio = encodeURIComponent(`Ciao CentroPost@ Anaclerio, vorrei informazioni/prenotare i biglietti per lo spettacolo "${ev.titolo}" a ${ev.citta} per la data del ${giornoF} alle ore ${dataSelezionata.ora}.`);
-                actionWrapper.innerHTML = `
-                    <a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${testoMessaggio}" class="whatsapp-btn" target="_blank">
-                        💬 PRENOTA ORA SU WHATSAPP
-                    </a>
-                `;
-            }
+        function cambiaDataSpettacoloSelezionataInModal(indice) {
+            dataIndiceSelezionatoCorrente = indice;
+            aggiornaDettagliDataInModal();
         }
 
-        function renderizzaPrezziSenzaFiltri() {
+        function aggiornaDettagliDataInModal() {
             const ev = eventi[idEventoCorrenteAperto];
+            if (!ev) return;
+
+            const badges = document.querySelectorAll('#modal-dates-list .detail-badge');
+            badges.forEach((b, index) => {
+                if (index === dataIndiceSelezionatoCorrente) {
+                    b.classList.add('selected-date');
+                } else {
+                    b.classList.remove('selected-date');
+                }
+            });
+
+            const dataObj = ev.dateSpettacolo ? ev.dateSpettacolo[dataIndiceSelezionatoCorrente] : null;
+
+            let immagineMappaDaMostrare = ev.mappaGenerale || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23e2e8f0%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%2394a3b8%22>Pianta non definita</text></svg>";
+            if (dataObj && dataObj.mappaDataSrc) {
+                immagineMappaDaMostrare = dataObj.mappaDataSrc;
+            }
+            document.getElementById('modal-map-img').src = immagineMappaDaMostrare;
+
+            document.getElementById('modal-map-timestamp').innerText = ev.timestampUltimaModificaMappa || "--/--/---- --:--";
+
+            const btnLinkEsterno = document.getElementById('link-mappa-btn');
+            if (ev.linkMappaUfficiale) {
+                btnLinkEsterno.href = ev.linkMappaUfficiale;
+                btnLinkEsterno.style.display = 'inline-flex';
+            } else {
+                btnLinkEsterno.style.display = 'none';
+            }
+
             const pricesContainer = document.getElementById('modal-prices');
             pricesContainer.innerHTML = '';
 
-            const timestamp = ev.timestampMappa || '--/--/---- --:--';
-            document.getElementById('modal-map-timestamp').innerText = timestamp;
+            const listinoBase = ev.prezziListino || [];
+            
+            const statoSettoriData = (dataObj && dataObj.settoriStato) ? dataObj.settoriStato : [];
 
-            const linkBtn = document.getElementById('link-mappa-btn');
-            if(ev.linkEsterno) {
-                linkBtn.href = ev.linkEsterno;
-                linkBtn.style.display = 'inline-flex';
+            if (listinoBase.length === 0) {
+                pricesContainer.innerHTML = '<div style="color:var(--text-muted); font-size:0.95rem;">Contattaci su WhatsApp per ricevere informazioni sulle tariffe dei biglietti.</div>';
             } else {
-                linkBtn.style.display = 'none';
-            }
+                listinoBase.forEach(p => {
+                    const itemDataStato = statoSettoriData.find(s => s.nome === p.nome);
+                    const settEsaurito = itemDataStato ? !!itemDataStato.esaurito : false;
 
-            if(ev.prezzi && ev.prezzi.length > 0) {
-                ev.prezzi.forEach(p => {
-                    const priceItem = document.createElement('div');
-                    priceItem.className = 'price-item';
-                    priceItem.innerHTML = `
+                    const pRow = document.createElement('div');
+                    pRow.className = "price-item";
+                    
+                    let importoHtml = `<span class="price-amount">${p.cifra || 'N.D.'}</span>`;
+                    if (ev.esauritoTotale || (dataObj && dataObj.dataEsaurita) || settEsaurito) {
+                        importoHtml = `<span class="price-amount esaurito">Esaurito</span>`;
+                    }
+
+                    pRow.innerHTML = `
                         <div class="price-sector-wrapper">
-                            <span class="color-indicator" style="background-color: ${p.colore || '#0ea5e9'}"></span>
-                            <span class="price-sector">${p.settore}</span>
+                            <span class="color-indicator" style="background-color: ${p.colore || '#cbd5e1'};"></span>
+                            <span class="price-sector">${p.nome}</span>
                         </div>
-                        <span class="price-amount">${p.prezzo}</span>
+                        ${importoHtml}
                     `;
-                    pricesContainer.appendChild(priceItem);
+                    pricesContainer.appendChild(pRow);
                 });
             }
 
             const actionWrapper = document.getElementById('whatsapp-action-wrapper');
-            if(ev.soldout) {
-                actionWrapper.innerHTML = `<div class="soldout-notice-btn">🔴 Spettacolo Esaurito</div>`;
+            actionWrapper.innerHTML = '';
+
+            const dataSelezionataEsaurita = dataObj ? !!dataObj.dataEsaurita : false;
+
+            if (ev.esauritoTotale || dataSelezionataEsaurita) {
+                actionWrapper.innerHTML = `<div class="soldout-notice-btn">❌ POSTI ESAURITI PER QUESTA DATA</div>`;
+            } else if (ev.aBreve) {
+                actionWrapper.innerHTML = `<div class="soldout-notice-btn" style="background:\#fffbeb; color:\#b45309; border-color:\#f59e0b;">⏳ VENDITE NON ANCORA APERTE</div>`;
             } else {
-                const msg = encodeURIComponent(`Ciao CentroPost@ Anaclerio, vorrei informazioni/prenotare i biglietti per lo spettacolo "${ev.titolo}" a ${ev.citta}.`);
+                let infoDataWp = "";
+                if (dataObj) {
+                    infoDataWp = ` del %2A${formattaDataLeggibile(dataObj.giorno)} ore ${dataObj.orario}%2A`;
+                }
+
+                const testoWp = `Ciao, vorrei informazioni per prenotare dei biglietti per l'evento: %2A${encodeURIComponent(ev.titolo)}%2A${infoDataWp} a ${encodeURIComponent(ev.citta)} (${encodeURIComponent(ev.location)}).`;
+                const linkWp = `https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${testoWp}`;
+
                 actionWrapper.innerHTML = `
-                    <a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${msg}" class="whatsapp-btn" target="_blank">
+                    <a href="${linkWp}" class="whatsapp-btn" target="_blank">
                         💬 PRENOTA ORA SU WHATSAPP
                     </a>
                 `;
@@ -1679,6 +1631,15 @@
                 chiudiModal();
             }
         }
+
+        function controlloHashUrlAperturaModal() {
+            const h = window.location.hash.substring(1);
+            if (h && eventi[h] && idEventoCorrenteAperto !== h) {
+                apriDettagliSpettacolo(h);
+            }
+        }
+
+        window.addEventListener('hashchange', controlloHashUrlAperturaModal);
     </script>
 </body>
 </html>
