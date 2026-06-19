@@ -727,7 +727,7 @@
 
         <div class="checkbox-container">
             <input type="checkbox" id="form-abreve">
-            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer;">⚠️ Imposta come "A BREVE IN VENDITA / BOZZA" (Blocca dettagli per i clienti)</label>
+            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer;">⚠️ Imposta come BOZZA / NASCONDI AL CLIENTE (Visibile solo in Admin)</label>
         </div>
 
         <div class="checkbox-container">
@@ -1002,8 +1002,8 @@
                     ev.data = dateRimaste[0].data;
                     ev.ora = dateRimaste[0].ora;
                 }
-                const specificoRef = ref(db, 'eventi/' + key);
-                set(specificoRef, ev);
+                const部署specificoRef = ref(db, 'eventi/' + key);
+                set(部署specificoRef, ev);
                 return true;
             }
             return false;
@@ -1015,14 +1015,14 @@
 
             let keys = Object.keys(eventi);
 
-            if (keys.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento disponibile in vetrina.</p>';
-                return;
-            }
-
             let listaEventi = keys.map(key => {
                 return { id: key, ...eventi[key] };
             });
+
+            // Se l'utente non è Admin, nascondi COMPLETAMENTE gli eventi passati/bozze
+            if (!modalitaAdmin) {
+                listaEventi = listaEventi.filter(ev => !ev.aBreve);
+            }
 
             if (categoriaSelezionata !== 'tutti') {
                 listaEventi = listaEventi.filter(ev => ev.categoria === categoriaSelezionata);
@@ -1042,7 +1042,7 @@
             });
 
             if (listaEventi.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento corrisponde ai criteri selezionati.</p>';
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento disponibile in vetrina.</p>';
                 return;
             }
 
@@ -1071,7 +1071,7 @@
                     luogoUnito = ev.citta || ev.posto || "In attesa di conferma";
                 }
 
-                const classeNonCliccabile = (ev.aBreve && !modalitaAdmin) ? 'non-cliccabile' : '';
+                const classeNonCliccabile = ev.aBreve ? 'non-cliccabile' : '';
                 const titoloVisualizzato = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
                 const emojiDaMostrare = emojiCategorie[ev.categoria] || '🎫';
 
