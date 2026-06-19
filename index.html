@@ -1245,7 +1245,7 @@
                 set(ref(db, 'eventi/' + idEdizione), payload)
                     .then(() => {
                         alert("Spettacolo aggiornato con successo!");
-                        chiudiSessioneAdmin();
+                        
                     }).catch(err => alert("Errore durante il salvataggio: " + err.message));
             } else {
                 push(eventiRef, payload)
