@@ -1537,47 +1537,84 @@
         }
 
         window.apriDettagliSpettacolo = function(id) {
-            const ev = eventi[id];
-            if (!ev) return;
+    const ev = eventi[id];
+    if (!ev) return;
 
-            idEventoCorrenteAperto = id;
-            window.location.hash = id;
+    idEventoCorrenteAperto = id;
+    window.location.hash = id;
 
-            document.getElementById('modal-title').innerText = ev.titolo;
-            document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Luogo:</strong> ${ev.citta.toUpperCase()} — ${ev.location}`;
+    document.getElementById('modal-title').innerText = ev.titolo;
+    document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Luogo:</strong> ${ev.citta.toUpperCase()} — ${ev.location}`;
 
-            const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
-            document.getElementById('modal-locandina-img').src = locandinaImgSrc;
+    const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
+    document.getElementById('modal-locandina-img').src = locandinaImgSrc;
 
-            const datesListContainer = document.getElementById('modal-dates-list');
-            datesListContainer.innerHTML = '';
+    const datesListContainer = document.getElementById('modal-dates-list');
+    datesListContainer.innerHTML = '';
 
-            dataIndiceSelezionatoCorrente = 0;
+    // Recuperiamo la data odierna nel formato YYYY-MM-DD
+    const oggiStr = new Date().toISOString().split('T')[0];
+    
+    // Variabile per capire qual è la prima data non scaduta da mostrare inizialmente
+    let primaDataValidaTrovata = -1;
 
-            if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
-                ev.dateSpettacolo.forEach((d, index) => {
-                    const badge = document.createElement('div');
-                    badge.className = "detail-badge";
-                    if (d.dataEsaurita) {
-                        badge.classList.add('date-soldout');
-                        badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> [ESAURITA]`;
-                    } else {
-                        badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> (Disponibile)`;
-                    }
+    dataIndiceSelezionatoCorrente = 0;
 
-                    badge.onclick = function() {
-                        cambiaDataSpettacoloSelezionataInModal(index);
-                    };
+    if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+        ev.dateSpettacolo.forEach((d, index) => {
+            // Controllo se questa specifica data è nel passato
+            const dataPassata = d.giorno && d.giorno < oggiStr;
 
-                    datesListContainer.appendChild(badge);
-                });
+            // Se la data è passata e NON siamo amministratori, la nascondiamo al cliente
+            if (dataPassata && !modalitaAdmin) {
+                return; 
             }
 
-            aggiornaDettagliDataInModal();
+            // Se troviamo la prima data futura (o odierna), salviamo il suo indice per selezionarla all'apertura
+            if (!dataPassata && primaDataValidaTrovata === -1) {
+                primaDataValidaTrovata = index;
+            }
 
-            document.getElementById('event-modal').style.display = 'flex';
-        }
+            const badge = document.createElement('div');
+            badge.className = "detail-badge";
 
+            // Se la data è passata e siamo admin, la mettiamo in grigio semi-trasparente
+            if (dataPassata) {
+                badge.style.opacity = '0.5';
+                badge.style.filter = 'grayscale(100%)';
+            }
+
+            if (d.dataEsaurita) {
+                badge.classList.add('date-soldout');
+                let testoScaduta = dataPassata ? " (PASSATA)" : "";
+                badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> [ESAURITA]<span style="color:var(--danger-color); font-weight:bold;">${testoScaduta}</span>`;
+            } else {
+                if (dataPassata) {
+                    badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> <span style="color:#64748b; font-weight:bold;">(PASSATA)</span>`;
+                } else {
+                    badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> (Disponibile)`;
+                }
+            }
+
+            badge.onclick = function() {
+                cambiaDataSpettacoloSelezionataInModal(index);
+            };
+
+            datesListContainer.appendChild(badge);
+        });
+    }
+
+    // Auto-seleziona la prima data valida non scaduta. Se sono tutte passate (es. in modalità admin), seleziona la prima (0).
+    if (primaDataValidaTrovata !== -1) {
+        dataIndiceSelezionatoCorrente = primaDataValidaTrovata;
+    } else {
+        dataIndiceSelezionatoCorrente = 0;
+    }
+
+    aggiornaDettagliDataInModal();
+
+    document.getElementById('event-modal').style.display = 'flex';
+}
         function cambiaDataSpettacoloSelezionataInModal(indice) {
             dataIndiceSelezionatoCorrente = indice;
             aggiornaDettagliDataInModal();
