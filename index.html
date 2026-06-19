@@ -1245,16 +1245,27 @@
                 set(ref(db, 'eventi/' + idEdizione), payload)
                     .then(() => {
                         alert("Spettacolo aggiornato con successo!");
-                        // Svuota i campi senza usare l'ID del form
-                        document.querySelector('#admin-panel form')?.reset();
-                        idEdizione = null; 
+                        
+                        // Svuota tutti i campi di testo del pannello
+                        document.querySelectorAll('#admin-panel input, #admin-panel textarea, #admin-panel select').forEach(input => {
+                            if (input.type !== 'button' && input.type !== 'submit') {
+                                input.value = '';
+                            }
+                        });
+                        
                     }).catch(err => alert("Errore durante il salvataggio: " + err.message));
             } else {
                 push(eventiRef, payload)
                     .then(() => {
                         alert("Nuovo spettacolo pubblicato con successo!");
-                        // Svuota i campi senza usare l'ID del form
-                        document.querySelector('#admin-panel form')?.reset();
+                        
+                        // Svuota tutti i campi di testo del pannello
+                        document.querySelectorAll('#admin-panel input, #admin-panel textarea, #admin-panel select').forEach(input => {
+                            if (input.type !== 'button' && input.type !== 'submit') {
+                                input.value = '';
+                            }
+                        });
+                        
                     }).catch(err => alert("Errore durante l'inserimento: " + err.message));
             }
         }
