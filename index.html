@@ -585,6 +585,7 @@
         .detail-badge:hover { background: #e2e8f0; }
         .detail-badge.selected-date { background: #e0f2fe; border-left-color: #0284c7; }
         .detail-badge strong { color: var(--text-main); margin-right: 4px; }
+        .detail-badge.date-soldout { border-left-color: var(--danger-color); background: #fef2f2; color: #991b1b; }
 
         .price-list { background: #f8fafc; padding: 15px 20px; border-radius: 14px; margin-bottom: 25px; border: 1px solid var(--border-color); }
         .price-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
@@ -732,7 +733,7 @@
 
         <div class="checkbox-container">
             <input type="checkbox" id="form-soldout">
-            <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE)</label>
+            <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE GENERALE)</label>
         </div>
         
         <label>Date, Orari Evento e Pianta dei Posti Specifica per Data:</label>
@@ -928,7 +929,7 @@
         function svuotaERinizializzaDate() {
             const container = document.getElementById('dynamic-dates-container');
             container.innerHTML = '';
-            aggiungiRigaData("", "", "");
+            aggiungiRigaData("", "", "", false);
         }
 
         window.gestisciInputPrezzo = function(input) {
@@ -962,19 +963,25 @@
             container.appendChild(row);
         }
 
-        window.aggiungiRigaData = function(dataVal = "", oraVal = "", mappaDataSrc = "") {
+        window.aggiungiRigaData = function(dataVal = "", oraVal = "", mappaDataSrc = "", dateSoldOut = false) {
             const container = document.getElementById('dynamic-dates-container');
             const row = document.createElement('div');
             row.className = 'date-input-row';
             row.dataset.mappaEsistente = mappaDataSrc;
+            
+            const dId = "chk_d_" + Math.random().toString(36).substring(2, 7);
+
             row.innerHTML = `
                 <input type="date" class="input-data-singola" value="${dataVal}" style="flex: 1.5; min-width: 120px;">
                 <input type="time" class="input-ora-singola" value="${oraVal}" style="flex: 1; min-width: 80px;">
-                <div style="flex: 2; min-width: 200px; display: flex; flex-direction: column; gap: 3px;">
+                <div style="flex: 2; min-width: 190px; display: flex; flex-direction: column; gap: 3px;">
                     <label style="margin:0; font-size: 0.75rem;">Pianta specifica per questa data:</label>
                     <input type="file" class="input-mappa-singola" accept="image/*">
                     ${mappaDataSrc ? `<span style="font-size:0.75rem; color:var(--whatsapp-color);">✔ Mappa caricata salvata</span>` : ''}
                 </div>
+                <label class="check-esaurito-settore" for="${dId}" style="margin-right: 5px;">
+                    <input type="checkbox" id="${dId}" class="input-data-esaurita" ${dateSoldOut ? 'checked' : ''}> Esaurita
+                </label>
                 <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">❌</button>
             `;
             container.appendChild(row);
@@ -1002,8 +1009,8 @@
                     ev.data = dateRimaste[0].data;
                     ev.ora = dateRimaste[0].ora;
                 }
-                const部署specificoRef = ref(db, 'eventi/' + key);
-                set(部署specificoRef, ev);
+                const specificoRef = ref(db, 'eventi/' + key);
+                set(specificoRef, ev);
                 return true;
             }
             return false;
@@ -1019,7 +1026,6 @@
                 return { id: key, ...eventi[key] };
             });
 
-            // Se l'utente non è Admin, nascondi COMPLETAMENTE gli eventi passati/bozze
             if (!modalitaAdmin) {
                 listaEventi = listaEventi.filter(ev => !ev.aBreve);
             }
@@ -1049,6 +1055,15 @@
             listaEventi.forEach((ev) => {
                 const key = ev.id;
                 
+                // Controllo automatico: se TUTTE le date dell'elenco sono contrassegnate come soldout, l'evento è interamente soldOut
+                let tuttoEsaurito = ev.soldOut || false;
+                if (ev.dateElenco && ev.dateElenco.length > 0) {
+                    const tutteDateSoldOut = ev.dateElenco.every(d => d.esaurita === true);
+                    if (tutteDateSoldOut) {
+                        tuttoEsaurito = true;
+                    }
+                }
+
                 let stringaDatePreview = "Data non specificata";
                 if (ev.dateElenco && ev.dateElenco.length > 0) {
                     const opzioni = { day: '2-digit', month: 'short', year: 'numeric' };
@@ -1071,14 +1086,15 @@
                     luogoUnito = ev.citta || ev.posto || "In attesa di conferma";
                 }
 
-                const classeNonCliccabile = ev.aBreve ? 'non-cliccabile' : '';
+                // Un evento è non-cliccabile se è in bozza/scaduto o se è completamente SOLD OUT (e l'utente non è admin)
+                const classeNonCliccabile = (ev.aBreve || (tuttoEsaurito && !modalitaAdmin)) ? 'non-cliccabile' : '';
                 const titoloVisualizzato = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
                 const emojiDaMostrare = emojiCategorie[ev.categoria] || '🎫';
 
                 const card = document.createElement('div');
                 card.className = `movie-card ${classeNonCliccabile}`;
                 card.innerHTML = `
-                    ${ev.soldOut ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
+                    ${tuttoEsaurito ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
                     ${ev.aBreve ? `<div class="abreve-badge">⚠️ Bozza / Scaduto</div>` : ''}
                     ${ev.inEvidenza ? `<div class="evidenza-badge">🔥 In Evidenza</div>` : ''}
                     <div class="tipo-emoji-badge">${emojiDaMostrare}</div>
@@ -1104,7 +1120,14 @@
         window.gestisciAperturaModal = function(key) {
             const ev = eventi[key];
             if (!ev) return;
+            
+            let tuttoEsaurito = ev.soldOut || false;
+            if (ev.dateElenco && ev.dateElenco.length > 0) {
+                if (ev.dateElenco.every(d => d.esaurita === true)) tuttoEsaurito = true;
+            }
+
             if (ev.aBreve && !modalitaAdmin) return; 
+            if (tuttoEsaurito && !modalitaAdmin) return; // Non apribile se totalmente sold out
             apriModal(key);
         }
 
@@ -1126,11 +1149,11 @@
             const datesContainer = document.getElementById('dynamic-dates-container');
             datesContainer.innerHTML = '';
             if (ev.dateElenco && ev.dateElenco.length > 0) {
-                ev.dateElenco.forEach(d => aggiungiRigaData(d.data, d.ora, d.mappaSpecifica || ""));
+                ev.dateElenco.forEach(d => aggiungiRigaData(d.data, d.ora, d.mappaSpecifica || "", d.esaurita || false));
             } else if (ev.data) {
-                aggiungiRigaData(ev.data, ev.ora || '', ev.mappa || '');
+                aggiungiRigaData(ev.data, ev.ora || '', ev.mappa || '', ev.soldOut || false);
             } else {
-                aggiungiRigaData("", "", "");
+                aggiungiRigaData("", "", "", false);
             }
 
             const container = document.getElementById('dynamic-price-container');
@@ -1209,6 +1232,7 @@
                 const dVal = row.querySelector('.input-data-singola').value;
                 const oVal = row.querySelector('.input-ora-singola').value;
                 const fMappaSingola = row.querySelector('.input-mappa-singola').files[0];
+                const dataEsaurita = row.querySelector('.input-data-esaurita').checked;
                 let mappaDettaglio = row.dataset.mappaEsistente || "";
 
                 if (fMappaSingola) {
@@ -1219,7 +1243,8 @@
                     elencoDateInserite.push({ 
                         data: dVal, 
                         ora: oVal,
-                        mappaSpecifica: mappaDettaglio || mappaRes 
+                        mappaSpecifica: mappaDettaglio || mappaRes,
+                        esaurita: dataEsaurita
                     });
                 }
             }
@@ -1289,11 +1314,21 @@
             alert("Operazione completata con successo!");
         }
 
-        window.cambiaMappaVisualizzata = function(srcMappa, badgeElement) {
+        window.cambiaMappaVisualizzata = function(srcMappa, badgeElement, isSoldOut, testoDataEsteso) {
             document.getElementById('modal-map-img').src = srcMappa;
             const tuttiBadges = document.querySelectorAll('#modal-dates-list .detail-badge');
             tuttiBadges.forEach(b => b.classList.remove('selected-date'));
             badgeElement.classList.add('selected-date');
+
+            // Cambia dinamicamente il pulsante WhatsApp in base alla data cliccata dall'utente
+            const wrapperWa = document.getElementById('whatsapp-action-wrapper');
+            if (isSoldOut) {
+                wrapperWa.innerHTML = `<div class="soldout-notice-btn">❌ I Biglietti per questa data (${testoDataEsteso}) sono Esauriti</div>`;
+            } else {
+                const ev = eventi[idEventoCorrenteAperto];
+                const messaggioWa = encodeURIComponent(`Salve! Vorrei ricevere informazioni e riservare un posto per l'evento: ${ev.titolo} (Data scelta: ${testoDataEsteso})`);
+                wrapperWa.innerHTML = `<a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${messaggioWa}" target="_blank" class="whatsapp-btn">💬 Richiedi Prenotazione su WhatsApp</a>`;
+            }
         }
 
         window.apriModal = function(key) {
@@ -1317,19 +1352,33 @@
                     const oraString = d.ora ? ` ore ${d.ora}` : '';
                     const mappaDellaData = d.mappaSpecifica || ev.mappa;
                     const classeSelezionata = index === 0 ? 'selected-date' : '';
+                    const dataSoldOut = d.esaurita || false;
+                    const classeSoldOut = dataSoldOut ? 'date-soldout' : '';
                     
+                    const dataFormattataTesto = dataObj.toLocaleDateString('it-IT') + oraString;
+                    const etichettaSoldOut = dataSoldOut ? ' [SOLD OUT]' : '';
+
                     if(index === 0) {
                         document.getElementById('modal-map-img').src = mappaDellaData;
                     }
 
-                    containerDate.innerHTML += `
-                        <div class="detail-badge ${classeSelezionata}" onclick="cambiaMappaVisualizzata('${mappaDellaData}', this)">
-                            📅 <strong>Data:</strong> ${dataObj.toLocaleDateString('it-IT')}${oraString}
-                        </div>`;
+                    // Crea l'elemento DOM per poter passare correttamente "this"
+                    const badge = document.createElement('div');
+                    badge.className = `detail-badge ${classeSelezionata} ${classeSoldOut}`;
+                    badge.innerHTML = `📅 <strong>Data:</strong> ${dataFormattataTesto}${etichettaSoldOut}`;
+                    badge.onclick = function() {
+                        cambiaMappaVisualizzata(mappaDellaData, this, dataSoldOut, dataFormattataTesto);
+                    };
+                    containerDate.appendChild(badge);
                 });
             } else if(ev.data) {
                 const d = new Date(ev.data);
-                containerDate.innerHTML = `<div class="detail-badge selected-date" style="cursor:default;">📅 <strong>Data:</strong> ${d.toLocaleDateString('it-IT')} ore ${ev.ora || 'Da definire'}</div>`;
+                const oraString = ev.ora ? ` ore ${ev.ora}` : ' Da definire';
+                const dataFormattataTesto = d.toLocaleDateString('it-IT') + oraString;
+                const esauritoUnico = ev.soldOut ? ' [SOLD OUT]' : '';
+                const classeSoldOut = ev.soldOut ? 'date-soldout' : '';
+
+                containerDate.innerHTML = `<div class="detail-badge selected-date ${classeSoldOut}" style="cursor:default;">📅 <strong>Data:</strong> ${dataFormattataTesto}${esauritoUnico}</div>`;
             } else {
                 containerDate.innerHTML = `<div class="detail-badge" style="cursor:default;">📅 <strong>Data:</strong> Non specificata</div>`;
             }
@@ -1361,17 +1410,22 @@
                 });
             }
 
+            // Inizializza il pulsante WhatsApp per la prima data visibile nel popup
             const wrapperWa = document.getElementById('whatsapp-action-wrapper');
-            if (ev.soldOut) {
-                wrapperWa.innerHTML = `<div class="soldout-notice-btn">❌ Tutti i Biglietti sono Esauriti</div>`;
+            let primaDataEsaurita = ev.soldOut || false;
+            let testoPrimaData = "";
+
+            if(ev.dateElenco && ev.dateElenco.length > 0) {
+                primaDataEsaurita = ev.dateElenco[0].esaurita || false;
+                testoPrimaData = new Date(ev.dateElenco[0].data).toLocaleDateString('it-IT') + (ev.dateElenco[0].ora ? ` ore ${ev.dateElenco[0].ora}` : '');
+            } else if(ev.data) {
+                testoPrimaData = new Date(ev.data).toLocaleDateString('it-IT') + (ev.ora ? ` ore ${ev.ora}` : '');
+            }
+
+            if (primaDataEsaurita) {
+                wrapperWa.innerHTML = `<div class="soldout-notice-btn">❌ I Biglietti per questa data (${testoPrimaData}) sono Esauriti</div>`;
             } else {
-                let testoDateMessaggio = "";
-                if(ev.dateElenco && ev.dateElenco.length > 0) {
-                    testoDateMessaggio = ev.dateElenco.map(d => new Date(d.data).toLocaleDateString('it-IT')).join(', ');
-                } else if(ev.data) {
-                    testoDateMessaggio = new Date(ev.data).toLocaleDateString('it-IT');
-                }
-                const messaggioWa = encodeURIComponent(`Salve! Vorrei ricevere informazioni e riservare un posto per l'evento: ${ev.titolo} (Date disponibili: ${testoDateMessaggio})`);
+                const messaggioWa = encodeURIComponent(`Salve! Vorrei ricevere informazioni e riservare un posto per l'evento: ${ev.titolo} (Data scelta: ${testoPrimaData})`);
                 wrapperWa.innerHTML = `<a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${messaggioWa}" target="_blank" class="whatsapp-btn">💬 Richiedi Prenotazione su WhatsApp</a>`;
             }
             
