@@ -89,29 +89,7 @@
             margin: 15px auto 0 auto;
         }
 
-        /* Barra di ricerca */
-        .search-container {
-            max-width: 500px;
-            margin: 0 auto 25px auto;
-            text-align: center;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px 20px;
-            font-size: 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 9999px;
-            outline: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            transition: all 0.2s;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
-        }
-
+        /* Nuova sezione filtri */
         .filter-container {
             display: flex;
             justify-content: center;
@@ -203,6 +181,7 @@
             z-index: 5;
         }
 
+        /* Badge evidenza fuoco */
         .evidenza-badge {
             position: absolute;
             top: 15px;
@@ -217,6 +196,7 @@
             z-index: 5;
         }
 
+        /* Badge emoji tipologia in basso a destra della locandina */
         .tipo-emoji-badge {
             position: absolute;
             top: 335px;
@@ -362,14 +342,9 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 10px;
-            flex-wrap: wrap;
-            background: #f8fafc;
-            padding: 10px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
         }
         .price-input-row input[type="text"], .date-input-row input {
-            background: #ffffff;
+            background: #f8fafc;
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 10px;
@@ -485,7 +460,7 @@
 
         @media (max-width: 950px) {
             .modal-content { flex-direction: column; max-height: 90vh; overflow-y: auto; }
-            .tipo-emoji-badge { top: 315px; }
+            .tipo-emoji-badge { top: 315px; } /* Aggiustamento per responsive */
         }
 
         .close-btn {
@@ -579,11 +554,7 @@
             border-radius: 0 8px 8px 0;
             font-size: 0.95rem;
             color: var(--text-main);
-            cursor: pointer;
-            transition: background 0.2s;
         }
-        .detail-badge:hover { background: #e2e8f0; }
-        .detail-badge.selected-date { background: #e0f2fe; border-left-color: #0284c7; }
         .detail-badge strong { color: var(--text-main); margin-right: 4px; }
 
         .price-list { background: #f8fafc; padding: 15px 20px; border-radius: 14px; margin-bottom: 25px; border: 1px solid var(--border-color); }
@@ -683,10 +654,6 @@
         <p>Seleziona uno spettacolo, controlla la pianta dei posti ed effettua la prenotazione diretta.</p>
     </header>
 
-    <div class="search-container" id="search-bar-wrapper">
-        <input type="text" id="search-input" class="search-input" placeholder="🔍 Cerca evento per titolo o città..." oninput="gestisciRicerca()">
-    </div>
-
     <div class="filter-container" id="category-filter-bar">
         <button class="filter-btn active" onclick="filtraCategoria('tutti', this)">Tutti</button>
         <button class="filter-btn" onclick="filtraCategoria('concerti', this)">🎤 Concerti</button>
@@ -727,7 +694,7 @@
 
         <div class="checkbox-container">
             <input type="checkbox" id="form-abreve">
-            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer;">⚠️ Imposta come BOZZA / NASCONDI AL CLIENTE (Visibile solo in Admin)</label>
+            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer;">⚠️ Imposta come "A BREVE IN VENDITA" (Blocca dettagli per i clienti)</label>
         </div>
 
         <div class="checkbox-container">
@@ -735,7 +702,7 @@
             <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE)</label>
         </div>
         
-        <label>Date, Orari Evento e Pianta dei Posti Specifica per Data:</label>
+        <label>Date e Orari Evento (Spunta "Esaurita" per singole date sold out):</label>
         <div id="dynamic-dates-container"></div>
         <button type="button" class="btn-add-date" onclick="aggiungiRigaData()">➕ Aggiungi un'altra Data</button>
 
@@ -756,7 +723,7 @@
                 <input type="file" id="form-locandina" accept="image/*">
             </div>
             <div>
-                <label for="form-mappa">Immagine Pianta dei Posti Generale (Se non definita per data):</label>
+                <label for="form-mappa">Immagine Pianta dei Posti:</label>
                 <input type="file" id="form-mappa" accept="image/*">
             </div>
         </div>
@@ -799,11 +766,11 @@
             <div class="modal-col-dettagli">
                 <h2 id="modal-title">Titolo Evento</h2>
                 
-                <div class="subtitle">Date e Orari Spettacolo (Clicca per cambiare mappa)</div>
+                <div class="subtitle">Date e Orari Spettacolo</div>
                 <div class="event-details-badge-box" id="modal-dates-list"></div>
 
                 <div class="event-details-badge-box">
-                    <div class="detail-badge" id="modal-detail-location" style="cursor:default;">📍 <strong>Luogo:</strong> ---</div>
+                    <div class="detail-badge" id="modal-detail-location">📍 <strong>Luogo:</strong> ---</div>
                 </div>
 
                 <div class="subtitle">Tariffe e Settori</div>
@@ -841,7 +808,6 @@
         let idEventoCorrenteAperto = null;
         let inManutenzione = false;
         let categoriaSelezionata = 'tutti'; 
-        let testoRicerca = '';
 
         const emojiCategorie = {
             'concerti': '🎤',
@@ -891,29 +857,21 @@
             renderEventi();
         }
 
-        window.gestisciRicerca = function() {
-            testoRicerca = document.getElementById('search-input').value.toLowerCase().trim();
-            renderEventi();
-        }
-
         function aggiornaVisibilitaSito() {
             const grid = document.getElementById('event-grid');
             const maintenanceScreen = document.getElementById('maintenance-screen');
             const header = document.getElementById('main-header');
             const filterBar = document.getElementById('category-filter-bar');
-            const searchBar = document.getElementById('search-bar-wrapper');
 
             if (inManutenzione && !modalitaAdmin) {
                 grid.style.display = 'none';
                 header.style.display = 'none';
                 filterBar.style.display = 'none';
-                searchBar.style.display = 'none';
                 maintenanceScreen.style.display = 'block';
             } else {
                 grid.style.display = 'grid';
                 header.style.display = 'block';
                 filterBar.style.display = 'flex';
-                searchBar.style.display = 'block';
                 maintenanceScreen.style.display = 'none';
                 renderEventi();
             }
@@ -928,7 +886,7 @@
         function svuotaERinizializzaDate() {
             const container = document.getElementById('dynamic-dates-container');
             container.innerHTML = '';
-            aggiungiRigaData("", "", "");
+            aggiungiRigaData("", "", false);
         }
 
         window.gestisciInputPrezzo = function(input) {
@@ -962,51 +920,20 @@
             container.appendChild(row);
         }
 
-        window.aggiungiRigaData = function(dataVal = "", oraVal = "", mappaDataSrc = "") {
+        window.aggiungiRigaData = function(dataVal = "", oraVal = "", soldOutVal = false) {
             const container = document.getElementById('dynamic-dates-container');
             const row = document.createElement('div');
             row.className = 'date-input-row';
-            row.dataset.mappaEsistente = mappaDataSrc;
+            const rId = "chk_date_" + Math.random().toString(36).substring(2, 7);
             row.innerHTML = `
-                <input type="date" class="input-data-singola" value="${dataVal}" style="flex: 1.5; min-width: 120px;">
-                <input type="time" class="input-ora-singola" value="${oraVal}" style="flex: 1; min-width: 80px;">
-                <div style="flex: 2; min-width: 200px; display: flex; flex-direction: column; gap: 3px;">
-                    <label style="margin:0; font-size: 0.75rem;">Pianta specifica per questa data:</label>
-                    <input type="file" class="input-mappa-singola" accept="image/*">
-                    ${mappaDataSrc ? `<span style="font-size:0.75rem; color:var(--whatsapp-color);">✔ Mappa caricata salvata</span>` : ''}
-                </div>
+                <input type="date" class="input-data-singola" value="${dataVal}" style="flex: 2;">
+                <input type="time" class="input-ora-singola" value="${oraVal}" style="flex: 1;">
+                <label class="check-esaurito-settore" for="${rId}">
+                    <input type="checkbox" id="${rId}" class="input-data-esaurita" ${soldOutVal ? 'checked' : ''}> Esaurita
+                </label>
                 <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">❌</button>
             `;
             container.appendChild(row);
-        }
-
-        function verificaERimuoviDateScadute(key, ev) {
-            if (!ev.dateElenco || ev.dateElenco.length === 0) return false;
-            
-            const oggi = new Date();
-            oggi.setHours(0,0,0,0);
-
-            const dateRimaste = ev.dateElenco.filter(d => {
-                if (!d.data) return false;
-                const dataSpettacolo = new Date(d.data);
-                dataSpettacolo.setHours(0,0,0,0);
-                return dataSpettacolo >= oggi;
-            });
-
-            if (dateRimaste.length !== ev.dateElenco.length) {
-                if (dateRimaste.length === 0) {
-                    ev.aBreve = true; 
-                    ev.dateElenco = [];
-                } else {
-                    ev.dateElenco = dateRimaste;
-                    ev.data = dateRimaste[0].data;
-                    ev.ora = dateRimaste[0].ora;
-                }
-                const部署specificoRef = ref(db, 'eventi/' + key);
-                set(部署specificoRef, ev);
-                return true;
-            }
-            return false;
         }
 
         function renderEventi() {
@@ -1015,24 +942,17 @@
 
             let keys = Object.keys(eventi);
 
+            if (keys.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento disponibile in vetrina.</p>';
+                return;
+            }
+
             let listaEventi = keys.map(key => {
                 return { id: key, ...eventi[key] };
             });
 
-            // Se l'utente non è Admin, nascondi COMPLETAMENTE gli eventi passati/bozze
-            if (!modalitaAdmin) {
-                listaEventi = listaEventi.filter(ev => !ev.aBreve);
-            }
-
             if (categoriaSelezionata !== 'tutti') {
                 listaEventi = listaEventi.filter(ev => ev.categoria === categoriaSelezionata);
-            }
-
-            if (testoRicerca !== '') {
-                listaEventi = listaEventi.filter(ev => 
-                    ev.titolo.toLowerCase().includes(testoRicerca) || 
-                    (ev.citta && ev.citta.toLowerCase().includes(testoRicerca))
-                );
             }
 
             listaEventi.sort((a, b) => {
@@ -1042,7 +962,7 @@
             });
 
             if (listaEventi.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento disponibile in vetrina.</p>';
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding: 40px;">Nessun evento presente in questa categoria.</p>';
                 return;
             }
 
@@ -1071,7 +991,7 @@
                     luogoUnito = ev.citta || ev.posto || "In attesa di conferma";
                 }
 
-                const classeNonCliccabile = ev.aBreve ? 'non-cliccabile' : '';
+                const classeNonCliccabile = (ev.aBreve && !modalitaAdmin) ? 'non-cliccabile' : '';
                 const titoloVisualizzato = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
                 const emojiDaMostrare = emojiCategorie[ev.categoria] || '🎫';
 
@@ -1079,7 +999,7 @@
                 card.className = `movie-card ${classeNonCliccabile}`;
                 card.innerHTML = `
                     ${ev.soldOut ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
-                    ${ev.aBreve ? `<div class="abreve-badge">⚠️ Bozza / Scaduto</div>` : ''}
+                    ${ev.aBreve ? `<div class="abreve-badge">⚠️ A Breve in Vendita</div>` : ''}
                     ${ev.inEvidenza ? `<div class="evidenza-badge">🔥 In Evidenza</div>` : ''}
                     <div class="tipo-emoji-badge">${emojiDaMostrare}</div>
                     <img src="${ev.locandina}" alt="${ev.titolo}" onclick="gestisciAperturaModal('${key}')">
@@ -1126,11 +1046,11 @@
             const datesContainer = document.getElementById('dynamic-dates-container');
             datesContainer.innerHTML = '';
             if (ev.dateElenco && ev.dateElenco.length > 0) {
-                ev.dateElenco.forEach(d => aggiungiRigaData(d.data, d.ora, d.mappaSpecifica || ""));
+                ev.dateElenco.forEach(d => aggiungiRigaData(d.data, d.ora, d.soldOut || false));
             } else if (ev.data) {
-                aggiungiRigaData(ev.data, ev.ora || '', ev.mappa || '');
+                aggiungiRigaData(ev.data, ev.ora || '', ev.soldOut || false);
             } else {
-                aggiungiRigaData("", "", "");
+                aggiungiRigaData("", "", false);
             }
 
             const container = document.getElementById('dynamic-price-container');
@@ -1176,53 +1096,31 @@
             const fLocandina = document.getElementById('form-locandina').files[0];
             const fMappa = document.getElementById('form-mappa').files[0];
             const linkEsterno = document.getElementById('form-link').value.trim() || "#";
-            const soldOutGenerale = document.getElementById('form-soldout').checked;
+            const soldOutGeneraleFlag = document.getElementById('form-soldout').checked;
             const impostaABreve = document.getElementById('form-abreve').checked;
             const inEvidenzaImpostato = document.getElementById('form-evidenza').checked;
             const categoriaImpostata = document.getElementById('form-category').value;
 
             if (!titolo) { alert("Inserisci il titolo!"); return; }
-            if (!currentId && !fLocandina) {
-                alert("La locandina è obbligatoria per i nuovi inserimenti!");
+            if (!currentId && (!fLocandina || !fMappa)) {
+                alert("Locandina e mappa sono obbligatorie per i nuovi inserimenti!");
                 return;
-            }
-
-            let locandinaRes = currentId ? eventi[currentId].locandina : "";
-            let mappaRes = currentId ? (eventi[currentId].mappa || "") : "";
-            let timestampString = currentId ? eventi[currentId].timestamp : "";
-
-            if (fLocandina) locandinaRes = await elaboraImmagine(fLocandina, 600);
-            if (fMappa) mappaRes = await elaboraImmagine(fMappa, 1000);
-
-            const oraCorrente = new Date();
-            if (!timestampString || fMappa) {
-                timestampString = oraCorrente.toLocaleDateString('it-IT', {
-                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                });
             }
 
             let elencoDateInserite = [];
             const righeDate = document.querySelectorAll('.date-input-row');
-            
-            for (let i = 0; i < righeDate.length; i++) {
-                const row = righeDate[i];
+            righeDate.forEach(row => {
                 const dVal = row.querySelector('.input-data-singola').value;
                 const oVal = row.querySelector('.input-ora-singola').value;
-                const fMappaSingola = row.querySelector('.input-mappa-singola').files[0];
-                let mappaDettaglio = row.dataset.mappaEsistente || "";
-
-                if (fMappaSingola) {
-                    mappaDettaglio = await elaboraImmagine(fMappaSingola, 1000);
+                const sVal = row.querySelector('.input-data-esaurita').checked;
+                if(dVal) {
+                    elencoDateInserite.push({ data: dVal, ora: oVal, soldOut: sVal });
                 }
+            });
 
-                if (dVal) {
-                    elencoDateInserite.push({ 
-                        data: dVal, 
-                        ora: oVal,
-                        mappaSpecifica: mappaDettaglio || mappaRes 
-                    });
-                }
-            }
+            // Condizione: se tutte le date dell'elenco sono contrassegnate come soldOut, l'evento intero diventa Sold Out
+            const tutteDateEsaurite = elencoDateInserite.length > 0 && elencoDateInserite.every(d => d.soldOut);
+            const soldOutGenerale = soldOutGeneraleFlag || tutteDateEsaurite;
 
             const righPrezzo = document.querySelectorAll('.price-input-row');
             let listinoPrezzi = [];
@@ -1243,21 +1141,38 @@
 
             if(listinoPrezzi.length === 0) listinoPrezzi.push({ settore: 'Posto Unico', prezzo: 'N.D.', colore: '#0ea5e9', esaurito: false });
 
+            let locandinaRes = currentId ? eventi[currentId].locandina : "";
+            let mappaRes = currentId ? eventi[currentId].mappa : "";
+            let timestampString = currentId ? eventi[currentId].timestamp : "";
+
+            if (fLocandina) locandinaRes = await elaboraImmagine(fLocandina, 600);
+            if (fMappa) {
+                mappaRes = await elaboraImmagine(fMappa, 1000);
+                const oraCorrente = new Date();
+                timestampString = oraCorrente.toLocaleDateString('it-IT', {
+                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+            } else if (!currentId) {
+                const oraCorrente = new Date();
+                timestampString = oraCorrente.toLocaleDateString('it-IT', {
+                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+            }
+
             const oggettoSpettacolo = {
                 titolo: titolo, 
                 data: elencoDateInserite.length > 0 ? elencoDateInserite[0].data : "", 
                 ora: elencoDateInserite.length > 0 ? elencoDateInserite[0].ora : "",
                 dateElenco: elencoDateInserite,
                 citta: cittaEv || "", posto: postoEv || "In attesa di conferma", locandina: locandinaRes,
-                mappa: mappaRes || (elencoDateInserite.length > 0 ? elencoDateInserite[0].mappaSpecifica : ""), 
-                linkSite: linkEsterno, timestamp: timestampString, 
+                mappa: mappaRes, linkSite: linkEsterno, timestamp: timestampString, 
                 prezzi: listinoPrezzi, soldOut: soldOutGenerale, aBreve: impostaABreve,
                 inEvidenza: inEvidenzaImpostato, categoria: categoriaImpostata
             };
 
             if (!currentId) {
                 const nuovoPostRef = push(eventiRef);
-                set(nuovoPostRef, oggettoSpettacolo)
+                set(nuovoPostRef, objetoSpettacolo)
                     .then(() => resetFormEAvvisa())
                     .catch(err => alert("Errore nel salvataggio: " + err.message));
             } else {
@@ -1289,13 +1204,6 @@
             alert("Operazione completata con successo!");
         }
 
-        window.cambiaMappaVisualizzata = function(srcMappa, badgeElement) {
-            document.getElementById('modal-map-img').src = srcMappa;
-            const tuttiBadges = document.querySelectorAll('#modal-dates-list .detail-badge');
-            tuttiBadges.forEach(b => b.classList.remove('selected-date'));
-            badgeElement.classList.add('selected-date');
-        }
-
         window.apriModal = function(key) {
             const ev = eventi[key];
             if(!ev) return;
@@ -1312,26 +1220,18 @@
             containerDate.innerHTML = '';
             
             if(ev.dateElenco && ev.dateElenco.length > 0) {
-                ev.dateElenco.forEach((d, index) => {
+                ev.dateElenco.forEach(d => {
                     const dataObj = new Date(d.data);
                     const oraString = d.ora ? ` ore ${d.ora}` : '';
-                    const mappaDellaData = d.mappaSpecifica || ev.mappa;
-                    const classeSelezionata = index === 0 ? 'selected-date' : '';
-                    
-                    if(index === 0) {
-                        document.getElementById('modal-map-img').src = mappaDellaData;
-                    }
-
-                    containerDate.innerHTML += `
-                        <div class="detail-badge ${classeSelezionata}" onclick="cambiaMappaVisualizzata('${mappaDellaData}', this)">
-                            📅 <strong>Data:</strong> ${dataObj.toLocaleDateString('it-IT')}${oraString}
-                        </div>`;
+                    const tagSoldOut = d.soldOut ? ' <span style="color:var(--danger-color); font-weight:bold;">[ESAURITA]</span>' : '';
+                    containerDate.innerHTML += `<div class="detail-badge">📅 <strong>Data:</strong> ${dataObj.toLocaleDateString('it-IT')}${oraString}${tagSoldOut}</div>`;
                 });
             } else if(ev.data) {
                 const d = new Date(ev.data);
-                containerDate.innerHTML = `<div class="detail-badge selected-date" style="cursor:default;">📅 <strong>Data:</strong> ${d.toLocaleDateString('it-IT')} ore ${ev.ora || 'Da definire'}</div>`;
+                const tagSoldOut = ev.soldOut ? ' <span style="color:var(--danger-color); font-weight:bold;">[ESAURITA]</span>' : '';
+                containerDate.innerHTML = `<div class="detail-badge">📅 <strong>Data:</strong> ${d.toLocaleDateString('it-IT')} ore ${ev.ora || 'Da definire'}${tagSoldOut}</div>`;
             } else {
-                containerDate.innerHTML = `<div class="detail-badge" style="cursor:default;">📅 <strong>Data:</strong> Non specificata</div>`;
+                containerDate.innerHTML = `<div class="detail-badge">📅 <strong>Data:</strong> Non specificata</div>`;
             }
             
             let luogoUnito = "";
@@ -1367,7 +1267,8 @@
             } else {
                 let testoDateMessaggio = "";
                 if(ev.dateElenco && ev.dateElenco.length > 0) {
-                    testoDateMessaggio = ev.dateElenco.map(d => new Date(d.data).toLocaleDateString('it-IT')).join(', ');
+                    // Propone solo le date che NON sono sold out all'interno del messaggio WhatsApp
+                    testoDateMessaggio = ev.dateElenco.filter(d => !d.soldOut).map(d => new Date(d.data).toLocaleDateString('it-IT')).join(', ');
                 } else if(ev.data) {
                     testoDateMessaggio = new Date(ev.data).toLocaleDateString('it-IT');
                 }
@@ -1434,15 +1335,6 @@
         onValue(eventiRef, (snapshot) => {
             const data = snapshot.val();
             eventi = data || {}; 
-
-            let aggiornamentoRichiesto = false;
-            Object.keys(eventi).forEach(key => {
-                const haCambiato = verificaERimuoviDateScadute(key, eventi[key]);
-                if (haCambiato) aggiornamentoRichiesto = true;
-            });
-
-            if (aggiornamentoRichiesto) return;
-
             if (!inManutenzione || modalitaAdmin) {
                 renderEventi();
                 const hashIniziale = window.location.hash.substring(1);
