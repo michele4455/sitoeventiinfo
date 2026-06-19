@@ -287,35 +287,49 @@
         #admin-panel {
             display: none;
             background: #ffffff;
-            padding: 35px;
+            padding: 40px;
             border-radius: 24px;
-            max-width: 720px;
+            max-width: 800px;
             margin: 0 auto 50px auto;
             border: 1px solid var(--border-color);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
         }
 
         #admin-panel h3 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
+            font-size: 1.7rem;
+            margin-bottom: 25px;
             color: var(--text-main);
             text-align: center;
-            font-weight: 700;
+            font-weight: 800;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
         }
 
-        .form-row-grid {
+        .admin-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 25px 0 10px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+       .form-row-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 20px;
         }
 
         @media (max-width: 600px) {
-            .form-row-grid { grid-template-columns: 1fr; }
+            .form-row-grid { grid-template-columns: 1fr; gap: 10px; }
         }
 
         #admin-panel label {
             display: block;
-            margin-top: 15px;
+            margin-top: 12px;
             font-weight: 600;
             color: var(--text-main);
             font-size: 0.9rem;
@@ -326,115 +340,122 @@
         #admin-panel input[type="time"],
         #admin-panel select {
             width: 100%;
-            padding: 10px 14px;
+            padding: 12px 16px;
             margin: 6px 0;
             background: #f8fafc;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--text-main);
             font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s ease;
         }
 
         #admin-panel input:focus, #admin-panel select:focus {
             border-color: var(--accent-color);
             background: #fff;
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
         }
 
         .checkbox-container {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin: 15px 0;
-            background: #fef2f2;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px dashed rgba(239, 68, 68, 0.3);
+            gap: 12px;
+            margin: 12px 0;
+            background: #fdf2f2;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #fee2e2;
+            transition: all 0.2s;
         }
+        .checkbox-container:hover { transform: translateX(2px); }
         
         .checkbox-container.abreve-container {
-            background: #fef3c7;
-            border: 1px dashed rgba(245, 158, 11, 0.4);
+            background: #fef9c3;
+            border: 1px solid #fef08a;
         }
 
         .checkbox-container.evidenza-container {
             background: #fff7ed;
-            border: 1px dashed rgba(251, 146, 60, 0.5);
+            border: 1px solid #ffedd5;
         }
 
         .checkbox-container.maintenance-container {
-            background: #cbd5e1;
-            border: 1px solid #94a3b8;
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            margin-bottom: 25px;
         }
 
         .checkbox-container input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             cursor: pointer;
+            accent-color: var(--accent-color);
         }
 
         .price-input-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 12px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
             background: #f8fafc;
-            padding: 10px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
         }
         .price-input-row input[type="text"] {
             background: #ffffff;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 10px;
             color: var(--text-main);
             font-size: 0.95rem;
         }
 
         .date-input-row {
-            background: #f1f5f9;
-            padding: 15px;
-            border-radius: 14px;
+            background: #f8fafc;
+            padding: 18px;
+            border-radius: 16px;
             border: 1px solid var(--border-color);
-            margin-bottom: 15px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .date-input-main-fields {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
         .date-sectors-availability {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed #cbd5e1;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed #e2e8f0;
         }
 
         .sector-toggle-item {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             background: #fff;
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
             border: 1px solid var(--border-color);
-            margin-right: 6px;
-            margin-bottom: 6px;
+            margin-right: 8px;
+            margin-bottom: 8px;
             font-size: 0.85rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
 
         .input-settore { flex: 2; }
         .input-cifra { flex: 1; text-align: right; }
         .input-colore {
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             padding: 0;
             background: transparent;
@@ -451,30 +472,34 @@
         }
         
         .btn-add-price, .btn-add-date {
-            background: transparent;
+            background: #f0f9ff;
             color: var(--accent-color);
-            border: 1px solid var(--accent-color);
-            padding: 8px 14px;
-            border-radius: 8px;
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            padding: 10px 18px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            margin-bottom: 15px;
-            display: inline-block;
-            font-size: 0.85rem;
-            transition: background 0.2s;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
         }
-        .btn-add-price:hover, .btn-add-date:hover { background: #f0f9ff; }
-
+        .btn-add-price:hover, .btn-add-date:hover { background: var(--accent-color); color: white; transform: translateY(-1px); }
+        
         .btn-remove-row {
-            background: transparent;
+            background: #fff5f5;
             color: var(--danger-color);
-            border: 1px solid var(--danger-color);
-            border-radius: 8px;
-            padding: 8px 12px;
+            border: 1px solid #fed7d7;
+            border-radius: 10px;
+            padding: 10px 14px;
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.2s;
         }
-        .btn-remove-row:hover { background: #fef2f2; }
+        .btn-remove-row:hover { background: var(--danger-color); color: white; }
 
         .admin-actions {
             display: flex;
@@ -816,40 +841,24 @@
             <label for="system-maintenance-toggle" style="margin:0; color:#1e293b; cursor:pointer; font-weight: bold;">🔧 MODALITÀ MANUTENZIONE SITO (Scomparirà tutto al cliente)</label>
         </div>
 
-        <label for="form-title">Titolo Evento:</label>
-        <input type="text" id="form-title" placeholder="Es: Nome del concerto o dello spettacolo">
-
-        <label for="form-category">Categoria Evento:</label>
-        <select id="form-category">
-            <option value="concerti">🎤 Concerti</option>
-            <option value="teatro">🎭 Teatro</option>
-            <option value="sport">⚽ Sport</option>
-            <option value="fiere">🎪 Fiere</option>
-        </select>
-
-        <div class="checkbox-container evidenza-container">
-            <input type="checkbox" id="form-evidenza">
-            <label for="form-evidenza" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">🔥 Metti in evidenza (Sposta in cima alla lista con 🔥)</label>
+        <div class="admin-section-title">📝 Informazioni Generali</div>
+        <div class="form-row-grid">
+            <div>
+                <label for="form-title">Titolo Evento:</label>
+                <input type="text" id="form-title" placeholder="Es: Nome del concerto o dello spettacolo">
+            </div>
+            <div>
+                <label for="form-category">Categoria Evento:</label>
+                <select id="form-category">
+                    <option value="concerti">🎤 Concerti</option>
+                    <option value="teatro">🎭 Teatro</option>
+                    <option value="sport">⚽ Sport</option>
+                    <option value="fiere">🎪 Fiere</option>
+                </select>
+            </div>
         </div>
 
-        <div class="checkbox-container abreve-container">
-            <input type="checkbox" id="form-abreve">
-            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">⚠️ IMPOSTA COME A BREVE IN VENDITA (Visibile anche a tutti i Clienti)</label>
-        </div>
-
-        <div class="checkbox-container">
-            <input type="checkbox" id="form-soldout">
-            <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE GENERALE)</label>
-        </div>
-
-        <label>Listino Prezzi per Settori (Generale):</label>
-        <div id="dynamic-price-container"></div>
-        <button type="button" class="btn-add-price" onclick="aggiungiRigaPrezzo()">➕ Aggiungi Settore Prezzo</button>
-
-        <label style="margin-top:20px;">Date, Orari Evento e Pianta dei Posti / Disponibilità Settori per Data:</label>
-        <div id="dynamic-dates-container"></div>
-        <button type="button" class="btn-add-date" onclick="aggiungiRigaData()">➕ Aggiungi un'altra Data</button>
-
+        <div class="admin-section-title">📍 Luogo e Collegamenti</div>
         <div class="form-row-grid">
             <div>
                 <label for="form-city">Città:</label>
@@ -860,20 +869,42 @@
                 <input type="text" id="form-location" placeholder="Es: Teatro Olimpico, Stadio...">
             </div>
         </div>
+        <label for="form-link">Link Esterno Mappa Ufficiale (Opzionale):</label>
+        <input type="text" id="form-link" placeholder="Es: https://link-biglietteria.com">
 
-        <div class="form-row-grid" style="margin-top:0;">
+        <div class="admin-section-title">🖼️ Media e Immagini</div>
+        <div class="form-row-grid">
             <div>
                 <label for="form-locandina">Immagine Locandina:</label>
                 <input type="file" id="form-locandina" accept="image/*">
             </div>
             <div>
-                <label for="form-mappa">Immagine Pianta dei Posti Generale (Se non definita per data):</label>
+                <label for="form-mappa">Pianta dei Posti Generale:</label>
                 <input type="file" id="form-mappa" accept="image/*">
             </div>
         </div>
 
-        <label for="form-link">Link Externo Mappa Ufficiale (Opzionale):</label>
-        <input type="text" id="form-link" placeholder="Es: https://link-biglietteria.com">
+        <div class="admin-section-title">🏷️ Stato ed Evidenza Spettacolo</div>
+        <div class="checkbox-container evidenza-container">
+            <input type="checkbox" id="form-evidenza">
+            <label for="form-evidenza" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">🔥 Metti in evidenza (Sposta in cima alla lista con 🔥)</label>
+        </div>
+        <div class="checkbox-container abreve-container">
+            <input type="checkbox" id="form-abreve">
+            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">⚠️ IMPOSTA COME A BREVE IN VENDITA (Visibile anche a tutti i Clienti)</label>
+        </div>
+        <div class="checkbox-container">
+            <input type="checkbox" id="form-soldout">
+            <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE GENERALE)</label>
+        </div>
+
+        <div class="admin-section-title">💰 Listino Prezzi per Settori (Generale)</div>
+        <div id="dynamic-price-container"></div>
+        <button type="button" class="btn-add-price" onclick="aggiungiRigaPrezzo()">➕ Aggiungi Settore Prezzo</button>
+
+        <div class="admin-section-title">📅 Date, Orari e Disponibilità Specifiche</div>
+        <div id="dynamic-dates-container"></div>
+        <button type="button" class="btn-add-date" onclick="aggiungiRigaData()">➕ Aggiungi un'altra Data</button>
 
         <div class="admin-actions">
             <button class="btn-pubblica" id="btn-salva-evento" onclick="salvaInVetinra()">Pubblica Evento</button>
@@ -1192,11 +1223,8 @@
             }
 
             const listinoPrezziBase = leggiSettoriDaPrezziGenerali();
-
             const dateRows = document.querySelectorAll('#dynamic-dates-container .date-input-row');
             const listaDateSalvataggio = [];
-
-            for (let i = 0; i < dateRows.forEach; i++) {} 
             
             for (const row of Array.from(dateRows)) {
                 const giorno = row.querySelector('.input-data-giorno').value;
@@ -1271,31 +1299,33 @@
                 timestampUltimaModificaMappa: oraAttuale
             };
 
-            if (idEdizione) {
-                set(ref(db, 'eventi/' + idEdizione), payload)
+            const fineSalvataggio = () => {
+                // Pulisce tutti i campi e resetta i container dinamici
+                resettaCampiForm();
+                document.getElementById('form-soldout').checked = false;
+                document.getElementById('form-abreve').checked = false;
+                document.getElementById('form-evidenza').checked = false;
+                document.getElementById('form-category').value = "concerti";
+                svuotaERinizializzaPrezzi();
+                svuotaERinizializzaDate();
+                
+                // Se era una modifica, riporta il pannello allo stato di inserimento nuovo
+                document.getElementById('edit-id').value = "";
+                document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
+                document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
+            };
+
+            if (editId) {
+                set(ref(db, 'eventi/' + editId), payload)
                     .then(() => {
                         alert("Spettacolo aggiornato con successo!");
-                        
-                        // Svuota tutti i campi di testo del pannello
-                        document.querySelectorAll('#admin-panel input, #admin-panel textarea, #admin-panel select').forEach(input => {
-                            if (input.type !== 'button' && input.type !== 'submit') {
-                                input.value = '';
-                            }
-                        });
-                        
+                        fineSalvataggio();
                     }).catch(err => alert("Errore durante il salvataggio: " + err.message));
             } else {
                 push(eventiRef, payload)
                     .then(() => {
                         alert("Nuovo spettacolo pubblicato con successo!");
-                        
-                        // Svuota tutti i campi di testo del pannello
-                        document.querySelectorAll('#admin-panel input, #admin-panel textarea, #admin-panel select').forEach(input => {
-                            if (input.type !== 'button' && input.type !== 'submit') {
-                                input.value = '';
-                            }
-                        });
-                        
+                        fineSalvataggio();
                     }).catch(err => alert("Errore durante l'inserimento: " + err.message));
             }
         }
