@@ -1352,104 +1352,134 @@
             controlloHashUrlAperturaModal();
         });
 
-        function renderEventi() {
-            const grid = document.getElementById('event-grid');
-            grid.innerHTML = '';
+       function renderEventi() {
+    const grid = document.getElementById('event-grid');
+    grid.innerHTML = '';
 
-            let chiaviEventi = Object.keys(eventi);
+    let chiaviEventi = Object.keys(eventi);
+    let eventiOrdinati = chiaviEventi.map(id => ({ id, ...eventi[id] }));
 
-            let eventiOrdinati = chiaviEventi.map(id => ({ id, ...eventi[id] }));
+    eventiOrdinati.sort((a, b) => {
+        const evidenzaA = a.inEvidenza ? 1 : 0;
+        const evidenzaB = b.inEvidenza ? 1 : 0;
+        return evidenzaB - evidenzaA;
+    });
 
-            eventiOrdinati.sort((a, b) => {
-                const evidenzaA = a.inEvidenza ? 1 : 0;
-                const evidenzaB = b.inEvidenza ? 1 : 0;
-                return evidenzaB - evidenzaA;
+    let contatoreVisibili = 0;
+
+    // Recuperiamo la data odierna nel formato YYYY-MM-DD per fare il confronto pulito
+    const oggiStr = new Date().toISOString().split('T')[0];
+
+    eventiOrdinati.forEach(ev => {
+        // 1. Controllo scadenze date passate
+        let tutteDatePassate = true;
+        if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+            // Controlla se OGNI singola data inserita è precedente a oggi
+            ev.dateSpettacolo.forEach(d => {
+                if (d.giorno && d.giorno >= oggiStr) {
+                    tutteDatePassate = false; // C'è ancora almeno una data futura o odierna
+                }
             });
+        } else {
+            tutteDatePassate = false; // Se non ha date, non lo consideriamo passato di default
+        }
 
-            let contatoreVisibili = 0;
+        // 2. Se l'evento è passato e NON siamo amministratori, lo nascondiamo completamente al cliente
+        if (tutteDatePassate && !modalitaAdmin) {
+            return;
+        }
 
-            eventiOrdinati.forEach(ev => {
-                if (categoriaSelezionata !== 'tutti' && ev.categoria !== categoriaSelezionata) return;
-                
-                if (testoRicerca) {
-                    const t = ev.titolo.toLowerCase();
-                    const c = ev.citta.toLowerCase();
-                    const loc = ev.location.toLowerCase();
-                    if (!t.includes(testoRicerca) && !c.includes(testoRicerca) && !loc.includes(testoRicerca)) return;
-                }
+        // Altri filtri già esistenti (categoria e ricerca)
+        if (categoriaSelezionata !== 'tutti' && ev.categoria !== categoriaSelezionata) return;
+        
+        if (testoRicerca) {
+            const t = ev.titolo.toLowerCase();
+            const c = ev.citta.toLowerCase();
+            const loc = ev.location.toLowerCase();
+            if (!t.includes(testoRicerca) && !c.includes(testoRicerca) && !loc.includes(testoRicerca)) return;
+        }
 
-                contatoreVisibili++;
+        contatoreVisibili++;
 
-                const card = document.createElement('div');
-                card.className = "movie-card";
+        const card = document.createElement('div');
+        card.className = "movie-card";
 
-                let badgeHtml = "";
-                if (ev.esauritoTotale) {
-                    badgeHtml = `<div class="soldout-badge">SOLD OUT</div>`;
-                } else if (ev.aBreve) {
-                    badgeHtml = `<div class="abreve-badge">A Breve in Vendita</div>`;
-                } else {
-                    let tutteDateEsaurite = true;
-                    if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
-                        ev.dateSpettacolo.forEach(d => { if (!d.dataEsaurita) tutteDateEsaurite = false; });
-                    } else {
-                        tutteDateEsaurite = false;
-                    }
-                    if (tutteDateEsaurite) {
-                        badgeHtml = `<div class="soldout-badge">SOLD OUT</div>`;
-                    }
-                }
+        // 3. Se l'evento è passato e siamo in modalità amministratore, lo coloriamo di grigio e lo rendiamo opaco
+        if (tutteDatePassate && modalitaAdmin) {
+            card.style.opacity = '0.45';
+            card.style.filter = 'grayscale(100%)';
+        }
 
-                const evidenzaBadge = ev.inEvidenza ? `<div class="evidenza-badge">🔥 IN EVIDENZA</div>` : "";
-                const emojiTipo = emojiCategorie[ev.categoria] || '🎟️';
-
-                let dataMostrataAnteprima = "Nessuna data impostata";
-                if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
-                    const primaData = ev.dateSpettacolo[0];
-                    dataMostrataAnteprima = formattaDataLeggibile(primaData.giorno) + " ore " + primaData.orario;
-                    if (ev.dateSpettacolo.length > 1) {
-                        dataMostrataAnteprima += ` (+${ev.dateSpettacolo.length - 1} date)`;
-                    }
-                }
-
-                const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
-
-                let adminBtns = "";
-                if (modalitaAdmin) {
-                    adminBtns = `
-                        <div class="action-card-btns">
-                            <button class="edit-btn" onclick="event.stopPropagation(); avviaModificaSpettacolo('${ev.id}')">📝 Modifica</button>
-                            <button class="del-btn" onclick="event.stopPropagation(); eliminaSpettacolo('${ev.id}')">🗑️ Elimina</button>
-                        </div>
-                    `;
-                }
-
-                card.innerHTML = `
-                    ${badgeHtml}
-                    ${evidenzaBadge}
-                    <div class="tipo-emoji-badge">${emojiTipo}</div>
-                    <img src="${locandinaImgSrc}" alt="Locandina" onclick="apriDettagliSpettacolo('${ev.id}')">
-                    <div class="movie-info">
-                        <div>
-                            <div class="movie-title">${ev.titolo}</div>
-                            <div class="movie-meta-preview">📍 ${ev.citta.toUpperCase()} - ${ev.location}</div>
-                            <div class="movie-meta-preview" style="font-weight:700; color:var(--text-main);">📅 ${dataMostrataAnteprima}</div>
-                        </div>
-                        <div>
-                            <button class="filter-btn" style="width:100%; border-color:var(--accent-color); color:var(--accent-color); padding:8px;" onclick="apriDettagliSpettacolo('${ev.id}')">
-                                Vedi Dettagli e Pianta Posti
-                            </button>
-                            ${adminBtns}
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-
-            if (contatoreVisibili === 0) {
-                grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted); font-weight:600;">Nessun evento trovato nella categoria selezionata.</div>`;
+        // Gestione dei Badge (Con aggiunta del badge Passato per l'admin)
+        let badgeHtml = "";
+        if (tutteDatePassate) {
+            badgeHtml = `<div class="soldout-badge" style="background:#64748b;">⚠️ PASSATO</div>`;
+        } else if (ev.esauritoTotale) {
+            badgeHtml = `<div class="soldout-badge">SOLD OUT</div>`;
+        } else if (ev.aBreve) {
+            badgeHtml = `<div class="abreve-badge">A Breve in Vendita</div>`;
+        } else {
+            let tutteDateEsaurite = true;
+            if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+                ev.dateSpettacolo.forEach(d => { if (!d.dataEsaurita) tutteDateEsaurite = false; });
+            } else {
+                tutteDateEsaurite = false;
+            }
+            if (tutteDateEsaurite) {
+                badgeHtml = `<div class="soldout-badge">SOLD OUT</div>`;
             }
         }
+
+        const evidenzaBadge = (ev.inEvidenza && !tutteDatePassate) ? `<div class="evidenza-badge">🔥 IN EVIDENZA</div>` : "";
+        const emojiTipo = emojiCategorie[ev.categoria] || '🎟️';
+
+        let dataMostrataAnteprima = "Nessuna data impostata";
+        if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+            const primaData = ev.dateSpettacolo[0];
+            dataMostrataAnteprima = formattaDataLeggibile(primaData.giorno) + " ore " + primaData.orario;
+            if (ev.dateSpettacolo.length > 1) {
+                dataMostrataAnteprima += ` (+${ev.dateSpettacolo.length - 1} date)`;
+            }
+        }
+
+        const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
+
+        let adminBtns = "";
+        if (modalitaAdmin) {
+            adminBtns = `
+                <div class="action-card-btns">
+                    <button class="edit-btn" onclick="event.stopPropagation(); avviaModificaSpettacolo('${ev.id}')">📝 Modifica</button>
+                    <button class="del-btn" onclick="event.stopPropagation(); eliminaSpettacolo('${ev.id}')">🗑️ Elimina</button>
+                </div>
+            `;
+        }
+
+        card.innerHTML = `
+            ${badgeHtml}
+            ${evidenzaBadge}
+            <div class="tipo-emoji-badge">${emojiTipo}</div>
+            <img src="${locandinaImgSrc}" alt="Locandina" onclick="apriDettagliSpettacolo('${ev.id}')">
+            <div class="movie-info">
+                <div>
+                    <div class="movie-title">${ev.titolo}</div>
+                    <div class="movie-meta-preview">📍 ${ev.citta.toUpperCase()} - ${ev.location}</div>
+                    <div class="movie-meta-preview" style="font-weight:700; color:var(--text-main);">📅 ${dataMostrataAnteprima}</div>
+                </div>
+                <div>
+                    <button class="filter-btn" style="width:100%; border-color:var(--accent-color); color:var(--accent-color); padding:8px;" onclick="apriDettagliSpettacolo('${ev.id}')">
+                        Vedi Dettagli e Pianta Posti
+                    </button>
+                    ${adminBtns}
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+
+    if (contatoreVisibili === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted); font-weight:600;">Nessun evento trovato nella categoria selezionata.</div>`;
+    }
+}
 
         function formattaDataLeggibile(isoString) {
             if (!isoString) return "";
