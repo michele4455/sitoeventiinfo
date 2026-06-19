@@ -28,7 +28,6 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            text-transform: uppercase; /* MODIFICA 1: Tutto il testo del sito convertito in automatico in maiuscolo */
         }
 
         body {
@@ -75,6 +74,7 @@
             letter-spacing: -0.5px;
             color: var(--text-main);
             margin-bottom: 12px;
+            text-transform: uppercase;
         }
 
         header h2 {
@@ -183,6 +183,7 @@
             padding: 6px 14px;
             border-radius: 9999px;
             font-size: 0.85rem;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
             box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
             z-index: 5;
@@ -198,6 +199,7 @@
             padding: 6px 14px;
             border-radius: 9999px;
             font-size: 0.85rem;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
             box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
             z-index: 5;
@@ -213,6 +215,7 @@
             padding: 6px 14px;
             border-radius: 9999px;
             font-size: 0.85rem;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
             z-index: 5;
         }
@@ -613,7 +616,7 @@
 
         .modal-col-dettagli h2 { color: var(--text-main); font-size: 1.8rem; font-weight: 800; margin-bottom: 15px; line-height: 1.2; }
         
-        .subtitle { font-size: 0.9rem; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.5px; }
+        .subtitle { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.5px; }
 
         .event-details-badge-box {
             display: flex;
@@ -644,7 +647,7 @@
         .color-indicator { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); display: inline-block; }
         .price-sector { font-weight: 600; color: var(--text-main); }
         .price-amount { color: var(--whatsapp-color); font-weight: 700; }
-        .price-amount.esaurito { color: var(--danger-color); font-size: 0.85rem;}
+        .price-amount.esaurito { color: var(--danger-color); text-transform: uppercase; font-size: 0.85rem;}
 
         .modal-actions-container {
             display: flex;
@@ -670,6 +673,7 @@
             font-weight: 700;
             font-size: 1rem;
             border-radius: 12px;
+            text-transform: uppercase;
         }
 
         .share-link-btn {
@@ -868,7 +872,7 @@
             </div>
         </div>
 
-        <label for="form-link">Link Esterno Mappa Ufficiale (Opzionale):</label>
+        <label for="form-link">Link Externo Mappa Ufficiale (Opzionale):</label>
         <input type="text" id="form-link" placeholder="Es: https://link-biglietteria.com">
 
         <div class="admin-actions">
@@ -937,7 +941,6 @@
         const configRef = ref(db, 'configurazione_sito');
 
         const TUO_NUMERO_WHATSAPP = "393487326468";
-
         let eventi = {};
         let modalitaAdmin = false;
         let idEventoCorrenteAperto = null;
@@ -945,18 +948,7 @@
         let categoriaSelezionata = 'tutti';
         let testoRicerca = '';
 
-        const emojiCategorie = {
-            'concerti': '🎤',
-            'teatro': '🎭',
-            'sport': '⚽',
-            'fiere': '🎪'
-        };
-
-        // CONTROLLO PERSISTENZA ALL'AVVIO DELLA PAGINA (MODIFICA 2)
-        if (sessionStorage.getItem("adminLoggato") === "true") {
-            modalitaAdmin = true;
-            document.getElementById('admin-panel').style.display = 'block';
-        }
+        const emojiCategorie = { 'concerti': '🎤', 'teatro': '🎭', 'sport': '⚽', 'fiere': '🎪' };
 
         window.apriLoginAdmin = function() {
             document.getElementById('login-password-field').value = '';
@@ -971,10 +963,8 @@
         window.confermaAccessoAdmin = function() {
             const pw = document.getElementById('login-password-field').value;
             if (!pw) return;
-            
             if (btoa(JSON.stringify(pw)) === "IjIwMjYi") {
                 modalitaAdmin = true;
-                sessionStorage.setItem("adminLoggato", "true"); // MODIFICA 2: Salva lo stato nella sessione del browser
                 chiudiLoginAdmin();
                 document.getElementById('admin-panel').style.display = 'block';
                 svuotaERinizializzaPrezzi();
@@ -987,7 +977,6 @@
         }
 
         window.chiudiSessioneAdmin = function() {
-            sessionStorage.removeItem("adminLoggato"); // MODIFICA 2: Rimuove lo stato di amministratore
             document.getElementById('admin-panel').style.display = 'none';
             document.getElementById('edit-id').value = "";
             document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
@@ -1095,77 +1084,67 @@
         window.aggiornaSettoriNelleDate = function() {
             const settori = recuperaListaSettoriAttuali();
             const righeDate = document.querySelectorAll('.date-input-row');
-            
             righeDate.forEach(row => {
                 const containerDispo = row.querySelector('.date-sectors-availability');
                 let statiPrecedenti = {};
-                
                 containerDispo.querySelectorAll('input[type="checkbox"]').forEach(chk => {
                     statiPrecedenti[chk.dataset.nomeSettore] = chk.checked;
                 });
-                
+
                 containerDispo.innerHTML = '<div style="font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Spunta i settori ESAURITI in QUESTA DATA:</div>';
-                
                 settori.forEach(s => {
                     const eraEsaurito = statiPrecedenti[s.nome] || false;
                     const item = document.createElement('label');
                     item.className = 'sector-toggle-item';
                     item.innerHTML = `
                         <input type="checkbox" data-nome-settore="${s.nome}" ${eraEsaurito ? 'checked' : ''}>
-                        <span>${s.nome}</span>
+                        <span style="color:var(--danger-color); font-weight:600;">${s.nome} Esaurito</span>
                     `;
                     containerDispo.appendChild(item);
                 });
             });
         }
 
-        window.aggiungiRigaData = function(dataVal = "", oraVal = "", timestampVal = "", dataEsaurita = false, settoriEsauriti = []) {
+        window.aggiungiRigaData = function(dataVal = "", oraVal = "", mappaDataSrc = "", dateSoldOut = false, settoriEsauriti = []) {
             const container = document.getElementById('dynamic-dates-container');
             const row = document.createElement('div');
             row.className = 'date-input-row';
             
             row.innerHTML = `
                 <div class="date-input-main-fields">
-                    <input type="date" class="input-data-gg" value="${dataVal}" style="flex:2;">
-                    <input type="time" class="input-data-orario" value="${oraVal}" style="flex:1;">
-                    <input type="text" class="input-data-timestamp" placeholder="Ultimo Agg. Mappa (Opzionale)" value="${timestampVal}" style="flex:2;">
-                    <label class="check-esaurito-settore">
-                        <input type="checkbox" class="input-data-soldout" ${dataEsaurita ? 'checked' : ''}> 🔴 DATA SOLD OUT
-                    </label>
-                    <button type="button" class="btn-remove-row" onclick="this.parentElement.parentElement.remove()">❌</button>
-                </div>
-                <div class="form-row-grid" style="margin-top:10px;">
-                    <div>
-                        <label style="margin:0; font-size:0.8rem;">Pianta dei Posti Specifica per questa Data (Opzionale):</label>
-                        <input type="file" class="input-data-mappa-file" accept="image/*">
+                    <input type="date" class="input-data-giorno" value="${dataVal}" style="width:140px; margin:0;">
+                    <input type="time" class="input-data-ora" value="${oraVal}" style="width:100px; margin:0;">
+                    <div style="flex:1; min-width:180px;">
+                        <span style="font-size:0.75rem; font-weight:bold; display:block; color:var(--text-muted);">Mappa specifica per questa data (opzionale):</span>
+                        <input type="file" class="input-data-mappa" accept="image/*" style="margin:2px 0; padding:4px;">
+                        <input type="hidden" class="input-data-mappa-current-src" value="${mappaDataSrc}">
                     </div>
+                    <label class="check-esaurito-settore" style="margin:0;">
+                        <input type="checkbox" class="input-data-soldout" ${dateSoldOut ? 'checked' : ''}> Data Esaurita
+                    </label>
+                    <button type="button" class="btn-remove-row" onclick="this.parentElement.parentElement.remove();">❌</button>
                 </div>
                 <div class="date-sectors-availability"></div>
             `;
             container.appendChild(row);
-            
-            if(settoriEsauriti.length > 0) {
-                const settori = recuperaListaSettoriAttuali();
-                const containerDispo = row.querySelector('.date-sectors-availability');
-                containerDispo.innerHTML = '<div style="font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Spunta i settori ESAURITI in QUESTA DATA:</div>';
-                settori.forEach(s => {
-                    const eraEsaurito = settoriEsauriti.includes(s.nome);
-                    const item = document.createElement('label');
-                    item.className = 'sector-toggle-item';
-                    item.innerHTML = `
-                        <input type="checkbox" data-nome-settore="${s.nome}" ${eraEsaurito ? 'checked' : ''}>
-                        <span>${s.nome}</span>
-                    `;
-                    containerDispo.appendChild(item);
-                });
-            } else {
-                aggiornaSettoriNelleDate();
-            }
+
+            const settori = recuperaListaSettoriAttuali();
+            const containerDispo = row.querySelector('.date-sectors-availability');
+            containerDispo.innerHTML = '<div style="font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Spunta i settori ESAURITI in QUESTA DATA:</div>';
+            settori.forEach(s => {
+                const eraEsaurito = settoriEsauriti.includes(s.nome);
+                const item = document.createElement('label');
+                item.className = 'sector-toggle-item';
+                item.innerHTML = `
+                    <input type="checkbox" data-nome-settore="${s.nome}" ${eraEsaurito ? 'checked' : ''}>
+                    <span style="color:var(--danger-color); font-weight:600;">${s.nome} Esaurito</span>
+                `;
+                containerDispo.appendChild(item);
+            });
         }
 
         function convertiFileInBase64(file) {
             return new Promise((resolve, reject) => {
-                if(!file) { resolve(""); return; }
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = () => resolve(reader.result);
@@ -1174,358 +1153,469 @@
         }
 
         window.salvaInVetinra = async function() {
-            const idModifica = document.getElementById('edit-id').value;
+            const idEdizione = document.getElementById('edit-id').value;
             const titolo = document.getElementById('form-title').value.trim();
             const categoria = document.getElementById('form-category').value;
             const inEvidenza = document.getElementById('form-evidenza').checked;
             const aBreve = document.getElementById('form-abreve').checked;
-            const soldoutGenerale = document.getElementById('form-soldout').checked;
+            const totaleSoldout = document.getElementById('form-soldout').checked;
             const citta = document.getElementById('form-city').value.trim();
             const location = document.getElementById('form-location').value.trim();
-            const linkMappaEsterno = document.getElementById('form-link').value.trim();
+            const linkEsterno = document.getElementById('form-link').value.trim();
 
-            if(!titolo || !citta) {
-                alert("Compila almeno i campi Titolo e Città.");
+            if (!titolo || !citta || !location) {
+                alert("Compila almeno i campi Titolo, Città e Luogo dell'evento.");
                 return;
             }
 
-            let prezziList = [];
-            const righPrezzo = document.querySelectorAll('#dynamic-price-container .price-input-row');
-            righPrezzo.forEach(row => {
+            const righePrezzo = document.querySelectorAll('#dynamic-price-container .price-input-row');
+            let listinoPrezzi = [];
+            righePrezzo.forEach((row, idx) => {
                 const sett = row.querySelector('.input-settore').value.trim();
                 const cifra = row.querySelector('.input-cifra').value.trim();
                 const col = row.querySelector('.input-colore').value;
-                if(sett) prezziList.push({ settore: sett, prezzo: cifra, colore: col });
+                if(sett && cifra) {
+                    listinoPrezzi.push({ id: 's_' + idx, settore: sett, prezzo: cifra, colore: col });
+                }
             });
 
-            let dateList = [];
-            const righeDate = document.querySelectorAll('.date-input-row');
-            for(let row of righeDate) {
-                const dGg = row.querySelector('.input-data-gg').value;
-                const dOra = row.querySelector('.input-data-orario').value;
-                const dTime = row.querySelector('.input-data-timestamp').value.trim();
-                const dSoldout = row.querySelector('.input-data-soldout').checked;
-                
-                const mappaFileInput = row.querySelector('.input-data-mappa-file').files[0];
-                let mappaDataB64 = "";
-                if(mappaFileInput) {
-                    mappaDataB64 = await convertiFileInBase64(mappaFileInput);
-                } else if(idModifica && eventi[idModifica] && eventi[idModifica].date) {
-                    const vecchiaData = eventi[idModifica].date.find(d => d.data === dGg && d.orario === dOra);
-                    if(vecchiaData && vecchiaData.mappaSpecifica) mappaDataB64 = vecchiaData.mappaSpecifica;
+            const righeDate = document.querySelectorAll('#dynamic-dates-container .date-input-row');
+            let listaDate = [];
+            
+            for (let row of righeDate) {
+                const g = row.querySelector('.input-data-giorno').value;
+                const o = row.querySelector('.input-data-ora').value;
+                const fileMappaData = row.querySelector('.input-data-mappa').files[0];
+                let srcMappaData = row.querySelector('.input-data-mappa-current-src').value;
+                const dataEsaurita = row.querySelector('.input-data-soldout').checked;
+
+                if(!g || !o) continue;
+
+                if (fileMappaData) {
+                    try { srcMappaData = await convertiFileInBase64(fileMappaData); } catch(e) { console.error(e); }
                 }
 
-                let settoriEsauritiInData = [];
+                let settoriEsauritiQui = [];
                 row.querySelectorAll('.date-sectors-availability input[type="checkbox"]').forEach(chk => {
-                    if(chk.checked) settoriEsauritiInData.push(chk.dataset.nomeSettore);
+                    if(chk.checked) settoriEsauritiQui.push(chk.dataset.nomeSettore);
                 });
 
-                if(dGg) {
-                    dateList.push({
-                        data: dGg,
-                        orario: dOra,
-                        timestampMappa: dTime,
-                        esaurita: dSoldout,
-                        mappaSpecifica: mappaDataB64,
-                        settoriEsauriti: settoriEsauritiInData
-                    });
-                }
+                listaDate.push({
+                    giorno: g,
+                    ora: o,
+                    mappaSpecifica: srcMappaData || "",
+                    soldout: dataEsaurita,
+                    settoriEsauriti: settoriEsauritiQui
+                });
             }
 
+            if(listaDate.length === 0) {
+                alert("Inserisci almeno una data e un orario validi per l'evento.");
+                return;
+            }
+
+            let locandinaSrc = "";
             const fileLocandina = document.getElementById('form-locandina').files[0];
+            if (fileLocandina) {
+                try { locandinaSrc = await convertiFileInBase64(fileLocandina); } catch(e) { console.error(e); }
+            } else if(idEdizione && eventi[idEdizione]) {
+                locandinaSrc = eventi[idEdizione].locandina || "";
+            }
+
+            let mappaGeneraleSrc = "";
             const fileMappaGen = document.getElementById('form-mappa').files[0];
+            if (fileMappaGen) {
+                try { mappaGeneraleSrc = await convertiFileInBase64(fileMappaGen); } catch(e) { console.error(e); }
+            } else if(idEdizione && eventi[idEdizione]) {
+                mappaGeneraleSrc = eventi[idEdizione].mappaGenerale || "";
+            }
 
-            let locandinaB64 = idModifica && eventi[idModifica] ? eventi[idModifica].locandina : "";
-            let mappaGenB64 = idModifica && eventi[idModifica] ? eventi[idModifica].mappaGenerale : "";
+            const timestampMappa = new Date().toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-            if(fileLocandina) locandinaB64 = await convertiFileInBase64(fileLocandina);
-            if(fileMappaGen) mappaGenB64 = await convertiFileInBase64(fileMappaGen);
+            // Manteniamo lo stato scaduto precedentemente se stiamo modificando
+            const giaScaduto = (idEdizione && eventi[idEdizione]) ? !!eventi[idEdizione].scaduto : false;
 
-            const datiEvento = {
-                titolo, categoria, evidenza: inEvidenza, abreve: aBreve, soldout: soldoutGenerale,
-                citta, location, linkMappaEsterno, prezzi: prezziList, date: dateList,
-                locandina: locandinaB64, mappaGenerale: mappaGenB64
+            const payload = {
+                titolo, categoria, evidenza: inEvidenza, abreve: aBreve, soldout: totaleSoldout, scaduto: giaScaduto,
+                citta, location, linkEsterno, prezzi: listinoPrezzi, date: listaDate,
+                locandina: locandinaSrc, mappaGenerale: mappaGeneraleSrc, timestampMappa
             };
 
-            if(idModifica) {
-                set(ref(db, 'eventi/' + idModifica), datiEvento)
+            if (idEdizione) {
+                set(ref(db, 'eventi/' + idEdizione), payload)
                     .then(() => {
-                        alert("Evento modificato con successo!");
-                        azzeraFormAdmin();
-                    }).catch(err => alert("Errore di salvataggio: " + err.message));
+                        alert("Spettacolo aggiornato con successo!");
+                        chiudiSessioneAdmin();
+                    }).catch(err => alert("Errore durante il salvataggio: " + err.message));
             } else {
-                const nuovoRef = push(eventiRef);
-                set(nuovoRef, datiEvento)
+                push(eventiRef, payload)
                     .then(() => {
-                        alert("Nuovo evento pubblicato!");
-                        azzeraFormAdmin();
-                    }).catch(err => alert("Errore di pubblicazione: " + err.message));
+                        alert("Nuovo spettacolo pubblicato con successo!");
+                        chiudiSessioneAdmin();
+                    }).catch(err => alert("Errore durante l'inserimento: " + err.message));
             }
         }
 
-        function azzeraFormAdmin() {
-            document.getElementById('edit-id').value = "";
-            document.getElementById('form-title').value = "";
-            document.getElementById('form-city').value = "";
-            document.getElementById('form-location').value = "";
-            document.getElementById('form-link').value = "";
-            document.getElementById('form-evidenza').checked = false;
-            document.getElementById('form-abreve').checked = false;
-            document.getElementById('form-soldout').checked = false;
-            document.getElementById('form-locandina').value = "";
-            document.getElementById('form-mappa').value = "";
-            document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
-            document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
-            svuotaERinizializzaPrezzi();
-            svuotaERinizializzaDate();
-        }
+        window.avviaModifica = function(key) {
+            const ev = eventi[key];
+            if (!ev) return;
 
-        window.avviaModificaEvento = function(id) {
-            const ev = eventi[id];
-            if(!ev) return;
-
-            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-id').value = key;
             document.getElementById('admin-panel-title').innerText = "Modifica Spettacolo: " + ev.titolo;
-            document.getElementById('btn-salva-evento').innerText = "Salva Modifiche";
+            document.getElementById('btn-salva-evento').innerText = "Save Modifiche";
 
-            document.getElementById('form-title').value = ev.titolo || "";
+            document.getElementById('form-title').value = ev.titolo;
             document.getElementById('form-category').value = ev.categoria || "concerti";
-            document.getElementById('form-evidenza').checked = ev.evidenza || false;
-            document.getElementById('form-abreve').checked = ev.abreve || false;
-            document.getElementById('form-soldout').checked = ev.soldout || false;
+            document.getElementById('form-evidenza').checked = !!ev.evidenza;
+            document.getElementById('form-abreve').checked = !!ev.abreve;
+            document.getElementById('form-soldout').checked = !!ev.soldout;
             document.getElementById('form-city').value = ev.citta || "";
             document.getElementById('form-location').value = ev.location || "";
-            document.getElementById('form-link').value = ev.linkMappaEsterno || "";
-            document.getElementById('form-locandina').value = "";
-            document.getElementById('form-mappa').value = "";
+            document.getElementById('form-link').value = ev.linkEsterno || "";
 
-            const pContainer = document.getElementById('dynamic-price-container');
-            pContainer.innerHTML = '';
-            if(ev.prezzi && ev.prezzi.length > 0) {
+            document.getElementById('dynamic-price-container').innerHTML = '';
+            if (ev.prezzi && ev.prezzi.length > 0) {
                 ev.prezzi.forEach(p => aggiungiRigaPrezzo(p.settore, p.prezzo, p.colore));
             } else {
                 svuotaERinizializzaPrezzi();
             }
 
-            const dContainer = document.getElementById('dynamic-dates-container');
-            dContainer.innerHTML = '';
-            if(ev.date && ev.date.length > 0) {
-                ev.date.forEach(d => aggiungiRigaData(d.data, d.orario, d.timestampMappa || "", d.esaurita || false, d.settoriEsauriti || []));
+            document.getElementById('dynamic-dates-container').innerHTML = '';
+            if (ev.date && ev.date.length > 0) {
+                ev.date.forEach(d => aggiungiRigaData(d.giorno, d.ora, d.mappaSpecifica || "", !!d.soldout, d.settoriEsauriti || []));
             } else {
                 svuotaERinizializzaDate();
             }
 
+            document.getElementById('form-locandina').value = "";
+            document.getElementById('form-mappa').value = "";
+
             document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
         }
 
-        window.eliminaEvento = function(id) {
-            if(confirm("Sei sicuro di voler eliminare definitivamente questo evento?")) {
-                remove(ref(db, 'eventi/' + id))
-                    .then(() => alert("Evento eliminato."))
-                    .catch(err => alert("Errore: " + err.message));
+        window.rimuoviEvento = function(key) {
+            if (confirm("Sei sicuro di voler eliminare definitivamente questo spettacolo dalla vetrina pubblica?")) {
+                const specificoRef = ref(db, 'eventi/' + key);
+                remove(specificoRef)
+                    .then(() => {
+                        alert("Evento rimosso con successo.");
+                    })
+                    .catch(err => alert("Errore durante la rimozione: " + err.message));
             }
         }
 
-        function formattaDataItaliana(stringaData) {
-            if(!stringaData) return "DATA N.D.";
-            const parti = stringaData.split("-");
-            if(parti.length !== 3) return stringaData;
-            return `${parti[2]}/${parti[1]}/${parti[0]}`;
+        onValue(configRef, (snapshot) => {
+            const config = snapshot.val();
+            inManutenzione = config ? !!config.manutenzione : false;
+            document.getElementById('system-maintenance-toggle').checked = inManutenzione;
+            aggiornaVisibilitaSito();
+        });
+
+        // NUOVA LOGICA: Se le date passano, imposta 'scaduto' su Firebase (Invece di toccare il campo 'abreve')
+        function verificaERimuoviDateScadute(key, ev) {
+            if (!ev || !ev.date || ev.date.length === 0) return false;
+            
+            const oggi = new Date();
+            let tutteScadute = true;
+
+            ev.date.forEach(d => {
+                const dataSpettacolo = new Date(d.giorno + 'T' + d.ora);
+                if (dataSpettacolo >= oggi) {
+                    tutteScadute = false;
+                }
+            });
+
+            // Se tutte le date sono passate e l'evento non è ancora marcato come scaduto, lo aggiorniamo su DB
+            if (tutteScadute && !ev.scaduto) {
+                set(ref(db, 'eventi/' + key + '/scaduto'), true)
+                    .catch(e => console.error("Errore aggiornamento scaduto automatico:", e));
+                return true; 
+            }
+            return false;
         }
+
+        onValue(eventiRef, (snapshot) => {
+            const data = snapshot.val();
+            eventi = data || {}; 
+
+            let aggiornamentoRichiesto = false;
+            Object.keys(eventi).forEach(key => {
+                const haCambiato = verificaERimuoviDateScadute(key, eventi[key]);
+                if (haCambiato) aggiornamentoRichiesto = true;
+            });
+
+            if (aggiornamentoRichiesto) return;
+
+            if (!inManutenzione || modalitaAdmin) {
+                renderEventi();
+                const hashIniziale = window.location.hash.substring(1);
+                if (hashIniziale && eventi[hashIniziale]) {
+                    gestisciAperturaModal(hashIniziale);
+                }
+            }
+        });
 
         function renderEventi() {
             const grid = document.getElementById('event-grid');
             grid.innerHTML = '';
 
-            let listaEventi = [];
-            for (let id in eventi) {
-                listaEventi.push({ id, ...eventi[id] });
-            }
+            let chiaviOrdinate = Object.keys(eventi);
 
-            listaEventi.sort((a, b) => {
-                const bA = a.evidenza ? 1 : 0;
-                const bB = b.evidenza ? 1 : 0;
-                return bB - bA;
+            chiaviOrdinate.sort((a, b) => {
+                const evA = eventi[a];
+                const evB = eventi[b];
+                const evAEvidenza = evA.evidenza ? 1 : 0;
+                const evBEvidenza = evB.evidenza ? 1 : 0;
+                return evBEvidenza - evAEvidenza;
             });
 
-            listaEventi.forEach(ev => {
-                if (categoriaSelezionata !== 'tutti' && ev.categoria !== categoriaSelezionata) return;
+            let contatoreVisibili = 0;
+
+            chiaviOrdinate.forEach(key => {
+                const ev = eventi[key];
                 
+                // SE L'EVENTO È SCADUTO, scompare dalla Home Page pubblica dei clienti. Resta visibile solo se sei Admin loggato.
+                if (ev.scaduto && !modalitaAdmin) return; 
+
+                if (categoriaSelezionata !== 'tutti' && ev.categoria !== categoriaSelezionata) return;
+
                 if (testoRicerca) {
-                    const t = (ev.titolo || "").toLowerCase();
-                    const c = (ev.citta || "").toLowerCase();
-                    if (!t.includes(testoRicerca) && !c.includes(testoRicerca)) return;
+                    const titoloOk = ev.titolo && ev.titolo.toLowerCase().includes(testoRicerca);
+                    const cittaOk = ev.citta && ev.citta.toLowerCase().includes(testoRicerca);
+                    const luogoOk = ev.location && ev.location.toLowerCase().includes(testoRicerca);
+                    if (!titoloOk && !cittaOk && !luogoOk) return;
                 }
+
+                contatoreVisibili++;
 
                 const card = document.createElement('div');
-                card.className = `movie-card ${ev.abreve && !modalitaAdmin ? 'non-cliccabile' : ''}`;
-
-                let badgeHtml = "";
-                if(ev.soldout) {
-                    badgeHtml += `<span class="soldout-badge">SOLD OUT</span>`;
-                } else if(ev.abreve) {
-                    badgeHtml += `<span class="abreve-badge">A BREVE IN VENDITA</span>`;
+                card.className = 'movie-card';
+                if(ev.scaduto && modalitaAdmin) {
+                    card.style.border = "2px dashed #64748b";
+                    card.style.opacity = "0.7";
                 }
-                if(ev.evidenza) {
-                    badgeHtml += `<span class="evidenza-badge">🔥 IN EVIDENZA</span>`;
+
+                let badgeHtml = '';
+                if (ev.soldout) {
+                    badgeHtml += `<div class="soldout-badge">Esaurito</div>`;
+                } else if (ev.scaduto) {
+                    badgeHtml += `<div class="scaduto-badge">Scaduto / Solo Admin</div>`;
+                } else if (ev.abreve) {
+                    // "A breve in vendita" esce regolarmente nell'elenco pubblico
+                    badgeHtml += `<div class="abreve-badge">A breve in vendita</div>`;
+                }
+
+                if (ev.evidenza) {
+                    badgeHtml += `<div class="evidenza-badge">🔥 In Evidenza</div>`;
                 }
 
                 const emoji = emojiCategorie[ev.categoria] || '🎟️';
-                const locandinaSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 font-size=%2240%22 text-anchor=%22middle%22 dy=%22.3em%22>🖼️</text></svg>";
+                badgeHtml += `<div class="tipo-emoji-badge">${emoji}</div>`;
 
-                let dateSottoTitolo = "NESSUNA DATA";
+                let stringaDateAnteprima = "Nessuna data definita";
                 if(ev.date && ev.date.length > 0) {
-                    if(ev.date.length === 1) {
-                        dateSottoTitolo = `${formattaDataItaliana(ev.date[0].data)} ORE ${ev.date[0].orario || '--:--'}`;
-                    } else {
-                        dateSottoTitolo = `${ev.date.length} DATE DISPONIBILI`;
-                    }
+                    const opzioni = { day: '2-digit', month: '2-digit' };
+                    const d1 = new Date(ev.date[0].giorno);
+                    const formattata = isNaN(d1) ? ev.date[0].giorno : d1.toLocaleDateString('it-IT', opzioni);
+                    stringaDateAnteprima = formattata + " alle " + ev.date[0].ora;
+                    if(ev.date.length > 1) stringaDateAnteprima += ` (+${ev.date.length - 1} date)`;
                 }
 
-                let azioniAdminHtml = "";
-                if(modalitaAdmin) {
-                    azioniAdminHtml = `
+                const locandinaUrl = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23e2e8f0%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
+
+                let adminBtnsHtml = '';
+                if (modalitaAdmin) {
+                    adminBtnsHtml = `
                         <div class="action-card-btns">
-                            <button class="edit-btn" onclick="avviaModificaEvento('${ev.id}')">✏️ MODIFICA</button>
-                            <button class="del-btn" onclick="eliminaEvento('${ev.id}')">🗑️ ELIMINA</button>
+                            <button class="edit-btn" onclick="avviaModifica('${key}')">✏️ Modifica</button>
+                            <button class="del-btn" onclick="rimuoviEvento('${key}')">🗑️ Rimuovi</button>
                         </div>
                     `;
                 }
 
                 card.innerHTML = `
                     ${badgeHtml}
-                    <span class="tipo-emoji-badge">${emoji}</span>
-                    <img src="${locandinaSrc}" alt="Locandina" onclick="apriDettaglioSpettacolo('${ev.id}')">
+                    <img src="${locandinaUrl}" alt="Locandina" onclick="gestisciAperturaModal('${key}')">
                     <div class="movie-info">
                         <div>
                             <div class="movie-title">${ev.titolo}</div>
-                            <div class="movie-meta-preview">📍 ${ev.citta} - ${ev.location}</div>
+                            <div class="movie-meta-preview">📍 ${ev.citta || 'Bari'} - ${ev.location || 'Location'}</div>
+                            <div class="movie-meta-preview" style="font-weight:600; color:var(--text-main);">📅 ${stringaDateAnteprima}</div>
                         </div>
                         <div>
-                            <div class="movie-meta-preview" style="font-weight:700; color:var(--accent-color); margin-bottom:0;">${dateSottoTitolo}</div>
-                            ${azioniAdminHtml}
+                            ${adminBtnsHtml}
                         </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
+
+            if (contatoreVisibili === 0) {
+                const vuoto = document.createElement('div');
+                vuoto.style.gridColumn = '1 / -1';
+                vuoto.style.textAlign = 'center';
+                vuoto.style.padding = '40px';
+                vuoto.style.color = 'var(--text-muted)';
+                vuoto.style.fontSize = '1.1rem';
+                vuoto.innerText = 'Nessuno spettacolo corrisponde ai criteri o risulta attualmente attivo.';
+                grid.appendChild(vuoto);
+            }
         }
 
-        window.apriDettaglioSpettacolo = function(id) {
-            const ev = eventi[id];
+        window.gestisciAperturaModal = function(key) {
+            idEventoCorrenteAperto = key;
+            window.location.hash = key;
+            
+            const ev = eventi[key];
             if(!ev) return;
-            if(ev.abreve && !modalitaAdmin) return;
-
-            idEventoCorrenteAperto = id;
-            window.location.hash = id;
 
             document.getElementById('modal-title').innerText = ev.titolo;
-            document.getElementById('modal-detail-location').innerHTML = `📍 <strong>LUOGO:</strong> ${ev.citta} - ${ev.location}`;
+            document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Luogo:</strong> ${ev.citta || ''} - ${ev.location || ''}`;
             
-            const locGen = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 font-size=%2240%22 text-anchor=%22middle%22 dy=%22.3em%22>🖼️</text></svg>";
-            document.getElementById('modal-locandina-img').src = locGen;
+            const locandinaUrl = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23e2e8f0%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
+            document.getElementById('modal-locandina-img').src = locandinaUrl;
 
             const datesListContainer = document.getElementById('modal-dates-list');
             datesListContainer.innerHTML = '';
 
             if(ev.date && ev.date.length > 0) {
                 ev.date.forEach((d, index) => {
-                    const b = document.createElement('div');
-                    b.className = `detail-badge ${d.esaurita ? 'date-soldout' : ''}`;
-                    b.innerHTML = `📅 <strong>${formattaDataItaliana(d.data)}</strong> ORE ${d.orario || '--:--'} ${d.esaurita ? ' (ESAURITA)' : ''}`;
-                    b.onclick = () => selezionaDataInModal(id, index);
-                    datesListContainer.appendChild(b);
+                    const badge = document.createElement('div');
+                    badge.className = 'detail-badge';
+                    
+                    const opzioni = { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' };
+                    const dObj = new Date(d.giorno);
+                    const giornoFormattato = isNaN(dObj) ? d.giorno : dObj.toLocaleDateString('it-IT', opzioni);
+                    
+                    if (ev.soldout || d.soldout) {
+                        badge.classList.add('date-soldout');
+                        badge.innerHTML = `📅 <strong>${giornoFormattato}</strong> alle ore ${d.ora} <span style="float:right; font-weight:bold;">🔴 ESAURITA</span>`;
+                    } else {
+                        badge.innerHTML = `📅 <strong>${giornoFormattato}</strong> alle ore ${d.ora}`;
+                    }
+                    
+                    badge.onclick = () => selezionaDataInModal(index);
+                    datesListContainer.appendChild(badge);
                 });
-                selezionaDataInModal(id, 0);
+
+                selezionaDataInModal(0);
             } else {
-                renderizzaSettoriPrezziSingolaMappa(ev.prezzi, [], ev.soldout);
-                impostaMappaInModal(ev.mappaGenerale, "--/--/---- --:--", ev.linkMappaEsterno);
+                document.getElementById('modal-map-img').src = ev.mappaGenerale || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23e2e8f0%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%2364748b%22>Nessuna Mappa</text></svg>";
+                renderizzaPrezziSenzaFiltri();
             }
 
             document.getElementById('event-modal').style.display = 'flex';
         }
 
-        function impostaMappaInModal(srcB64, timestamp, linkEsterno) {
-            const mapImg = document.getElementById('modal-map-img');
-            const placeholder = "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%2364748b%22 dy=%22.3em%22>PIANTA POSTI NON DEFINITA</text></svg>";
-            
-            if(srcB64) {
-                mapImg.src = srcB64;
-                mapImg.style.cursor = "zoom-in";
-            } else {
-                mapImg.src = placeholder;
-                mapImg.style.cursor = "not-allowed";
-            }
-
-            document.getElementById('modal-map-timestamp').innerText = timestamp || "--/--/---- --:--";
-            
-            const btnLink = document.getElementById('link-mappa-btn');
-            if(linkEsterno) {
-                btnLink.href = linkEsterno;
-                btnLink.style.display = "inline-flex";
-            } else {
-                btnLink.style.display = "none";
-            }
-        }
-
-        function selezionaDataInModal(idEvento, indexData) {
-            const ev = eventi[idEvento];
+        function selezionaDataInModal(indexData) {
+            const ev = eventi[idEventoCorrenteAperto];
             if(!ev || !ev.date || !ev.date[indexData]) return;
 
-            const tutteLeDateBadges = document.querySelectorAll('#modal-dates-list .detail-badge');
-            tutteLeDateBadges.forEach((b, i) => {
+            const tuttiIBadge = document.querySelectorAll('#modal-dates-list .detail-badge');
+            tuttiIBadge.forEach((b, i) => {
                 if(i === indexData) b.classList.add('selected-date');
                 else b.classList.remove('selected-date');
             });
 
-            const dSelezionata = ev.date[indexData];
-            const mappaDaUsare = dSelezionata.mappaSpecifica || ev.mappaGenerale || "";
-            impostaMappaInModal(mappaDaUsare, dSelezionata.timestampMappa, ev.linkMappaEsterno);
+            const dataSelezionata = ev.date[indexData];
 
-            const isDataSoldoutTotale = ev.soldout || dSelezionata.esaurita;
-            renderizzaSettoriPrezziSingolaMappa(ev.prezzi, dSelezionata.settoriEsauriti || [], isDataSoldoutTotale, dSelezionata.data, dSelezionata.orario);
-        }
+            const mappaUrl = dataSelezionata.mappaSpecifica || ev.mappaGenerale || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23e2e8f0%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%2364748b%22>Nessuna Mappa</text></svg>";
+            document.getElementById('modal-map-img').src = mappaUrl;
 
-        function renderizzaSettoriPrezziSingolaMappa(listinoPrezziGen, settoriEsauritiInData, dataSoldoutGlobale, dataGg = "", dataOra = "") {
-            const pContainer = document.getElementById('modal-prices');
-            pContainer.innerHTML = '';
+            const timestamp = ev.timestampMappa || '--/--/---- --:--';
+            document.getElementById('modal-map-timestamp').innerText = timestamp;
 
-            if(!listinoPrezziGen || listinoPrezziGen.length === 0) {
-                pContainer.innerHTML = '<div style="color:var(--text-muted); font-size:0.95rem;">TARIFFE NON INSERITE</div>';
+            const linkBtn = document.getElementById('link-mappa-btn');
+            if(ev.linkEsterno) {
+                linkBtn.href = ev.linkEsterno;
+                linkBtn.style.display = 'inline-flex';
             } else {
-                listinoPrezziGen.forEach(p => {
-                    const item = document.createElement('div');
-                    item.className = 'price-item';
+                linkBtn.style.display = 'none';
+            }
+
+            const settoriEsauritiInQuestaData = dataSelezionata.settoriEsauriti || [];
+            const pricesContainer = document.getElementById('modal-prices');
+            pricesContainer.innerHTML = '';
+
+            if (ev.prezzi && ev.prezzi.length > 0) {
+                ev.prezzi.forEach(p => {
+                    const priceItem = document.createElement('div');
+                    priceItem.className = 'price-item';
                     
-                    const isSettoreEsaurito = dataSoldoutGlobale || settoriEsauritiInData.includes(p.settore);
-                    let bloccoQuotaPrezzo = `<span class="price-amount">${p.prezzo || 'N.D.'}</span>`;
+                    const isSettoreEsaurito = settoriEsauritiInQuestaData.includes(p.settore) || ev.soldout || dataSelezionata.soldout;
+                    let prezzoTestoHtml = `<span class="price-amount">${p.prezzo}</span>`;
                     if(isSettoreEsaurito) {
-                        bloccoQuotaPrezzo = `<span class="price-amount esaurito">ESAURITO</span>`;
+                        prezzoTestoHtml = `<span class="price-amount esaurito">🚫 Esaurito</span>`;
                     }
 
-                    item.innerHTML = `
+                    priceItem.innerHTML = `
                         <div class="price-sector-wrapper">
-                            <span class="color-indicator" style="background:${p.colore || '#0ea5e9'};"></span>
+                            <span class="color-indicator" style="background-color: ${p.colore || '#0ea5e9'}"></span>
+                            <span class="price-sector" style="${isSettoreEsaurito ? 'text-decoration: line-through; opacity:0.6;' : ''}">${p.settore}</span>
+                        </div>
+                        ${prezzoTestoHtml}
+                    `;
+                    pricesContainer.appendChild(priceItem);
+                });
+            } else {
+                pricesContainer.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">Contattaci su WhatsApp per ricevere il listino prezzi.</div>';
+            }
+
+            const actionWrapper = document.getElementById('whatsapp-action-wrapper');
+            if (ev.soldout || dataSelezionata.soldout) {
+                actionWrapper.innerHTML = `<div class="soldout-notice-btn">🔴 Spettacolo Esaurito</div>`;
+            } else {
+                const opzioni = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                const dObj = new Date(dataSelezionata.giorno);
+                const giornoF = isNaN(dObj) ? dataSelezionata.giorno : dObj.toLocaleDateString('it-IT', opzioni);
+                
+                const testoMessaggio = encodeURIComponent(`Ciao CentroPost@ Anaclerio, vorrei informazioni/prenotare i biglietti per lo spettacolo "${ev.titolo}" a ${ev.citta} per la data del ${giornoF} alle ore ${dataSelezionata.ora}.`);
+                actionWrapper.innerHTML = `
+                    <a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${testoMessaggio}" class="whatsapp-btn" target="_blank">
+                        💬 PRENOTA ORA SU WHATSAPP
+                    </a>
+                `;
+            }
+        }
+
+        function renderizzaPrezziSenzaFiltri() {
+            const ev = eventi[idEventoCorrenteAperto];
+            const pricesContainer = document.getElementById('modal-prices');
+            pricesContainer.innerHTML = '';
+
+            const timestamp = ev.timestampMappa || '--/--/---- --:--';
+            document.getElementById('modal-map-timestamp').innerText = timestamp;
+
+            const linkBtn = document.getElementById('link-mappa-btn');
+            if(ev.linkEsterno) {
+                linkBtn.href = ev.linkEsterno;
+                linkBtn.style.display = 'inline-flex';
+            } else {
+                linkBtn.style.display = 'none';
+            }
+
+            if(ev.prezzi && ev.prezzi.length > 0) {
+                ev.prezzi.forEach(p => {
+                    const priceItem = document.createElement('div');
+                    priceItem.className = 'price-item';
+                    priceItem.innerHTML = `
+                        <div class="price-sector-wrapper">
+                            <span class="color-indicator" style="background-color: ${p.colore || '#0ea5e9'}"></span>
                             <span class="price-sector">${p.settore}</span>
                         </div>
-                        ${bloccoQuotaPrezzo}
+                        <span class="price-amount">${p.prezzo}</span>
                     `;
-                    pContainer.appendChild(item);
+                    pricesContainer.appendChild(priceItem);
                 });
             }
 
-            const waWrapper = document.getElementById('whatsapp-action-wrapper');
-            if(dataSoldoutGlobale) {
-                waWrapper.innerHTML = `<div class="soldout-notice-btn">🔴 SPETTACOLO ESAURITO</div>`;
+            const actionWrapper = document.getElementById('whatsapp-action-wrapper');
+            if(ev.soldout) {
+                actionWrapper.innerHTML = `<div class="soldout-notice-btn">🔴 Spettacolo Esaurito</div>`;
             } else {
-                const testoTitolo = document.getElementById('modal-title').innerText;
-                const stringaDataOrario = dataGg ? ` PER LA DATA DEL ${formattaDataItaliana(dataGg)} DELLE ORE ${dataOra}` : "";
-                
-                const testoWhatsapp = `CIAO CENTROPOSTA, VORREI MAGGIORI INFORMAZIONI E PRENOTARE I BIGLIETTI PER LO SPETTACOLO: "${testoTitolo}"${stringaDataOrario}.`;
-                const urlWa = `https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${encodeURIComponent(testoWhatsapp)}`;
-                
-                waWrapper.innerHTML = `
-                    <a href="${urlWa}" class="whatsapp-btn" target="_blank">
+                const msg = encodeURIComponent(`Ciao CentroPost@ Anaclerio, vorrei informazioni/prenotare i biglietti per lo spettacolo "${ev.titolo}" a ${ev.citta}.`);
+                actionWrapper.innerHTML = `
+                    <a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${msg}" class="whatsapp-btn" target="_blank">
                         💬 PRENOTA ORA SU WHATSAPP
                     </a>
                 `;
@@ -1552,9 +1642,9 @@
             if(!idEventoCorrenteAperto) return;
             const urlCompleto = window.location.origin + window.location.pathname + '#' + idEventoCorrenteAperto;
             navigator.clipboard.writeText(urlCompleto).then(() => {
-                alert("LINK DELL'EVENTO COPIATO NEGLI APPUNTI! PUOI CONDIVIDERLO DOVE VUOI.");
+                alert("Link dell'evento copiato negli appunti! Puoi condividerlo dove vuoi.");
             }).catch(err => {
-                alert("IMPOSSIBILE COPIARE IL LINK: " + err);
+                alert("Impossibile copiare il link: " + err);
             });
         }
 
@@ -1564,26 +1654,6 @@
                 chiudiModal();
             }
         }
-
-        onValue(eventiRef, (snapshot) => {
-            const data = snapshot.val();
-            eventi = data || {};
-            renderEventi();
-            
-            if(window.location.hash) {
-                const idHash = window.location.hash.substring(1);
-                if(eventi[idHash] && idEventoCorrenteAperto !== idHash) {
-                    apriDettaglioSpettacolo(idHash);
-                }
-            }
-        });
-
-        onValue(configRef, (snapshot) => {
-            const config = snapshot.val();
-            inManutenzione = config ? !!config.manutenzione : false;
-            document.getElementById('system-maintenance-toggle').checked = inManutenzione;
-            aggiornaVisibilitaSito();
-        });
     </script>
 </body>
 </html>
