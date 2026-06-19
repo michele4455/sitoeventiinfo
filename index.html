@@ -1271,18 +1271,32 @@
                 timestampUltimaModificaMappa: oraAttuale
             };
 
-            if (editId) {
-                set(ref(db, `eventi/${editId}`), payload)
+            if (idEdizione) {
+                set(ref(db, 'eventi/' + idEdizione), payload)
                     .then(() => {
-                        alert("Spettacolo modificato correttamente!");
-                        chiudiSessioneAdmin();
-                    }).catch(err => alert("Errore: " + err.message));
+                        alert("Spettacolo aggiornato con successo!");
+                        
+                        // Svuota tutti i campi di testo del pannello
+                        document.querySelectorAll('#admin-panel input, #admin-panel textarea, #admin-panel select').forEach(input => {
+                            if (input.type !== 'button' && input.type !== 'submit') {
+                                input.value = '';
+                            }
+                        });
+                        
+                    }).catch(err => alert("Errore durante il salvataggio: " + err.message));
             } else {
                 push(eventiRef, payload)
                     .then(() => {
                         alert("Nuovo spettacolo pubblicato con successo!");
-                        chiudiSessioneAdmin();
-                    }).catch(err => alert("Errore: " + err.message));
+                        
+                        // Svuota tutti i campi di testo del pannello
+                        document.querySelectorAll('#admin-panel input, #admin-panel textarea, #admin-panel select').forEach(input => {
+                            if (input.type !== 'button' && input.type !== 'submit') {
+                                input.value = '';
+                            }
+                        });
+                        
+                    }).catch(err => alert("Errore durante l'inserimento: " + err.message));
             }
         }
 
