@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vetrina Eventi Esclusivi</title>
-    <link class="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎟️</text></svg>">
-    
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -359,67 +357,45 @@
             cursor: pointer;
         }
 
+        .date-input-row {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+        }
+
         .price-input-row {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             flex-wrap: wrap;
-            background: #f8fafc;
-            padding: 10px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-        .price-input-row input[type="text"] {
             background: #ffffff;
+            padding: 8px;
+            border-radius: 8px;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 10px;
+        }
+
+        .price-input-row input[type="text"] {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px;
             color: var(--text-main);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
-
-        .date-input-row {
-            background: #f1f5f9;
-            padding: 15px;
-            border-radius: 14px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 15px;
-        }
-
-        .date-input-main-fields {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .date-sectors-availability {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed #cbd5e1;
-        }
-
-        .sector-toggle-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #fff;
-            padding: 4px 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            margin-right: 6px;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-        }
-
         .input-settore { flex: 2; }
         .input-cifra { flex: 1; text-align: right; }
         .input-colore {
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             padding: 0;
             background: transparent;
@@ -455,9 +431,10 @@
             color: var(--danger-color);
             border: 1px solid var(--danger-color);
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 6px 12px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 0.85rem;
         }
         .btn-remove-row:hover { background: #fef2f2; }
 
@@ -518,7 +495,6 @@
             position: relative;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border-color);
-            transition: max-width 0.3s;
         }
 
         @media (max-width: 950px) {
@@ -623,7 +599,6 @@
         .detail-badge:hover { background: #e2e8f0; }
         .detail-badge.selected-date { background: #e0f2fe; border-left-color: #0284c7; }
         .detail-badge strong { color: var(--text-main); margin-right: 4px; }
-        .detail-badge.date-soldout { border-left-color: var(--danger-color); background: #fef2f2; color: #991b1b; }
 
         .price-list { background: #f8fafc; padding: 15px 20px; border-radius: 14px; margin-bottom: 25px; border: 1px solid var(--border-color); }
         .price-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
@@ -707,65 +682,12 @@
             color: #64748b;
             font-size: 1.1rem;
         }
-
-        /* --- STILE DI LOGIN GRAFICO PERSONALIZZATO --- */
-        .login-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(12px);
-            z-index: 3000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .login-box {
-            background: #ffffff;
-            padding: 35px;
-            border-radius: 24px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            border: 1px solid var(--border-color);
-            text-align: center;
-            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        @keyframes popIn {
-            0% { transform: scale(0.85); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .login-box h3 { font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 10px; }
-        .login-box p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; }
-        .login-box input[type="password"] {
-            width: 100%; padding: 12px 16px; border: 1px solid var(--border-color);
-            border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 15px;
-            text-align: center; transition: all 0.2s; background: #f8fafc;
-        }
-        .login-box input[type="password"]:focus { border-color: var(--accent-color); background: #ffffff; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); }
-        .login-btn-container { display: flex; gap: 10px; }
-        .login-btn-confirm { background: var(--accent-color); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 700; flex: 2; cursor: pointer; }
-        .login-btn-confirm:hover { background: var(--accent-hover); }
-        .login-btn-cancel { background: #e2e8f0; color: var(--text-main); border: none; padding: 12px; border-radius: 12px; font-weight: 600; flex: 1; cursor: pointer; }
-        .login-btn-cancel:hover { background: #cbd5e1; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <button class="admin-trigger-btn" onclick="apriLoginAdmin()">Area Riservata</button>
-    </div>
-
-    <div class="login-modal" id="custom-login-modal">
-        <div class="login-box">
-            <h3>🔐 Accesso Area Riservata</h3>
-            <p>Inserisci la chiave di sicurezza per gestire gli eventi</p>
-            <input type="password" id="login-password-field" placeholder="••••••••" onkeydown="if(event.key==='Enter') confermaAccessoAdmin()">
-            <div class="login-btn-container">
-                <button class="login-btn-cancel" onclick="chiudiLoginAdmin()">Annulla</button>
-                <button class="login-btn-confirm" onclick="confermaAccessoAdmin()">Accedi</button>
-            </div>
-        </div>
+        <button class="admin-trigger-btn" onclick="richiediAccesso()">Area Riservata</button>
     </div>
 
     <header id="main-header">
@@ -824,14 +746,10 @@
 
         <div class="checkbox-container">
             <input type="checkbox" id="form-soldout">
-            <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE GENERALE)</label>
+            <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE)</label>
         </div>
-
-        <label>Listino Prezzi per Settori (Generale):</label>
-        <div id="dynamic-price-container"></div>
-        <button type="button" class="btn-add-price" onclick="aggiungiRigaPrezzo()">➕ Aggiungi Settore Prezzo</button>
         
-        <label style="margin-top:20px;">Date, Orari Evento e Pianta dei Posti / Disponibilità Settori per Data:</label>
+        <label>Date, Orari Evento, Piante e Listino Prezzi specifici per Data:</label>
         <div id="dynamic-dates-container"></div>
         <button type="button" class="btn-add-date" onclick="aggiungiRigaData()">➕ Aggiungi un'altra Data</button>
 
@@ -869,15 +787,15 @@
     <div class="cinema-grid" id="event-grid"></div>
 
     <div class="modal" id="event-modal">
-        <div class="modal-content" id="modal-content-container">
+        <div class="modal-content">
             <span class="close-btn" onclick="chiudiModal()">&times;</span>
             
-            <div class="modal-col-locandina" id="modal-col-locandina">
+            <div class="modal-col-locandina">
                 <span class="subtitle">Locandina Evento</span>
                 <img id="modal-locandina-img" src="" alt="Locandina Evento" onclick="apriMappaIngrandita(this.src)">
             </div>
 
-            <div class="modal-col-mappa" id="modal-col-mappa">
+            <div class="modal-col-mappa">
                 <span class="subtitle">Pianta dei Posti</span>
                 <img id="modal-map-img" src="" alt="Mappa Posti" onclick="apriMappaIngrandita(this.src)">
                 
@@ -888,10 +806,10 @@
                 </div>
             </div>
 
-            <div class="modal-col-dettagli" id="modal-col-dettagli">
+            <div class="modal-col-dettagli">
                 <h2 id="modal-title">Titolo Evento</h2>
                 
-                <div class="subtitle">Date e Orari Spettacolo (Clicca per cambiare mappa)</div>
+                <div class="subtitle">Date e Orari Spettacolo (Clicca per cambiare mappa e prezzi)</div>
                 <div class="event-details-badge-box" id="modal-dates-list"></div>
 
                 <div class="event-details-badge-box">
@@ -942,24 +860,12 @@
             'fiere': '🎪'
         };
 
-        window.apriLoginAdmin = function() {
-            document.getElementById('login-password-field').value = '';
-            document.getElementById('custom-login-modal').style.display = 'flex';
-            document.getElementById('login-password-field').focus();
-        }
-
-        window.chiudiLoginAdmin = function() {
-            document.getElementById('custom-login-modal').style.display = 'none';
-        }
-
-        window.confermaAccessoAdmin = function() {
-            const pw = document.getElementById('login-password-field').value;
+        window.richiediAccesso = function() {
+            const pw = prompt("Inserisci la password amministratore:");
             if (!pw) return;
             if (btoa(JSON.stringify(pw)) === "IjIwMjYi") {
                 modalitaAdmin = true;
-                chiudiLoginAdmin();
                 document.getElementById('admin-panel').style.display = 'block';
-                svuotaERinizializzaPrezzi();
                 svuotaERinizializzaDate();
                 aggiornaVisibilitaSito();
                 alert("Identità verificata correttamente.");
@@ -1022,16 +928,10 @@
             }
         }
 
-        function svuotaERinizializzaPrezzi() {
-            const container = document.getElementById('dynamic-price-container');
-            container.innerHTML = '';
-            aggiungiRigaPrezzo("", "", "#0ea5e9");
-        }
-
         function svuotaERinizializzaDate() {
             const container = document.getElementById('dynamic-dates-container');
             container.innerHTML = '';
-            aggiungiRigaData("", "", "", false, []);
+            aggiungiRigaData("", "", "", []);
         }
 
         window.gestisciInputPrezzo = function(input) {
@@ -1044,102 +944,62 @@
             let decimali = valore.slice(-2);
             if (decimali.length === 1) decimali = "0" + decimali;
             input.value = "€ " + parseInt(intero, 10) + "," + decimali;
-            aggiornaSettoriNelleDate();
         }
 
-        window.aggiungiRigaPrezzo = function(settore = "", cifra = "", colore = "#0ea5e9") {
-            const container = document.getElementById('dynamic-price-container');
+        window.aggiungiRigaPrezzoSpecifico = function(containerId, settore = "", cifra = "", esaurito = false, colore = "#0ea5e9") {
+            const container = document.getElementById(containerId);
+            if (!container) return;
             const row = document.createElement('div');
             row.className = 'price-input-row';
             
+            const rId = "chk_" + Math.random().toString(36).substring(2, 7);
+            
             row.innerHTML = `
-                <input type="text" class="input-settore" placeholder="Es: Platea" value="${settore}" oninput="aggiornaSettoriNelleDate()">
+                <input type="text" class="input-settore" placeholder="Es: Platea" value="${settore}">
                 <input type="text" class="input-cifra" placeholder="Es: 40,00" value="${cifra}" oninput="gestisciInputPrezzo(this)">
-                <input type="color" class="input-colore" value="${colore}" onchange="aggiornaSettoriNelleDate()">
-                <button type="button" class="btn-remove-row" onclick="this.parentElement.remove(); aggiornaSettoriNelleDate();">❌</button>
+                <input type="color" class="input-colore" value="${colore}">
+                <label class="check-esaurito-settore" for="${rId}">
+                    <input type="checkbox" id="${rId}" class="input-esaurito" ${esaurito ? 'checked' : ''}> Esaurito
+                </label>
+                <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">❌</button>
             `;
             container.appendChild(row);
-            aggiornaSettoriNelleDate();
         }
 
-        function recuperaListaSettoriAttuali() {
-            const righPrezzo = document.querySelectorAll('#dynamic-price-container .price-input-row');
-            let settori = [];
-            righPrezzo.forEach((row, index) => {
-                const sett = row.querySelector('.input-settore').value.trim();
-                if(sett) {
-                    settori.push({ id: 's_' + index, nome: sett });
-                }
-            });
-            return settori;
-        }
-
-        window.aggiornaSettoriNelleDate = function() {
-            const settori = recuperaListaSettoriAttuali();
-            const righeDate = document.querySelectorAll('.date-input-row');
-            
-            righeDate.forEach(row => {
-                const containerDispo = row.querySelector('.date-sectors-availability');
-                let statiPrecedenti = {};
-                containerDispo.querySelectorAll('input[type="checkbox"]').forEach(chk => {
-                    statiPrecedenti[chk.dataset.nomeSettore] = chk.checked;
-                });
-
-                containerDispo.innerHTML = '<div style="font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Spunta i settori ESAURITI in QUESTA DATA:</div>';
-                
-                settori.forEach(s => {
-                    const eraEsaurito = statiPrecedenti[s.nome] || false;
-                    const item = document.createElement('label');
-                    item.className = 'sector-toggle-item';
-                    item.innerHTML = `
-                        <input type="checkbox" data-nome-settore="${s.nome}" ${eraEsaurito ? 'checked' : ''}>
-                        <span style="color:var(--danger-color); font-weight:600;">${s.nome} Esaurito</span>
-                    `;
-                    containerDispo.appendChild(item);
-                });
-            });
-        }
-
-        window.aggiungiRigaData = function(dataVal = "", oraVal = "", mappaDataSrc = "", dateSoldOut = false, settoriEsauritiSalvati = []) {
+        window.aggiungiRigaData = function(dataVal = "", oraVal = "", mappaDataSrc = "", prezziIniziali = []) {
             const container = document.getElementById('dynamic-dates-container');
             const row = document.createElement('div');
             row.className = 'date-input-row';
             row.dataset.mappaEsistente = mappaDataSrc;
-            
-            const dId = "chk_d_" + Math.random().toString(36).substring(2, 7);
+
+            const dPrezziId = "prezzi_data_" + Math.random().toString(36).substring(2, 7);
 
             row.innerHTML = `
-                <div class="date-input-main-fields">
-                    <input type="date" class="input-data-singola" value="${dataVal}" style="flex: 1.5; min-width: 120px;">
-                    <input type="time" class="input-ora-singola" value="${oraVal}" style="flex: 1; min-width: 80px;">
-                    <div style="flex: 2; min-width: 190px; display: flex; flex-direction: column; gap: 3px;">
-                        <label style="margin:0; font-size: 0.75rem;">Pianta specifica per questa data:</label>
-                        <input type="file" class="input-mappa-singola" accept="image/*">
-                        ${mappaDataSrc ? `<span style="font-size:0.75rem; color:var(--whatsapp-color);">✔ Mappa caricata salvata</span>` : ''}
-                    </div>
-                    <label class="check-esaurito-settore" for="${dId}" style="margin-right: 5px;">
-                        <input type="checkbox" id="${dId}" class="input-data-esaurita" ${dateSoldOut ? 'checked' : ''}> Intera Data Esaurita
-                    </label>
-                    <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">❌</button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; align-items: center;">
+                    <input type="date" class="input-data-singola" value="${dataVal}" style="flex: 1.5; min-width: 120px; margin:0;">
+                    <input type="time" class="input-ora-singola" value="${oraVal}" style="flex: 1; min-width: 80px; margin:0;">
+                    <button type="button" class="btn-remove-row" onclick="this.parentElement.parentElement.remove()">❌ Rimuovi Data</button>
                 </div>
-                <div class="date-sectors-availability"></div>
+                <div style="display: flex; flex-direction: column; gap: 3px; background: #ffffff; padding: 8px; border-radius: 8px; border:1px solid var(--border-color);">
+                    <label style="margin:0; font-size: 0.75rem; font-weight:bold;">Pianta specifica per questa data:</label>
+                    <input type="file" class="input-mappa-singola" accept="image/*" style="padding:4px; margin:2px 0;">
+                    ${mappaDataSrc ? `<span style="font-size:0.75rem; color:var(--whatsapp-color);">✔ Mappa caricata salvata</span>` : ''}
+                </div>
+                <div style="background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 5px;">
+                    <label style="margin:0 0 5px 0; font-size: 0.8rem; font-weight:bold; color: var(--text-main);">Settori e Prezzi per questa data:</label>
+                    <div id="${dPrezziId}"></div>
+                    <button type="button" class="btn-add-price" style="margin-top:5px; margin-bottom:0;" onclick="aggiungiRigaPrezzoSpecifico('${dPrezziId}')">➕ Aggiungi Settore a questa data</button>
+                </div>
             `;
             container.appendChild(row);
 
-            const settoriUfficiali = recuperaListaSettoriAttuali();
-            const containerDispo = row.querySelector('.date-sectors-availability');
-            containerDispo.innerHTML = '<div style="font-size:0.8rem; margin-bottom:4px; font-weight:bold;">Spunta i settori ESAURITI in QUESTA DATA:</div>';
-            
-            settoriUfficiali.forEach(s => {
-                const eraEsaurito = settoriEsauritiSalvati.includes(s.nome);
-                const item = document.createElement('label');
-                item.className = 'sector-toggle-item';
-                item.innerHTML = `
-                    <input type="checkbox" data-nome-settore="${s.nome}" ${eraEsaurito ? 'checked' : ''}>
-                    <span style="color:var(--danger-color); font-weight:600;">${s.nome} Esaurito</span>
-                `;
-                containerDispo.appendChild(item);
-            });
+            if (prezziIniziali && prezziIniziali.length > 0) {
+                prezziIniziali.forEach(p => {
+                    aggiungiRigaPrezzoSpecifico(dPrezziId, p.settore, p.prezzo, p.esaurito || false, p.colore || "#0ea5e9");
+                });
+            } else {
+                aggiungiRigaPrezzoSpecifico(dPrezziId, "", "", false, "#0ea5e9");
+            }
         }
 
         function verificaERimuoviDateScadute(key, ev) {
@@ -1210,14 +1070,6 @@
             listaEventi.forEach((ev) => {
                 const key = ev.id;
                 
-                let tuttoEsaurito = ev.soldOut || false;
-                if (ev.dateElenco && ev.dateElenco.length > 0) {
-                    const tutteDateSoldOut = ev.dateElenco.every(d => d.esaurita === true);
-                    if (tutteDateSoldOut) {
-                        tuttoEsaurito = true;
-                    }
-                }
-
                 let stringaDatePreview = "Data non specificata";
                 if (ev.dateElenco && ev.dateElenco.length > 0) {
                     const opzioni = { day: '2-digit', month: 'short', year: 'numeric' };
@@ -1240,14 +1092,14 @@
                     luogoUnito = ev.citta || ev.posto || "In attesa di conferma";
                 }
 
-                const classeNonCliccabile = (ev.aBreve || (tuttoEsaurito && !modalitaAdmin)) ? 'non-cliccabile' : '';
+                const classeNonCliccabile = ev.aBreve ? 'non-cliccabile' : '';
                 const titoloVisualizzato = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
                 const emojiDaMostrare = emojiCategorie[ev.categoria] || '🎫';
 
                 const card = document.createElement('div');
                 card.className = `movie-card ${classeNonCliccabile}`;
                 card.innerHTML = `
-                    ${tuttoEsaurito ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
+                    ${ev.soldOut ? `<div class="soldout-badge">🔴 Sold Out</div>` : ''}
                     ${ev.aBreve ? `<div class="abreve-badge">⚠️ Bozza / Scaduto</div>` : ''}
                     ${ev.inEvidenza ? `<div class="evidenza-badge">🔥 In Evidenza</div>` : ''}
                     <div class="tipo-emoji-badge">${emojiDaMostrare}</div>
@@ -1273,14 +1125,7 @@
         window.gestisciAperturaModal = function(key) {
             const ev = eventi[key];
             if (!ev) return;
-            
-            let tuttoEsaurito = ev.soldOut || false;
-            if (ev.dateElenco && ev.dateElenco.length > 0) {
-                if (ev.dateElenco.every(d => d.esaurita === true)) tuttoEsaurito = true;
-            }
-
             if (ev.aBreve && !modalitaAdmin) return; 
-            if (tuttoEsaurito && !modalitaAdmin) return; 
             apriModal(key);
         }
 
@@ -1299,24 +1144,16 @@
             document.getElementById('admin-panel-title').innerText = "✏️ Modifica Spettacolo: " + ev.titolo;
             document.getElementById('btn-salva-evento').innerText = "Salva Modifiche";
 
-            const container = document.getElementById('dynamic-price-container');
-            container.innerHTML = '';
-            if (ev.prezzi && ev.prezzi.length > 0) {
-                ev.prezzi.forEach(p => aggiungiRigaPrezzo(p.settore, p.prezzo, p.colore || "#0ea5e9"));
-            } else {
-                aggiungiRigaPrezzo("", "", "#0ea5e9");
-            }
-
             const datesContainer = document.getElementById('dynamic-dates-container');
             datesContainer.innerHTML = '';
             if (ev.dateElenco && ev.dateElenco.length > 0) {
                 ev.dateElenco.forEach(d => {
-                    aggiungiRigaData(d.data, d.ora, d.mappaSpecifica || "", d.esaurita || false, d.settoriEsauriti || []);
+                    aggiungiRigaData(d.data, d.ora, d.mappaSpecifica || "", d.prezzi || []);
                 });
             } else if (ev.data) {
-                aggiungiRigaData(ev.data, ev.ora || '', ev.mappa || '', ev.soldOut || false, []);
+                aggiungiRigaData(ev.data, ev.ora || '', ev.mappa || '', ev.prezzi || []);
             } else {
-                aggiungiRigaData("", "", "", false, []);
+                aggiungiRigaData("", "", "", []);
             }
 
             document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
@@ -1379,22 +1216,6 @@
                 });
             }
 
-            const righPrezzo = document.querySelectorAll('#dynamic-price-container .price-input-row');
-            let listinoPrezzi = [];
-            righPrezzo.forEach(row => {
-                const sett = row.querySelector('.input-settore').value.trim();
-                const cifr = row.querySelector('.input-cifra').value.trim();
-                const colr = row.querySelector('.input-colore').value;
-                if(sett || cifr) {
-                    listinoPrezzi.push({ 
-                        settore: sett || 'Intero', 
-                        prezzo: cifr || 'N.D.',
-                        colore: colr
-                    });
-                }
-            });
-            if(listinoPrezzi.length === 0) listinoPrezzi.push({ settore: 'Posto Unico', prezzo: 'N.D.', colore: '#0ea5e9' });
-
             let elencoDateInserite = [];
             const righeDate = document.querySelectorAll('.date-input-row');
             
@@ -1403,27 +1224,39 @@
                 const dVal = row.querySelector('.input-data-singola').value;
                 const oVal = row.querySelector('.input-ora-singola').value;
                 const fMappaSingola = row.querySelector('.input-mappa-singola').files[0];
-                const dataEsaurita = row.querySelector('.input-data-esaurita').checked;
                 let mappaDettaglio = row.dataset.mappaEsistente || "";
 
                 if (fMappaSingola) {
                     mappaDettaglio = await elaboraImmagine(fMappaSingola, 1000);
                 }
 
-                let settoriEsauritiInQuestaData = [];
-                row.querySelectorAll('.date-sectors-availability input[type="checkbox"]').forEach(chk => {
-                    if(chk.checked) {
-                        settoriEsauritiInQuestaData.push(chk.dataset.nomeSettore);
+                let listinoPrezziData = [];
+                const righePrezzoData = row.querySelectorAll('.price-input-row');
+                righePrezzoData.forEach(pRow => {
+                    const sett = pRow.querySelector('.input-settore').value.trim();
+                    const cifr = pRow.querySelector('.input-cifra').value.trim();
+                    const colr = pRow.querySelector('.input-colore').value;
+                    const esauritoSingolo = pRow.querySelector('.input-esaurito').checked;
+                    if(sett || cifr) {
+                        listinoPrezziData.push({ 
+                            settore: sett || 'Intero', 
+                            prezzo: cifr || 'N.D.',
+                            colore: colr,
+                            esaurito: esauritoSingolo
+                        });
                     }
                 });
+                
+                if(listinoPrezziData.length === 0) {
+                    listinoPrezziData.push({ settore: 'Posto Unico', prezzo: 'N.D.', colore: '#0ea5e9', esaurito: false });
+                }
 
                 if (dVal) {
                     elencoDateInserite.push({ 
                         data: dVal, 
                         ora: oVal,
-                        mappaSpecifica: mappaDettaglio || mappaRes,
-                        esaurita: dataEsaurita,
-                        settoriEsauriti: settoriEsauritiInQuestaData
+                        mappaSpecifica: mappaDettaglio || mappaRes || "",
+                        prezzi: listinoPrezziData
                     });
                 }
             }
@@ -1436,7 +1269,7 @@
                 citta: cittaEv || "", posto: postoEv || "In attesa di conferma", locandina: locandinaRes,
                 mappa: mappaRes || (elencoDateInserite.length > 0 ? elencoDateInserite[0].mappaSpecifica : ""), 
                 linkSite: linkEsterno, timestamp: timestampString, 
-                prezzi: listinoPrezzi, soldOut: soldOutGenerale, aBreve: impostaABreve,
+                soldOut: soldOutGenerale, aBreve: impostaABreve,
                 inEvidenza: inEvidenzaImpostato, categoria: categoriaImpostata
             };
 
@@ -1446,9 +1279,8 @@
                     .then(() => resetFormEAvvisa())
                     .catch(err => alert("Errore nel salvataggio: " + err.message));
             } else {
-                constSilicon = ref(db, 'eventi/' + currentId);
                 const specificoRef = ref(db, 'eventi/' + currentId);
-                set(specificoRef, objetoSpettacolo)
+                set(specificoRef, oggettoSpettacolo)
                     .then(() => {
                         document.getElementById('edit-id').value = "";
                         document.getElementById('admin-panel-title').innerText = "Aggiungi Nuovo Spettacolo";
@@ -1470,39 +1302,25 @@
             document.getElementById('form-abreve').checked = false;
             document.getElementById('form-evidenza').checked = false;
             document.getElementById('form-category').value = "concerti";
-            svuotaERinizializzaPrezzi();
             svuotaERinizializzaDate();
             alert("Operazione completata con successo!");
         }
 
-        window.cambiaMappaVisualizzata = function(srcMappa, badgeElement, isSoldOut, testoDataEsteso, settoriEsauritiSalvati = []) {
-            const colMappa = document.getElementById('modal-col-mappa');
-            const modalContent = document.getElementById('modal-content-container');
-
-            // SE LA DATA È COMPLETAMENTE SOLD OUT, NASCONDI LA COLONNA MAPPA
-            if (isSoldOut) {
-                colMappa.style.display = 'none';
-                modalContent.style.maxWidth = '800px'; 
-            } else {
-                colMappa.style.display = 'flex';
-                modalContent.style.maxWidth = '1200px';
-                document.getElementById('modal-map-img').src = srcMappa;
-            }
-
+        window.cambiaMappaVisualizzata = function(srcMappa, prezziSottoData, titoloEvento, dataSelezionata, badgeElement) {
+            document.getElementById('modal-map-img').src = srcMappa;
             const tuttiBadges = document.querySelectorAll('#modal-dates-list .detail-badge');
             tuttiBadges.forEach(b => b.classList.remove('selected-date'));
             badgeElement.classList.add('selected-date');
-
-            // RIGENERA IL LISTINO PREZZI IDENTIFICANDO QUELLI ESAURITI IN QUESTA DATA SPECIFICA
-            const ev = eventi[idEventoCorrenteAperto];
+            
             const containerPrezzi = document.getElementById('modal-prices');
             containerPrezzi.innerHTML = '';
             
-            if (ev.prezzi) {
-                ev.prezzi.forEach(p => {
-                    const settoreEsauritoInQuestaData = settoriEsauritiSalvati.includes(p.settore) || isSoldOut;
-                    const classeEsaurito = settoreEsauritoInQuestaData ? 'esaurito' : '';
-                    const testoPrezzo = settoreEsauritoInQuestaData ? '[Esaurito]' : p.prezzo;
+            const prezziDaRenderizzare = (typeof prezziSottoData === 'string') ? JSON.parse(prezziSottoData) : prezziSottoData;
+            
+            if (prezziDaRenderizzare && prezziDaRenderizzare.length > 0) {
+                prezziDaRenderizzare.forEach(p => {
+                    const classeEsaurito = p.esaurito ? 'esaurito' : '';
+                    const testoPrezzo = p.esaurito ? '[Esaurito]' : p.prezzo;
                     const coloreSettore = p.colore || '#0ea5e9';
                     containerPrezzi.innerHTML += `
                         <div class="price-item">
@@ -1514,13 +1332,17 @@
                         </div>
                     `;
                 });
+            } else {
+                containerPrezzi.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">Nessun listino specifico inserito.</div>';
             }
 
             const wrapperWa = document.getElementById('whatsapp-action-wrapper');
-            if (isSoldOut) {
-                wrapperWa.innerHTML = `<div class="soldout-notice-btn">❌ I Biglietti per questa data (${testoDataEsteso}) sono Esauriti</div>`;
+            const soldOutTuttiIPrezzi = prezziDaRenderizzare && prezziDaRenderizzare.length > 0 ? prezziDaRenderizzare.every(p => p.esaurito) : false;
+            
+            if (soldOutTuttiIPrezzi) {
+                wrapperWa.innerHTML = `<div class="soldout-notice-btn">❌ Biglietti esauriti per questa data</div>`;
             } else {
-                const messaggioWa = encodeURIComponent(`Salve! Vorrei ricevere informazioni e riservare un posto per l'evento: ${ev.titolo} (Data scelta: ${testoDataEsteso})`);
+                const messaggioWa = encodeURIComponent(`Salve! Vorrei ricevere informazioni e riservare un posto per l'evento: ${titoloEvento} (Data scelta: ${dataSelezionata})`);
                 wrapperWa.innerHTML = `<a href="https://wa.me/${TUO_NUMERO_WHATSAPP}?text=${messaggioWa}" target="_blank" class="whatsapp-btn">💬 Richiedi Prenotazione su WhatsApp</a>`;
             }
         }
@@ -1533,6 +1355,7 @@
 
             document.getElementById('modal-title').innerText = ev.inEvidenza ? `🔥 ${ev.titolo}` : ev.titolo;
             document.getElementById('modal-locandina-img').src = ev.locandina || '';
+            document.getElementById('modal-map-img').src = ev.mappa || '';
             document.getElementById('modal-map-timestamp').innerText = ev.timestamp || 'Recentemente';
             document.getElementById('link-mappa-btn').href = ev.linkSite || '#';
 
@@ -1542,48 +1365,43 @@
             if(ev.dateElenco && ev.dateElenco.length > 0) {
                 ev.dateElenco.forEach((d, index) => {
                     const dataObj = new Date(d.data);
+                    const dataFormattataIT = dataObj.toLocaleDateString('it-IT');
                     const oraString = d.ora ? ` ore ${d.ora}` : '';
-                    const mappaDellaData = d.mappaSpecifica || ev.mappa;
+                    const mappaDellaData = d.mappaSpecifica || ev.mappa || '';
                     const classeSelezionata = index === 0 ? 'selected-date' : '';
                     
-                    // Controlla se la data è marcata interamente soldout o se tutti i settori del listino lo sono
-                    let dataSoldOut = d.esaurita || false;
-                    const salvatiEsauriti = d.settoriEsauriti || [];
-                    if (ev.prezzi && ev.prezzi.length > 0 && salvatiEsauriti.length >= ev.prezzi.length) {
-                        dataSoldOut = true;
-                    }
-
-                    const classeSoldOut = dataSoldOut ? 'date-soldout' : '';
-                    const dataFormattataTesto = dataObj.toLocaleDateString('it-IT') + oraString;
-                    const etichettaSoldOut = dataSoldOut ? ' [SOLD OUT]' : '';
-
-                    const badge = document.createElement('div');
-                    badge.className = `detail-badge ${classeSelezionata} ${classeSoldOut}`;
-                    badge.innerHTML = `📅 <strong>Data:</strong> ${dataFormattataTesto}${etichettaSoldOut}`;
-                    badge.onclick = function() {
-                        cambiaMappaVisualizzata(mappaDellaData, this, dataSoldOut, dataFormattataTesto, salvatiEsauriti);
-                    };
-                    containerDate.appendChild(badge);
+                    const stringaPrezziJson = JSON.stringify(d.prezzi || []).replace(/"/g, '&quot;');
+                    const titoloPulito = ev.titolo.replace(/'/g, "\\'");
 
                     if(index === 0) {
-                        // Inizializza la prima data del modal
+                        document.getElementById('modal-map-img').src = mappaDellaData;
                         setTimeout(() => {
-                            cambiaMappaVisualizzata(mappaDellaData, badge, dataSoldOut, dataFormattataTesto, salvatiEsauriti);
+                            const primoBadge = containerDate.querySelector('.detail-badge');
+                            if(primoBadge) cambiaMappaVisualizzata(mappaDellaData, d.prezzi || [], titoloPulito, dataFormattataIT + oraString, primoBadge);
                         }, 50);
                     }
+
+                    containerDate.innerHTML += `
+                        <div class="detail-badge ${classeSelezionata}" onclick="cambiaMappaVisualizzata('${mappaDellaData}', '${stringaPrezziJson}', '${titoloPulito}', '${dataFormattataIT}${oraString}', this)">
+                            📅 <strong>Data:</strong> ${dataFormattataIT}${oraString}
+                        </div>`;
                 });
             } else if(ev.data) {
                 const d = new Date(ev.data);
-                const oraString = ev.ora ? ` ore ${ev.ora}` : ' Da definire';
-                const dataFormattataTesto = d.toLocaleDateString('it-IT') + oraString;
-                const esauritoUnico = ev.soldOut ? ' [SOLD OUT]' : '';
-                const classeSoldOut = ev.soldOut ? 'date-soldout' : '';
+                const dataFormattataIT = d.toLocaleDateString('it-IT');
+                const oraString = ev.ora ? ` ore ${ev.ora}` : '';
+                const titoloPulito = ev.titolo.replace(/'/g, "\\'");
+                const stringaPrezziJson = JSON.stringify(ev.prezzi || []).replace(/"/g, '&quot;');
 
-                containerDate.innerHTML = `<div class="detail-badge selected-date ${classeSoldOut}" style="cursor:default;">📅 <strong>Data:</strong> ${dataFormattataTesto}${esauritoUnico}</div>`;
-                cambiaMappaVisualizzata(ev.mappa, containerDate.firstChild, ev.soldOut, dataFormattataTesto, []);
+                containerDate.innerHTML = `<div class="detail-badge selected-date" id="fallback-badge">📅 <strong>Data:</strong> ${dataFormattataIT}${oraString}</div>`;
+                
+                setTimeout(() => {
+                    const fallbackBadge = document.getElementById('fallback-badge');
+                    cambiaMappaVisualizzata(ev.mappa || '', stringaPrezziJson, titoloPulito, dataFormattataIT + oraString, fallbackBadge);
+                }, 50);
             } else {
                 containerDate.innerHTML = `<div class="detail-badge" style="cursor:default;">📅 <strong>Data:</strong> Non specificata</div>`;
-                cambiaMappaVisualizzata(ev.mappa, containerDate.firstChild, false, "Da definire", []);
+                document.getElementById('modal-prices').innerHTML = '';
             }
             
             let luogoUnito = "";
@@ -1594,6 +1412,11 @@
             }
             document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Posto:</strong> ${luogoUnito}`;
 
+            const wrapperWa = document.getElementById('whatsapp-action-wrapper');
+            if (ev.soldOut) {
+                wrapperWa.innerHTML = `<div class="soldout-notice-btn">❌ Tutti i Biglietti sono Esauriti</div>`;
+            }
+            
             window.location.hash = key;
             document.getElementById('event-modal').style.display = 'flex';
         }
