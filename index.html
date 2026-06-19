@@ -1523,13 +1523,20 @@
 
         function selezionaDataInModal(indexData) {
             const ev = eventi[idEventoCorrenteAperto];
-            if(!ev || !ev.date || !ev.date[indexData]) return;
+    if(!ev || !ev.date || !ev.date[indexData]) return;
 
-            const tuttiIBadge = document.querySelectorAll('#modal-dates-list .detail-badge');
-            tuttiIBadge.forEach((b, i) => {
-                if(i === indexData) b.classList.add('selected-date');
-                else b.classList.remove('selected-date');
-            });
+    const dataSelezionata = ev.date[indexData];
+
+    // SE L'EVENTO O LA DATA SONO SOLD OUT, E NON SEI ADMIN, BLOCCA IL CLICK
+    if ((ev.soldout || dataSelezionata.soldout) && !modalitaAdmin) {
+        return; // Esce dalla funzione senza cambiare mappa o aggiornare i dati
+    }
+
+    const tuttiIBadge = document.querySelectorAll('#modal-dates-list .detail-badge');
+    tuttiIBadge.forEach((b, i) => {
+        if(i === indexData) b.classList.add('selected-date');
+        else b.classList.remove('selected-date');
+    });
 
             const dataSelezionata = ev.date[indexData];
 
