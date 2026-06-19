@@ -1241,17 +1241,20 @@
                 locandina: locandinaSrc, mappaGenerale: mappaGeneraleSrc, timestampMappa
             };
 
-            if (idEdizione) {
+           if (idEdizione) {
                 set(ref(db, 'eventi/' + idEdizione), payload)
                     .then(() => {
                         alert("Spettacolo aggiornato con successo!");
-                        
+                        // Svuota i campi e azzera l'ID dell'evento modificato
+                        document.getElementById('admin-form').reset();
+                        idEdizione = null; 
                     }).catch(err => alert("Errore durante il salvataggio: " + err.message));
             } else {
                 push(eventiRef, payload)
                     .then(() => {
                         alert("Nuovo spettacolo pubblicato con successo!");
-                        chiudiSessioneAdmin();
+                        // Svuota i campi dopo il nuovo inserimento
+                        document.getElementById('admin-form').reset();
                     }).catch(err => alert("Errore durante l'inserimento: " + err.message));
             }
         }
