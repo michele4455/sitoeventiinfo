@@ -1450,11 +1450,15 @@
                 card.innerHTML = `
                     ${badgeHtml}
                     <img src="${locandinaUrl}" alt="Locandina" onclick="gestisciAperturaModal('${key}')">
-                    <div class="movie-info">
-                        <div>
-                            <div class="movie-title">${ev.titolo}</div>
-                            <div class="movie-meta-preview">📍 ${ev.citta || 'Bari'} - ${ev.location || 'Location'}</div>
-                            <div class="movie-meta-preview" style="font-weight:600; color:var(--text-main);">📅 ${stringaDateAnteprima}</div>
+                    <div class="movie-info" style="display: flex; flex-direction: column; justify-content: space-between; gap: 10px; padding: 15px; text-align: left;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <div class="movie-title" style="font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px; text-transform: uppercase;">${ev.titolo}</div>
+                            <div class="movie-meta-preview" style="font-size: 0.9rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin: 0;">
+                                📍 <span>${ev.citta || 'BARI'} - ${ev.location || 'LOCATION'}</span>
+                            </div>
+                            <div class="movie-meta-preview" style="font-size: 0.9rem; font-weight: 700; color: var(--accent-color); display: flex; align-items: center; gap: 4px; margin: 0;">
+                                📅 <span>${stringaDateAnteprima}</span>
+                            </div>
                         </div>
                         <div>
                             ${adminBtnsHtml}
