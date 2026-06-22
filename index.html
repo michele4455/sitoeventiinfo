@@ -1421,7 +1421,7 @@
             controlloHashUrlAperturaModal();
         });
 
-      function renderEventi() {
+        function renderEventi() {
     const grid = document.getElementById('event-grid');
     grid.innerHTML = '';
 
@@ -1479,15 +1479,26 @@
             card.style.filter = 'grayscale(100%)';
         }
 
-        // Calcolo degli stati Sold Out e A Breve
+        // CORREZIONE CRUCIALI: Normalizziamo i valori per essere sicuri che siano veri Booleani (true/false)
+        // Questo evita problemi se nel salvataggio vengono scritti come stringhe "true" o "false"
+        const esauritoTotaleBooleano = (ev.esauritoTotale === true || ev.esauritoTotale === 'true');
+        const aBreveBooleano = (ev.aBreve === true || ev.aBreve === 'true');
+
+        // Calcolo automatico se tutte le singole date sono esaurite
         let tutteDateEsaurite = true;
         if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
-            ev.dateSpettacolo.forEach(d => { if (!d.dataEsaurita) tutteDateEsaurite = false; });
+            ev.dateSpettacolo.forEach(d => { 
+                if (d.dataEsaurita !== true && d.dataEsaurita !== 'true') {
+                    tutteDateEsaurite = false; 
+                }
+            });
         } else {
             tutteDateEsaurite = false;
         }
-        const isSoldOut = ev.esauritoTotale || tutteDateEsaurite;
-        const isABreve = ev.aBreve;
+
+        // Stato finale dell'evento
+        const isSoldOut = esauritoTotaleBooleano || tutteDateEsaurite;
+        const isABreve = aBreveBooleano;
 
         // Gestione dei Badge (Con aggiunta del badge Passato per l'admin)
         let badgeHtml = "";
@@ -1499,14 +1510,12 @@
             badgeHtml = `<div class="abreve-badge">A Breve in Vendita</div>`;
         }
 
-        // Logica per decidere cosa fare al click sulla locandina
+        // Logica per decidere cosa fare al click sulla locandina o sul bottone dei dettagli
         let clickAzioneHtml = `apriDettagliSpettacolo('${ev.id}')`;
         if (!modalitaAdmin) {
             if (isSoldOut) {
-                // DECIDI QUI LA SCRITTA PER IL SOLD OUT:
                 clickAzioneHtml = `window.mostraPopupCustom('Siamo spiacenti! Questo evento è SOLD OUT. Tutti i biglietti sono esauriti.')`;
             } else if (isABreve) {
-                // DECIDI QUI LA SCRITTA PER IL A BREVE IN VENDITA:
                 clickAzioneHtml = `window.mostraPopupCustom('Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!')`;
             }
         }
@@ -1544,7 +1553,7 @@
                 <div>
                     <div class="movie-title">${ev.titolo}</div>
                     <div class="movie-meta-preview">📍 ${ev.citta.toUpperCase()} - ${ev.location}</div>
-                    <div class="movie-meta-preview" style="font-weight:700; color:var(--text-main);">📅 ${dataMostrataAnteprima}</div>
+                    <div class="movie-meta-preview" style="font-weight:700; color:var(--text-main);">📅 ${dataMostrataAntepreview || dataMostrataAnteprima}</div>
                 </div>
                 <div>
                     <button class="filter-btn" style="width:100%; border-color:var(--accent-color); color:var(--accent-color); padding:8px;" onclick="${clickAzioneHtml}">
@@ -1562,52 +1571,53 @@
     }
 }
 
-// Funzione globale di supporto per generare dinamicamente il pop-up a centro schermo
-window.mostraPopupCustom = function(testo) {
-    const vecchioPopup = document.getElementById('popup-temporaneo-custom');
-    if (vecchioPopup) vecchioPopup.remove();
+// Lascia pure la funzione window.mostraPopupCustom sotto così com'era, è perfetta!
+if (!window.mostraPopupCustom) {
+    window.mostraPopupCustom = function(testo) {
+        const vecchioPopup = document.getElementById('popup-temporaneo-custom');
+        if (vecchioPopup) vecchioPopup.remove();
 
-    const overlay = document.createElement('div');
-    overlay.id = 'popup-temporaneo-custom';
-    overlay.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:99999; display:flex; justify-content:center; align-items:center;';
+        const overlay = document.createElement('div');
+        overlay.id = 'popup-temporaneo-custom';
+        overlay.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:99999; display:flex; justify-content:center; align-items:center;';
 
-    const box = document.createElement('div');
-    box.style = 'background:#ffffff; padding:30px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.15); max-width:400px; width:90%; text-align:center; border:1px solid #e2e8f0; font-family:inherit; animation: popupScaleIn 0.2s ease-out;';
-    
-    // Stile di animazione rapida per la comparsa del pop-up
-    if (!document.getElementById('popup-style-animation')) {
-        const style = document.createElement('style');
-        style.id = 'popup-style-animation';
-        style.innerHTML = '@keyframes popupScaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }';
-        document.head.appendChild(style);
-    }
-
-    const p = document.createElement('p');
-    p.innerText = testo;
-    p.style = 'font-size:1.1rem; font-weight:600; color:#0f172a; margin:0 0 20px 0; line-height:1.5;';
-    box.appendChild(p);
-
-    const btn = document.createElement('button');
-    btn.innerText = 'OK';
-    btn.style = 'background:#0ea5e9; color:#ffffff; border:none; padding:10px 30px; font-size:1rem; font-weight:700; border-radius:8px; cursor:pointer; transition: background 0.2s;';
-    btn.onmouseover = () => btn.style.background = '#0284c7';
-    btn.onmouseout = () => btn.style.background = '#0ea5e9';
-
-    const chiudiPopup = () => {
-        if (overlay.parentNode) {
-            overlay.remove();
-            clearTimeout(timerAutochiusura);
+        const box = document.createElement('div');
+        box.style = 'background:#ffffff; padding:30px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.15); max-width:400px; width:90%; text-align:center; border:1px solid #e2e8f0; font-family:inherit; animation: popupScaleIn 0.2s ease-out;';
+        
+        if (!document.getElementById('popup-style-animation')) {
+            const style = document.createElement('style');
+            style.id = 'popup-style-animation';
+            style.innerHTML = '@keyframes popupScaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }';
+            document.head.appendChild(style);
         }
+
+        const p = document.createElement('p');
+        p.innerText = testo;
+        p.style = 'font-size:1.1rem; font-weight:600; color:#0f172a; margin:0 0 20px 0; line-height:1.5;';
+        box.appendChild(p);
+
+        const btn = document.createElement('button');
+        btn.innerText = 'OK';
+        btn.style = 'background:#0ea5e9; color:#ffffff; border:none; padding:10px 30px; font-size:1rem; font-weight:700; border-radius:8px; cursor:pointer; transition: background 0.2s;';
+        btn.onmouseover = () => btn.style.background = '#0284c7';
+        btn.onmouseout = () => btn.style.background = '#0ea5e9';
+
+        const chiudiPopup = () => {
+            if (overlay.parentNode) {
+                overlay.remove();
+                clearTimeout(timerAutochiusura);
+            }
+        };
+
+        btn.onclick = chiudiPopup;
+        box.appendChild(btn);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        const timerAutochiusura = setTimeout(chiudiPopup, 5000);
     };
-
-    btn.onclick = chiudiPopup;
-    box.appendChild(btn);
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
-
-    // Chiusura automatica impostata a 5000 millisecondi (5 secondi)
-    const timerAutochiusura = setTimeout(chiudiPopup, 5000);
-};
+}
+        
         function formattaDataLeggibile(isoString) {
             if (!isoString) return "";
             const parti = isoString.split('-');
