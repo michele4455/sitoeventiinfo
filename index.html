@@ -987,6 +987,75 @@
             'fiere': '🎪'
         };
 
+        window.mostraMessaggioTemporaneo = function(testo) {
+    // Rimuove eventuali avvisi precedenti ancora aperti
+    const vecchioPopup = document.getElementById('custom-temporary-popup');
+    if (vecchioPopup) vecchioPopup.remove();
+
+    // Creazione elemento pop-up container di sfondo (overlay)
+    const overlay = document.createElement('div');
+    overlay.id = 'custom-temporary-popup';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.5)';
+    overlay.style.backdropFilter = 'blur(4px)';
+    overlay.style.zIndex = '9999';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+
+    // Finestra interna dell'avviso
+    const box = document.createElement('div');
+    box.style.backgroundColor = '#ffffff';
+    box.style.padding = '30px';
+    box.style.borderRadius = '20px';
+    box.style.boxShadow = '0 20px 25px -5px rgba(0,0,0,0.15)';
+    box.style.maxWidth = '400px';
+    box.style.width = '90%';
+    box.style.textAlign = 'center';
+    box.style.border = '1px solid #e2e8f0';
+
+    // Testo del messaggio
+    const p = document.createElement('p');
+    p.innerText = testo;
+    p.style.fontSize = '1.15rem';
+    p.style.fontWeight = '600';
+    p.style.color = '#0f172a';
+    p.style.marginBottom = '20px';
+    box.appendChild(p);
+
+    // Bottone OK
+    const btn = document.createElement('button');
+    btn.innerText = 'OK';
+    btn.style.backgroundColor = '#0ea5e9';
+    btn.style.color = '#ffffff';
+    btn.style.border = 'none';
+    btn.style.padding = '10px 25px';
+    btn.style.fontSize = '1rem';
+    btn.style.fontWeight = 'bold';
+    btn.style.borderRadius = '10px';
+    btn.style.cursor = 'pointer';
+    
+    // Funzione per distruggere il popup
+    const chiudiPopup = () => {
+        if (overlay.parentNode) {
+            overlay.remove();
+            clearTimeout(timerAutochiusura);
+        }
+    };
+
+    btn.onclick = chiudiPopup;
+    box.appendChild(btn);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    // Timer per la chiusura automatica dopo 5 secondi (5000 millisecondi)
+    const timerAutochiusura = setTimeout(chiudiPopup, 5000);
+}
+
         window.apriLoginAdmin = function() {
             document.getElementById('login-password-field').value = '';
             document.getElementById('custom-login-modal').style.display = 'flex';
@@ -1352,7 +1421,7 @@
             controlloHashUrlAperturaModal();
         });
 
-       function renderEventi() {
+      function renderEventi() {
     const grid = document.getElementById('event-grid');
     grid.innerHTML = '';
 
@@ -1410,23 +1479,35 @@
             card.style.filter = 'grayscale(100%)';
         }
 
+        // Calcolo degli stati Sold Out e A Breve
+        let tutteDateEsaurite = true;
+        if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+            ev.dateSpettacolo.forEach(d => { if (!d.dataEsaurita) tutteDateEsaurite = false; });
+        } else {
+            tutteDateEsaurite = false;
+        }
+        const isSoldOut = ev.esauritoTotale || tutteDateEsaurite;
+        const isABreve = ev.aBreve;
+
         // Gestione dei Badge (Con aggiunta del badge Passato per l'admin)
         let badgeHtml = "";
         if (tutteDatePassate) {
             badgeHtml = `<div class="soldout-badge" style="background:#64748b;">⚠️ PASSATO</div>`;
-        } else if (ev.esauritoTotale) {
+        } else if (isSoldOut) {
             badgeHtml = `<div class="soldout-badge">SOLD OUT</div>`;
-        } else if (ev.aBreve) {
+        } else if (isABreve) {
             badgeHtml = `<div class="abreve-badge">A Breve in Vendita</div>`;
-        } else {
-            let tutteDateEsaurite = true;
-            if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
-                ev.dateSpettacolo.forEach(d => { if (!d.dataEsaurita) tutteDateEsaurite = false; });
-            } else {
-                tutteDateEsaurite = false;
-            }
-            if (tutteDateEsaurite) {
-                badgeHtml = `<div class="soldout-badge">SOLD OUT</div>`;
+        }
+
+        // Logica per decidere cosa fare al click sulla locandina
+        let clickAzioneHtml = `apriDettagliSpettacolo('${ev.id}')`;
+        if (!modalitaAdmin) {
+            if (isSoldOut) {
+                // DECIDI QUI LA SCRITTA PER IL SOLD OUT:
+                clickAzioneHtml = `window.mostraPopupCustom('Siamo spiacenti! Questo evento è SOLD OUT. Tutti i biglietti sono esauriti.')`;
+            } else if (isABreve) {
+                // DECIDI QUI LA SCRITTA PER IL A BREVE IN VENDITA:
+                clickAzioneHtml = `window.mostraPopupCustom('Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!')`;
             }
         }
 
@@ -1458,7 +1539,7 @@
             ${badgeHtml}
             ${evidenzaBadge}
             <div class="tipo-emoji-badge">${emojiTipo}</div>
-            <img src="${locandinaImgSrc}" alt="Locandina" onclick="apriDettagliSpettacolo('${ev.id}')">
+            <img src="${locandinaImgSrc}" alt="Locandina" onclick="${clickAzioneHtml}">
             <div class="movie-info">
                 <div>
                     <div class="movie-title">${ev.titolo}</div>
@@ -1466,7 +1547,7 @@
                     <div class="movie-meta-preview" style="font-weight:700; color:var(--text-main);">📅 ${dataMostrataAnteprima}</div>
                 </div>
                 <div>
-                    <button class="filter-btn" style="width:100%; border-color:var(--accent-color); color:var(--accent-color); padding:8px;" onclick="apriDettagliSpettacolo('${ev.id}')">
+                    <button class="filter-btn" style="width:100%; border-color:var(--accent-color); color:var(--accent-color); padding:8px;" onclick="${clickAzioneHtml}">
                         Vedi Dettagli e Pianta Posti
                     </button>
                     ${adminBtns}
@@ -1481,6 +1562,52 @@
     }
 }
 
+// Funzione globale di supporto per generare dinamicamente il pop-up a centro schermo
+window.mostraPopupCustom = function(testo) {
+    const vecchioPopup = document.getElementById('popup-temporaneo-custom');
+    if (vecchioPopup) vecchioPopup.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'popup-temporaneo-custom';
+    overlay.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:99999; display:flex; justify-content:center; align-items:center;';
+
+    const box = document.createElement('div');
+    box.style = 'background:#ffffff; padding:30px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.15); max-width:400px; width:90%; text-align:center; border:1px solid #e2e8f0; font-family:inherit; animation: popupScaleIn 0.2s ease-out;';
+    
+    // Stile di animazione rapida per la comparsa del pop-up
+    if (!document.getElementById('popup-style-animation')) {
+        const style = document.createElement('style');
+        style.id = 'popup-style-animation';
+        style.innerHTML = '@keyframes popupScaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }';
+        document.head.appendChild(style);
+    }
+
+    const p = document.createElement('p');
+    p.innerText = testo;
+    p.style = 'font-size:1.1rem; font-weight:600; color:#0f172a; margin:0 0 20px 0; line-height:1.5;';
+    box.appendChild(p);
+
+    const btn = document.createElement('button');
+    btn.innerText = 'OK';
+    btn.style = 'background:#0ea5e9; color:#ffffff; border:none; padding:10px 30px; font-size:1rem; font-weight:700; border-radius:8px; cursor:pointer; transition: background 0.2s;';
+    btn.onmouseover = () => btn.style.background = '#0284c7';
+    btn.onmouseout = () => btn.style.background = '#0ea5e9';
+
+    const chiudiPopup = () => {
+        if (overlay.parentNode) {
+            overlay.remove();
+            clearTimeout(timerAutochiusura);
+        }
+    };
+
+    btn.onclick = chiudiPopup;
+    box.appendChild(btn);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    // Chiusura automatica impostata a 5000 millisecondi (5 secondi)
+    const timerAutochiusura = setTimeout(chiudiPopup, 5000);
+};
         function formattaDataLeggibile(isoString) {
             if (!isoString) return "";
             const parti = isoString.split('-');
