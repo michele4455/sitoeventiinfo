@@ -1421,7 +1421,7 @@
             controlloHashUrlAperturaModal();
         });
 
-        function renderEventi() {
+          function renderEventi() {
     const grid = document.getElementById('event-grid');
     grid.innerHTML = '';
 
@@ -1515,10 +1515,8 @@
         let clickAzioneHtml = `apriDettagliSpettacolo('${ev.id}')`;
         if (!modalitaAdmin) {
             if (isSoldOut) {
-                // DECIDI QUI IL TESTO PER IL POP-UP DEL SOLD OUT (e passiamo la locandina):
                 clickAzioneHtml = `window.mostraPopupCustom('Siamo spiacenti! Questo evento è SOLD OUT. Tutti i biglietti sono esauriti.', '${locandinaImgSrc}')`;
             } else if (isABreve) {
-                // DECIDI QUI IL TESTO PER IL POP-UP DEL A BREVE IN VENDITA (e passiamo la locandina):
                 clickAzioneHtml = `window.mostraPopupCustom('Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!', '${locandinaImgSrc}')`;
             }
         }
@@ -1572,7 +1570,7 @@
     }
 }
 
-// Funzione globale aggiornata che genera graficamente l'avviso a centro schermo con locandina inclusa
+// Funzione globale aggiornata: Genera l'avviso a centro schermo con la locandina INGRANDITA e proporzionata
 window.mostraPopupCustom = function(testo, urlImmagine) {
     const vecchioPopup = document.getElementById('popup-temporaneo-custom');
     if (vecchioPopup) vecchioPopup.remove();
@@ -1582,7 +1580,8 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
     overlay.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:99999; display:flex; justify-content:center; align-items:center;';
 
     const box = document.createElement('div');
-    box.style = 'background:#ffffff; padding:25px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.15); max-width:380px; width:90%; text-align:center; border:1px solid #e2e8f0; font-family:inherit; animation: popupScaleIn 0.2s ease-out; display:flex; flex-direction:column; align-items:center;';
+    // max-width aumentata a 450px per contenere comodamente l'immagine più grande senza stringere il testo
+    box.style = 'background:#ffffff; padding:25px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.15); max-width:450px; width:92%; text-align:center; border:1px solid #e2e8f0; font-family:inherit; animation: popupScaleIn 0.2s ease-out; display:flex; flex-direction:column; align-items:center;';
     
     if (!document.getElementById('popup-style-animation')) {
         const style = document.createElement('style');
@@ -1591,23 +1590,23 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
         document.head.appendChild(style);
     }
 
-    // Se esiste la locandina, la inserisce sopra il testo
+    // Inserimento della locandina notevolmente ingrandita (mantenendo le proporzioni corrette delle locandine cinematografiche/teatrali)
     if (urlImmagine) {
         const imgPopup = document.createElement('img');
         imgPopup.src = urlImmagine;
         imgPopup.alt = "Anteprima Locandina";
-        imgPopup.style = 'width:140px; height:190px; object-fit:cover; border-radius:10px; margin-bottom:15px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1); border:1px solid #cbd5e1;';
+        imgPopup.style = 'width:260px; height:350px; object-fit:cover; border-radius:12px; margin-bottom:18px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.2); border:1px solid #cbd5e1;';
         box.appendChild(imgPopup);
     }
 
     const p = document.createElement('p');
     p.innerText = testo;
-    p.style = 'font-size:1.05rem; font-weight:600; color:#0f172a; margin:0 0 20px 0; line-height:1.5;';
+    p.style = 'font-size:1.1rem; font-weight:600; color:#0f172a; margin:0 0 20px 0; line-height:1.5; padding: 0 10px;';
     box.appendChild(p);
 
     const btn = document.createElement('button');
     btn.innerText = 'OK';
-    btn.style = 'background:#0ea5e9; color:#ffffff; border:none; padding:10px 30px; font-size:1rem; font-weight:700; border-radius:8px; cursor:pointer; transition: background 0.2s; width:100%; max-width:150px;';
+    btn.style = 'background:#0ea5e9; color:#ffffff; border:none; padding:11px 35px; font-size:1rem; font-weight:700; border-radius:8px; cursor:pointer; transition: background 0.2s; width:100%; max-width:160px;';
     btn.onmouseover = () => btn.style.background = '#0284c7';
     btn.onmouseout = () => btn.style.background = '#0ea5e9';
 
@@ -1625,7 +1624,7 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
 
     // Chiusura automatica a 5000 millisecondi (5 secondi)
     const timerAutochiusura = setTimeout(chiudiPopup, 5000);
-}; 
+};
         function formattaDataLeggibile(isoString) {
             if (!isoString) return "";
             const parti = isoString.split('-');
