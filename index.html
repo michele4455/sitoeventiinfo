@@ -1479,8 +1479,7 @@
             card.style.filter = 'grayscale(100%)';
         }
 
-        // CORREZIONE CRUCIALI: Normalizziamo i valori per essere sicuri che siano veri Booleani (true/false)
-        // Questo evita problemi se nel salvataggio vengono scritti come stringhe "true" o "false"
+        // NORMALIZZAZIONE VALORI: Sicurezza totale se i dati nel DB sono salvati come stringhe "true"/"false"
         const esauritoTotaleBooleano = (ev.esauritoTotale === true || ev.esauritoTotale === 'true');
         const aBreveBooleano = (ev.aBreve === true || ev.aBreve === 'true');
 
@@ -1553,7 +1552,7 @@
                 <div>
                     <div class="movie-title">${ev.titolo}</div>
                     <div class="movie-meta-preview">📍 ${ev.citta.toUpperCase()} - ${ev.location}</div>
-                    <div class="movie-meta-preview" style="font-weight:700; color:var(--text-main);">📅 ${dataMostrataAntepreview || dataMostrataAnteprima}</div>
+                    <div class="movie-meta-preview" style="font-weight:700; color:var(--text-main);">📅 ${dataMostrataAnteprima}</div>
                 </div>
                 <div>
                     <button class="filter-btn" style="width:100%; border-color:var(--accent-color); color:var(--accent-color); padding:8px;" onclick="${clickAzioneHtml}">
@@ -1569,53 +1568,6 @@
     if (contatoreVisibili === 0) {
         grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted); font-weight:600;">Nessun evento trovato nella categoria selezionata.</div>`;
     }
-}
-
-// Lascia pure la funzione window.mostraPopupCustom sotto così com'era, è perfetta!
-if (!window.mostraPopupCustom) {
-    window.mostraPopupCustom = function(testo) {
-        const vecchioPopup = document.getElementById('popup-temporaneo-custom');
-        if (vecchioPopup) vecchioPopup.remove();
-
-        const overlay = document.createElement('div');
-        overlay.id = 'popup-temporaneo-custom';
-        overlay.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:99999; display:flex; justify-content:center; align-items:center;';
-
-        const box = document.createElement('div');
-        box.style = 'background:#ffffff; padding:30px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.15); max-width:400px; width:90%; text-align:center; border:1px solid #e2e8f0; font-family:inherit; animation: popupScaleIn 0.2s ease-out;';
-        
-        if (!document.getElementById('popup-style-animation')) {
-            const style = document.createElement('style');
-            style.id = 'popup-style-animation';
-            style.innerHTML = '@keyframes popupScaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }';
-            document.head.appendChild(style);
-        }
-
-        const p = document.createElement('p');
-        p.innerText = testo;
-        p.style = 'font-size:1.1rem; font-weight:600; color:#0f172a; margin:0 0 20px 0; line-height:1.5;';
-        box.appendChild(p);
-
-        const btn = document.createElement('button');
-        btn.innerText = 'OK';
-        btn.style = 'background:#0ea5e9; color:#ffffff; border:none; padding:10px 30px; font-size:1rem; font-weight:700; border-radius:8px; cursor:pointer; transition: background 0.2s;';
-        btn.onmouseover = () => btn.style.background = '#0284c7';
-        btn.onmouseout = () => btn.style.background = '#0ea5e9';
-
-        const chiudiPopup = () => {
-            if (overlay.parentNode) {
-                overlay.remove();
-                clearTimeout(timerAutochiusura);
-            }
-        };
-
-        btn.onclick = chiudiPopup;
-        box.appendChild(btn);
-        overlay.appendChild(box);
-        document.body.appendChild(overlay);
-
-        const timerAutochiusura = setTimeout(chiudiPopup, 5000);
-    };
 }
         
         function formattaDataLeggibile(isoString) {
