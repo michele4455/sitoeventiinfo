@@ -889,21 +889,9 @@
             <input type="checkbox" id="form-evidenza">
             <label for="form-evidenza" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">🔥 Metti in evidenza (Sposta in cima alla lista con 🔥)</label>
         </div>
-        <div class="checkbox-container abreve-container" style="flex-direction: column; align-items: flex-start; gap: 6px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <input type="checkbox" id="form-abreve" onchange="document.getElementById('abreve-datetime-picker').style.display = this.checked ? 'flex' : 'none'">
-                <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">⚠️ IMPOSTA COME A BREVE IN VENDITA (Visibile anche a tutti i Clienti)</label>
-            </div>
-            <div id="abreve-datetime-picker" style="display: none; gap: 10px; margin-top: 8px; width: 100%;">
-                <div style="flex: 1;">
-                    <label style="margin:0; font-size:0.8rem;">Data Apertura (Opzionale):</label>
-                    <input type="date" id="form-abreve-data" style="margin:2px 0; padding:8px;">
-                </div>
-                <div style="flex: 1;">
-                    <label style="margin:0; font-size:0.8rem;">Ora Apertura (Opzionale):</label>
-                    <input type="time" id="form-abreve-ora" style="margin:2px 0; padding:8px;">
-                </div>
-            </div>
+        <div class="checkbox-container abreve-container">
+            <input type="checkbox" id="form-abreve">
+            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">⚠️ IMPOSTA COME A BREVE IN VENDITA (Visibile anche a tutti i Clienti)</label>
         </div>
         <div class="checkbox-container">
             <input type="checkbox" id="form-soldout">
@@ -1103,9 +1091,6 @@
             document.getElementById('form-abreve').checked = false;
             document.getElementById('form-evidenza').checked = false;
             document.getElementById('form-category').value = "concerti";
-            document.getElementById('form-abreve-data').value = "";
-            document.getElementById('form-abreve-ora').value = "";
-            document.getElementById('abreve-datetime-picker').style.display = 'none';
             resettaCampiForm();
             modalitaAdmin = false;
             aggiornaVisibilitaSito();
@@ -1300,8 +1285,6 @@
             const location = document.getElementById('form-location').value.trim();
             const linkMappaUfficiale = document.getElementById('form-link').value.trim();
             const editId = document.getElementById('edit-id').value;
-            const abreveData = document.getElementById('form-abreve-data').value;
-            const abreveOra = document.getElementById('form-abreve-ora').value;
 
             if (!titolo || !citta || !location) {
                 alert("Compila i campi obbligatori: Titolo, Città e Location.");
@@ -1374,8 +1357,6 @@
                 categoria,
                 inEvidenza,
                 aBreve,
-                abreveData, 
-                abreveOra,
                 esauritoTotale,
                 citta,
                 location,
@@ -1518,30 +1499,6 @@
         const isSoldOut = esauritoTotaleBooleano || tutteDateEsaurite;
         const isABreve = aBreveBooleano;
 
-        let countdownTarget = null; // Questa variabile conterrà il momento esatto dell'apertura in millisecondi
-
-        // 2. Se l'amministratore ha attivato la spunta "A Breve" E ha inserito sia una data che un orario...
-        if (isABreve && ev.abreveData && ev.abreveOra) {
-            
-            // 3. Uniamo la data e l'ora in un unico oggetto Data di JavaScript (es: "2026-07-01T21:00")
-            const dataOraApertura = new Date(`${ev.abreveData}T${ev.abreveOra}`);
-            
-            // Controlliamo che la data inserita sia valida
-            if (!isNaN(dataOraApertura.getTime())) {
-                
-                // 4. IL CONTROLLO CRUCIALI: La data/ora di adesso (new Date()) è MAGGIORE o UGUALE a quella di apertura?
-                if (new Date() >= dataOraApertura) {
-                    // SE SÌ: Il tempo è scaduto! Forziamo lo stato su 'false'.
-                    // L'evento smetterà di mostrare il blocco "A breve" e diventerà acquistabile normalmente.
-                    isABreve = false; 
-                } else {
-                    // SE NO: Manca ancora del tempo. SalGroup il momento esatto in millisecondi.
-                    // Ci servirà per fare i calcoli matematici nel countdown.
-                    countdownTarget = dataOraApertura.getTime();
-                }
-            }
-        }
-
         // Gestione dei Badge (Con aggiunta del badge Passato per l'admin)
         let badgeHtml = "";
         if (tutteDatePassate) {
@@ -1614,19 +1571,16 @@
 }
 
 // Funzione globale aggiornata: Genera l'avviso a centro schermo con la locandina INGRANDITA e proporzionata
-window.mostraPopupCustom = function(testo, urlImmagine, countdownTarget = null) {
+window.mostraPopupCustom = function(testo, urlImmagine) {
     const vecchioPopup = document.getElementById('popup-temporaneo-custom');
     if (vecchioPopup) vecchioPopup.remove();
-
-    // Rimuove eventuali timer di countdown attivi in precedenza per evitare conflitti
-    if (window.popupCountdownInterval) clearInterval(window.popupCountdownInterval);
-    if (window.popupAutochiusuraTimer) clearTimeout(window.popupAutochiusuraTimer);
 
     const overlay = document.createElement('div');
     overlay.id = 'popup-temporaneo-custom';
     overlay.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:99999; display:flex; justify-content:center; align-items:center;';
 
     const box = document.createElement('div');
+    // max-width aumentata a 450px per contenere comodamente l'immagine più grande senza stringere il testo
     box.style = 'background:#ffffff; padding:25px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.15); max-width:450px; width:92%; text-align:center; border:1px solid #e2e8f0; font-family:inherit; animation: popupScaleIn 0.2s ease-out; display:flex; flex-direction:column; align-items:center;';
     
     if (!document.getElementById('popup-style-animation')) {
@@ -1636,6 +1590,7 @@ window.mostraPopupCustom = function(testo, urlImmagine, countdownTarget = null) 
         document.head.appendChild(style);
     }
 
+    // Inserimento della locandina notevolmente ingrandita (mantenendo le proporzioni corrette delle locandine cinematografiche/teatrali)
     if (urlImmagine) {
         const imgPopup = document.createElement('img');
         imgPopup.src = urlImmagine;
@@ -1646,43 +1601,8 @@ window.mostraPopupCustom = function(testo, urlImmagine, countdownTarget = null) 
 
     const p = document.createElement('p');
     p.innerText = testo;
-    p.style = 'font-size:1.1rem; font-weight:600; color:#0f172a; margin:0 0 15px 0; line-height:1.5; padding: 0 10px;';
+    p.style = 'font-size:1.1rem; font-weight:600; color:#0f172a; margin:0 0 20px 0; line-height:1.5; padding: 0 10px;';
     box.appendChild(p);
-
-    // --- LOGICA GESTIONE COUNTDOWN ---
-    if (countdownTarget) {
-        const countdownDiv = document.createElement('div');
-        countdownDiv.style = 'font-size:1.2rem; font-weight:800; color:#f59e0b; margin-bottom:20px; background:#fef9c3; padding:10px 20px; border-radius:10px; border:1px solid #fef08a; letter-spacing:0.5px;';
-        box.appendChild(countdownDiv);
-
-        const aggiornaTimer = () => {
-            const ora = new Date().getTime();
-            const distanza = countdownTarget - ora;
-
-            if (distanza < 0) {
-                countdownDiv.innerText = "VENDITE APERTE! Ricarica la pagina.";
-                clearInterval(window.popupCountdownInterval);
-            } else {
-                const giorni = Math.floor(distanza / (1000 * 60 * 60 * 24));
-                const ore = Math.floor((distanza % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minuti = Math.floor((distanza % (1000 * 60 * 60)) / (1000 * 60));
-                const secondi = Math.floor((distanza % (1000 * 60)) / 1000);
-                
-                let testoTimer = "";
-                if (giorni > 0) {
-                    testoTimer += giorni + "g ";
-                }
-                testoTimer += ore.toString().padStart(2, '0') + ":" + 
-                             minuti.toString().padStart(2, '0') + ":" + 
-                             secondi.toString().padStart(2, '0');
-                
-                countdownDiv.innerHTML = "⏳ APERTURA TRA:<br>" + testoTimer;
-            }
-        };
-
-        aggiornaTimer();
-        window.popupCountdownInterval = setInterval(aggiornaTimer, 1000);
-    }
 
     const btn = document.createElement('button');
     btn.innerText = 'OK';
@@ -1693,8 +1613,7 @@ window.mostraPopupCustom = function(testo, urlImmagine, countdownTarget = null) 
     const chiudiPopup = () => {
         if (overlay.parentNode) {
             overlay.remove();
-            if (window.popupCountdownInterval) clearInterval(window.popupCountdownInterval);
-            if (window.popupAutochiusuraTimer) clearTimeout(window.popupAutochiusuraTimer);
+            clearTimeout(timerAutochiusura);
         }
     };
 
@@ -1703,9 +1622,8 @@ window.mostraPopupCustom = function(testo, urlImmagine, countdownTarget = null) 
     overlay.appendChild(box);
     document.body.appendChild(overlay);
 
-    // Determina il tempo di chiusura automatica: 15 secondi se c'è il countdown, altrimenti 5 secondi
-    const tempoAutochiusura = countdownTarget ? 15000 : 5000;
-    window.popupAutochiusuraTimer = setTimeout(chiudiPopup, tempoAutochiusura);
+    // Chiusura automatica a 5000 millisecondi (5 secondi)
+    const timerAutochiusura = setTimeout(chiudiPopup, 5000);
 };
         function formattaDataLeggibile(isoString) {
             if (!isoString) return "";
@@ -1727,9 +1645,6 @@ window.mostraPopupCustom = function(testo, urlImmagine, countdownTarget = null) 
             document.getElementById('form-evidenza').checked = !!ev.inEvidenza;
             document.getElementById('form-abreve').checked = !!ev.aBreve;
             document.getElementById('form-soldout').checked = !!ev.esauritoTotale;
-            document.getElementById('form-abreve-data').value = ev.abreveData || "";
-            document.getElementById('form-abreve-ora').value = ev.abreveOra || "";
-            document.getElementById('abreve-datetime-picker').style.display = ev.aBreve ? 'flex' : 'none';
             document.getElementById('form-city').value = ev.citta || "";
             document.getElementById('form-location').value = ev.location || "";
             document.getElementById('form-link').value = ev.linkMappaUfficiale || "";
