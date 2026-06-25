@@ -893,14 +893,6 @@
             <input type="checkbox" id="form-abreve">
             <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">⚠️ IMPOSTA COME A BREVE IN VENDITA (Visibile anche a tutti i Clienti)</label>
         </div>
-        <!-- AGGIUNTA: Campi data e ora di sblocco automatico -->
-        <div style="margin: -10px 0 20px 20px; background: #fffbeb; padding: 10px; border-radius: 8px; border: 1px solid #fef08a;">
-            <label style="margin:0; font-size:0.85rem;">Oppure programma l'apertura automatica delle vendite (Opzionale):</label>
-            <div style="display: flex; gap: 10px; margin-top: 5px;">
-                <input type="date" id="form-abreve-data" style="margin:0; padding:5px;">
-                <input type="time" id="form-abreve-ora" style="margin:0; padding:5px;">
-            </div>
-        </div>
         <div class="checkbox-container">
             <input type="checkbox" id="form-soldout">
             <label for="form-soldout" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">🔴 Contrassegna come EVENTO ESAURITO (SOLD OUT TOTALE GENERALE)</label>
@@ -1111,8 +1103,6 @@
             document.getElementById('form-link').value = '';
             document.getElementById('form-locandina').value = '';
             document.getElementById('form-mappa').value = '';
-            document.getElementById('form-abreve-data').value = '';
-            document.getElementById('form-abreve-ora').value = '';
         }
 
         window.cambiaStatoManutenzione = function(stato) {
@@ -1290,8 +1280,6 @@
             const categoria = document.getElementById('form-category').value;
             const inEvidenza = document.getElementById('form-evidenza').checked;
             const aBreve = document.getElementById('form-abreve').checked;
-            const aBreveData = document.getElementById('form-abreve-data').value;
-            const aBreveOra = document.getElementById('form-abreve-ora').value;
             const esauritoTotale = document.getElementById('form-soldout').checked;
             const citta = document.getElementById('form-city').value.trim();
             const location = document.getElementById('form-location').value.trim();
@@ -1369,8 +1357,6 @@
                 categoria,
                 inEvidenza,
                 aBreve,
-                aBreveData,
-                aBreveOra,
                 esauritoTotale,
                 citta,
                 location,
@@ -1453,11 +1439,6 @@
     // Recuperiamo la data odierna nel formato YYYY-MM-DD per fare il confronto pulito
     const oggiStr = new Date().toISOString().split('T')[0];
 
-    const oggiStr = new Date().toISOString().split('T')[0];
-
-    // AGGIUNTA: Calcolo timestamp corrente per sblocco automatico
-    const adesso = new Date();
-
     eventiOrdinati.forEach(ev => {
         // 1. Controllo scadenze date passate
         let tutteDatePassate = true;
@@ -1516,15 +1497,7 @@
 
         // Stato finale dell'evento
         const isSoldOut = esauritoTotaleBooleano || tutteDateEsaurite;
-        let isABreve = aBreveBooleano;
-        if (ev.aBreveData && ev.aBreveOra) {
-            const dataSblocco = new Date(`${ev.aBreveData}T${ev.aBreveOra}`);
-            if (adesso < dataSblocco) {
-                isABreve = true; // Bloccato fino alla data stabilita
-            } else if (!aBreveBooleano) {
-                isABreve = false; // Sblocco automatico avvenuto al superamento del tempo
-            }
-        }
+        const isABreve = aBreveBooleano;
 
         // Gestione dei Badge (Con aggiunta del badge Passato per l'admin)
         let badgeHtml = "";
@@ -1671,8 +1644,6 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
             document.getElementById('form-category').value = ev.categoria || "concerti";
             document.getElementById('form-evidenza').checked = !!ev.inEvidenza;
             document.getElementById('form-abreve').checked = !!ev.aBreve;
-            document.getElementById('form-abreve-data').value = ev.aBreveData || "";
-            document.getElementById('form-abreve-ora').value = ev.aBreveOra || "";
             document.getElementById('form-soldout').checked = !!ev.esauritoTotale;
             document.getElementById('form-city').value = ev.citta || "";
             document.getElementById('form-location').value = ev.location || "";
