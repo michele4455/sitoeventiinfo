@@ -889,21 +889,9 @@
             <input type="checkbox" id="form-evidenza">
             <label for="form-evidenza" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">🔥 Metti in evidenza (Sposta in cima alla lista con 🔥)</label>
         </div>
-        <div class="checkbox-container abreve-container" style="flex-direction: column; align-items: flex-start; gap: 6px;">
-            <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
-                <input type="checkbox" id="form-abreve">
-                <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">⚠️ IMPOSTA COME A BREVE IN VENDITA (Visibile anche a tutti i Clienti)</label>
-            </div>
-            <div style="display: flex; gap: 10px; width: 100%; margin-top: 8px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 140px;">
-                    <label style="margin:0; font-size: 0.8rem;" for="form-abreve-data">Data Apertura (Opzionale):</label>
-                    <input type="date" id="form-abreve-data" style="padding: 6px 12px; margin: 4px 0 0 0;">
-                </div>
-                <div style="flex: 1; min-width: 140px;">
-                    <label style="margin:0; font-size: 0.8rem;" for="form-abreve-ora">Ora Apertura (Opzionale):</label>
-                    <input type="time" id="form-abreve-ora" style="padding: 6px 12px; margin: 4px 0 0 0;">
-                </div>
-            </div>
+        <div class="checkbox-container abreve-container">
+            <input type="checkbox" id="form-abreve">
+            <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">⚠️ IMPOSTA COME A BREVE IN VENDITA (Visibile anche a tutti i Clienti)</label>
         </div>
         <div class="checkbox-container">
             <input type="checkbox" id="form-soldout">
@@ -1292,8 +1280,6 @@
             const categoria = document.getElementById('form-category').value;
             const inEvidenza = document.getElementById('form-evidenza').checked;
             const aBreve = document.getElementById('form-abreve').checked;
-            const aBreveData = document.getElementById('form-abreve-data').value || ""; // AGGIUNTO
-            const aBreveOra = document.getElementById('form-abreve-ora').value || "";   // AGGIUNTO
             const esauritoTotale = document.getElementById('form-soldout').checked;
             const citta = document.getElementById('form-city').value.trim();
             const location = document.getElementById('form-location').value.trim();
@@ -1371,8 +1357,6 @@
                 categoria,
                 inEvidenza,
                 aBreve,
-                abreveData: aBreveData, // AGGIUNTO
-                abreveOra: aBreveOra,   // AGGIUNTO
                 esauritoTotale,
                 citta,
                 location,
