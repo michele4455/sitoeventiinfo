@@ -1338,14 +1338,13 @@
                 if (isABreve && ev.dataApertura && ev.orarioApertura) {
                     const adesso = new Date();
                     const momentoApertura = new Date(`${ev.dataApertura}T${ev.orarioApertura}`);
-                    if (adesso >= momentoApertura) {
+                    if (!isNaN(momentoApertura.getTime()) && adesso >= momentoApertura) {
                         isABreve = false;
                     }
                 }
 
                 let badgeHtml = '';
                 let clickAzioneHtml = `window.apriDettagliSpettacolo('${ev.id}')`;
-                let stileDisabilitatoModaleInizioCardClick = '';
 
                 if (soldOutBooleano) {
                     badgeHtml = `<div class="soldout-badge">SOLD OUT</div>`;
@@ -1451,7 +1450,7 @@
             const containerSettori = document.getElementById('modal-sectors-container');
             containerSettori.innerHTML = '';
 
-            if (!idEventoCorrenteAperto || !eventi[idEventoCorrenteAperto]) return;
+            if (!idEventoCorrenteAperfo || !eventi[idEventoCorrenteAperto]) return;
             const ev = eventi[idEventoCorrenteAperto];
             const dataSelezionataObj = ev.date[idxData];
 
@@ -1569,7 +1568,7 @@
             modalitaAdmin = false;
             document.getElementById('admin-panel').style.display = 'none';
             document.getElementById('admin-floating-btn').style.display = 'flex';
-            document.getElementById('logout-admin-btn').style.display = 'none';
+            document.getElementById('logout-admin-btn').style.none = 'none';
             document.getElementById('manutenzione-toggle-wrapper').style.display = 'none';
             
             gestisciSchermataManutenzione();
@@ -1805,6 +1804,5 @@
         };
 
         window.aggiungiDataAlForm();
-    </script>
-</body>
+    </script></body>
 </html>
