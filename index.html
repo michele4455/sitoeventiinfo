@@ -193,15 +193,15 @@
             position: absolute;
             top: 15px;
             left: 15px;
-            background: #f59e0b;
-            color: white;
+            background: #eab308; /* Giallo intenso (Tailwind yellow-500) */
+            color: #0f172a;      /* Testo scuro per massima leggibilità */
             font-weight: 700;
             padding: 6px 14px;
             border-radius: 9999px;
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 4px 10px rgba(234, 179, 8, 0.3);
             z-index: 5;
         }
 
@@ -1017,7 +1017,8 @@
     });
 }, 1000);
 
-      window.mostraMessaggioTemporaneo = function(testo, eventoId = null) {
+      // SOSTITUISCI INTERAMENTE LA FUNZIONE window.mostraMessaggioTemporaneo CON QUESTA:
+window.mostraMessaggioTemporaneo = function(testo, eventoId = null) {
     const vecchioPopup = document.getElementById('custom-temporary-popup');
     if (vecchioPopup) {
         if (vecchioPopup.intervalId) clearInterval(vecchioPopup.intervalId);
@@ -1027,64 +1028,133 @@
     const overlay = document.createElement('div');
     overlay.id = 'custom-temporary-popup';
     overlay.style.position = 'fixed';
-    overlay.style.top = '0'; overlay.style.left = '0'; overlay.style.width = '100%'; overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.5)'; overlay.style.backdropFilter = 'blur(4px)';
-    overlay.style.zIndex = '9999'; overlay.style.display = 'flex'; overlay.style.justifyContent = 'center'; overlay.style.alignItems = 'center';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.5)';
+    overlay.style.backdropFilter = 'blur(4px)';
+    overlay.style.zIndex = '9999';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
 
     const box = document.createElement('div');
-    box.style.backgroundColor = '#ffffff'; box.style.padding = '30px'; box.style.borderRadius = '20px';
-    box.style.boxShadow = '0 20px 25px -5px rgba(0,0,0,0.15)'; box.style.maxWidth = '400px'; box.style.width = '90%';
-    box.style.textAlign = 'center'; box.style.border = '1px solid #e2e8f0';
+    box.style.backgroundColor = '#ffffff';
+    box.style.padding = '25px';
+    box.style.borderRadius = '20px';
+    box.style.boxShadow = '0 20px 25px -5px rgba(0,0,0,0.15)';
+    box.style.maxWidth = '420px';
+    box.style.width = '90%';
+    box.style.textAlign = 'center';
+    box.style.border = '1px solid #e2e8f0';
+    box.style.display = 'flex';
+    box.style.flexDirection = 'column';
+    box.style.alignItems = 'center';
+
+    // RECUPERO E INSERIMENTO DELLA LOCANDINA
+    const listaEventi = typeof window.leggiEventiGlobali === 'function' ? window.leggiEventiGlobali() : (window.eventi || eventi);
+    const ev = (listaEventi && eventoId) ? listaEventi[eventoId] : null;
+
+    if (ev && ev.locandina) {
+        const imgPopup = document.createElement('img');
+        imgPopup.src = ev.locandina;
+        imgPopup.alt = "Locandina Evento";
+        imgPopup.style.width = '200px';
+        imgPopup.style.height = '270px';
+        imgPopup.style.objectFit = 'cover';
+        imgPopup.style.borderRadius = '12px';
+        imgPopup.style.marginBottom = '15px';
+        imgPopup.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)';
+        imgPopup.style.border = '1px solid #cbd5e1';
+        box.appendChild(imgPopup);
+    }
 
     const p = document.createElement('p');
     p.innerText = testo;
-    p.style.fontSize = '1.15rem'; p.style.fontWeight = '600'; p.style.color = '#0f172a'; p.style.marginBottom = '20px';
+    p.style.fontSize = '1.1rem';
+    p.style.fontWeight = '600';
+    p.style.color = '#0f172a';
+    p.style.marginBottom = '20px';
     box.appendChild(p);
 
     let haCountdown = false;
-    let tempoChiusura = 5000;
-
-    // Recuperiamo la lista eventi in modo sicuro
-    const listaEventi = typeof window.leggiEventiGlobali === 'function' ? window.leggiEventiGlobali() : (window.eventi || eventi);
-    const ev = (listaEventi && eventoId) ? listaEventi[eventoId] : null;
+    let tempoChiusura = 5000; // 5 secondi di base se non c'è il countdown
 
     if (ev && ev.abreve && ev.abreveDataApertura && ev.abreveOraApertura) {
         const dataTarget = new Date(`${ev.abreveDataApertura}T${ev.abreveOraApertura}`).getTime();
         const adesso = new Date().getTime();
-        
+
         if (!isNaN(dataTarget) && dataTarget > adesso) {
             haCountdown = true;
-            tempoChiusura = 20000; // 20 secondi se c'è il countdown
-
+            tempoChiusura = 30000; // Estendiamo il tempo di chiusura automatica se c'è il countdown attivo
+            
             const countdownDiv = document.createElement('div');
-            countdownDiv.style.margin = '15px 0 25px 0';
-            countdownDiv.style.padding = '12px';
-            countdownDiv.style.backgroundColor = '#fef3c7';
-            countdownDiv.style.borderRadius = '12px';
-            countdownDiv.style.border = '1px solid #fde68a';
-            countdownDiv.style.color = '#d97706';
-            countdownDiv.style.fontWeight = '700';
-            countdownDiv.style.fontSize = '1.1rem';
-            countdownDiv.style.whiteSpace = 'pre-line';
+            countdownDiv.style.display = 'flex';
+            countdownDiv.style.justifyContent = 'center';
+            countdownDiv.style.gap = '10px';
+            countdownDiv.style.marginBottom = '20px';
+            countdownDiv.style.width = '100%';
+
+            const creaBloccoTempo = (label) => {
+                const wrap = document.createElement('div');
+                wrap.style.background = '#f1f5f9';
+                wrap.style.padding = '8px 12px';
+                wrap.style.borderRadius = '8px';
+                wrap.style.minWidth = '60px';
+                
+                const num = document.createElement('span');
+                num.style.display = 'block';
+                num.style.fontSize = '1.2rem';
+                num.style.fontWeight = '700';
+                num.style.color = '#0ea5e9';
+                num.innerText = '00';
+                
+                const txt = document.createElement('span');
+                txt.style.fontSize = '0.7rem';
+                txt.style.color = '#64748b';
+                txt.style.textTransform = 'uppercase';
+                txt.innerText = label;
+                
+                wrap.appendChild(num);
+                wrap.appendChild(txt);
+                return { wrap, num };
+            };
+
+            const bGiorni = creaBloccoTempo('Giorni');
+            const bOre = creaBloccoTempo('Ore');
+            const bMin = creaBloccoTempo('Min');
+            const bSec = creaBloccoTempo('Sec');
+
+            countdownDiv.appendChild(bGiorni.wrap);
+            countdownDiv.appendChild(bOre.wrap);
+            countdownDiv.appendChild(bMin.wrap);
+            countdownDiv.appendChild(bSec.wrap);
             box.appendChild(countdownDiv);
 
             const aggiornaTimer = () => {
-                const ora = new Date().getTime();
-                const distanza = dataTarget - ora;
+                const oraAttuale = new Date().getTime();
+                const distanza = dataTarget - oraAttuale;
+
                 if (distanza < 0) {
-                    countdownDiv.innerText = "Vendite in apertura...";
                     clearInterval(overlay.intervalId);
+                    bGiorni.num.innerText = '00';
+                    bOre.num.innerText = '00';
+                    bMin.num.innerText = '00';
+                    bSec.num.innerText = '00';
+                    p.innerText = "Le vendite sono aperte! Ricarica la pagina.";
                     return;
                 }
+
                 const giorni = Math.floor(distanza / (1000 * 60 * 60 * 24));
                 const ore = Math.floor((distanza % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minuti = Math.floor((distanza % (1000 * 60 * 60)) / (1000 * 60));
                 const secondi = Math.floor((distanza % (1000 * 60)) / 1000);
-                
-                let stringaTime = "⏳ Apertura vendite tra:\n";
-                if (giorni > 0) stringaTime += `${giorni}g `;
-                stringaTime += `${ore.toString().padStart(2, '0')}:${minuti.toString().padStart(2, '0')}:${secondi.toString().padStart(2, '0')}`;
-                countdownDiv.innerText = stringaTime;
+
+                bGiorni.num.innerText = giorni < 10 ? '0' + giorni : giorni;
+                bOre.num.innerText = ore < 10 ? '0' + ore : ore;
+                bMin.num.innerText = minuti < 10 ? '0' + minuti : minuti;
+                bSec.num.innerText = secondi < 10 ? '0' + secondi : secondi;
             };
 
             aggiornaTimer();
@@ -1093,10 +1163,16 @@
     }
 
     const btn = document.createElement('button');
-    btn.innerText = 'OK';
-    btn.style.backgroundColor = '#0ea5e9'; btn.style.color = '#ffffff'; btn.style.border = 'none';
-    btn.style.padding = '10px 25px'; btn.style.fontSize = '1rem'; btn.style.fontWeight = 'bold';
-    btn.style.borderRadius = '10px'; btn.style.cursor = 'pointer';
+    btn.innerText = "Ho capito";
+    btn.style.backgroundColor = '#0ea5e9';
+    btn.style.color = '#ffffff';
+    btn.style.border = 'none';
+    btn.style.padding = '10px 25px';
+    btn.style.fontSize = '1rem';
+    btn.style.fontWeight = 'bold';
+    btn.style.borderRadius = '10px';
+    btn.style.cursor = 'pointer';
+    btn.style.width = '100%';
 
     const chiudiPopup = () => {
         if (overlay.intervalId) clearInterval(overlay.intervalId);
@@ -1105,6 +1181,7 @@
             clearTimeout(timerAutochiusura);
         }
     };
+
     btn.onclick = chiudiPopup;
     box.appendChild(btn);
     overlay.appendChild(box);
