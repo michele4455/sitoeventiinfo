@@ -981,6 +981,7 @@
 
         const TUO_NUMERO_WHATSAPP = "393487326468";
         let eventi = {};
+        window.leggiEventiGlobali = function() { return eventi; }; // AGGIUNGI QUESTA RIGA
         let modalitaAdmin = false;
         let idEventoCorrenteAperto = null;
         let inManutenzione = false;
@@ -1016,7 +1017,7 @@
     });
 }, 1000);
 
-       window.mostraMessaggioTemporaneo = function(testo, eventoId = null) {
+      window.mostraMessaggioTemporaneo = function(testo, eventoId = null) {
     const vecchioPopup = document.getElementById('custom-temporary-popup');
     if (vecchioPopup) {
         if (vecchioPopup.intervalId) clearInterval(vecchioPopup.intervalId);
@@ -1040,18 +1041,20 @@
     p.style.fontSize = '1.15rem'; p.style.fontWeight = '600'; p.style.color = '#0f172a'; p.style.marginBottom = '20px';
     box.appendChild(p);
 
-    // Gestione del Countdown se presente un evento programmato
     let haCountdown = false;
-    let tempoChiusura = 5000; // default 5 secondi
-    const ev = eventoId ? eventi[eventoId] : null;
+    let tempoChiusura = 5000;
+
+    // Recuperiamo la lista eventi in modo sicuro
+    const listaEventi = typeof window.leggiEventiGlobali === 'function' ? window.leggiEventiGlobali() : null;
+    const ev = (listaEventi && eventoId) ? listaEventi[eventoId] : null;
 
     if (ev && ev.abreve && ev.abreveDataApertura && ev.abreveOraApertura) {
         const dataTarget = new Date(`${ev.abreveDataApertura}T${ev.abreveOraApertura}`).getTime();
         const adesso = new Date().getTime();
         
-        if (dataTarget > adesso) {
+        if (!isNaN(dataTarget) && dataTarget > adesso) {
             haCountdown = true;
-            tempoChiusura = 20000; // Imposta a 20 secondi se c'è il countdown
+            tempoChiusura = 20000; // 20 secondi se c'è il countdown
 
             const countdownDiv = document.createElement('div');
             countdownDiv.style.margin = '15px 0 25px 0';
@@ -1062,6 +1065,7 @@
             countdownDiv.style.color = '#d97706';
             countdownDiv.style.fontWeight = '700';
             countdownDiv.style.fontSize = '1.1rem';
+            countdownDiv.style.whiteSpace = 'pre-line';
             box.appendChild(countdownDiv);
 
             const aggiornaTimer = () => {
@@ -1108,7 +1112,6 @@
 
     const timerAutochiusura = setTimeout(chiudiPopup, tempoChiusura);
 };
-
         window.apriLoginAdmin = function() {
             document.getElementById('login-password-field').value = '';
             document.getElementById('custom-login-modal').style.display = 'flex';
@@ -1579,8 +1582,8 @@
             if (isSoldOut) {
                 clickAzioneHtml = `window.mostraPopupCustom('Siamo spiacenti! Questo evento è SOLD OUT. Tutti i biglietti sono esauriti.', '${locandinaImgSrc}')`;
             } else if (isABreve) {
-                // MODIFICATO QUI: Usiamo mostraMessaggioTemporaneo passando il testo e l'ID dell'evento
-                clickAzioneHtml = `window.mostraMessaggioTemporaneo('Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!', '${ev.id}')`;
+                // CORRETTO: Usiamo i doppi apici all'interno per evitare l'errore di sintassi
+                clickAzioneHtml = `window.mostraMessaggioTemporaneo("Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!", "${ev.id}")`;
             }
         }
 
@@ -1747,6 +1750,7 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
         }
 
         window.apriDettagliSpettacolo = function(id) {
+     idEventoCorrenteAperto = id;
     const ev = eventi[id];
     if (!ev) return;
 
