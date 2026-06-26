@@ -1045,7 +1045,7 @@
     let tempoChiusura = 5000;
 
     // Recuperiamo la lista eventi in modo sicuro
-    const listaEventi = typeof window.leggiEventiGlobali === 'function' ? window.leggiEventiGlobali() : null;
+    const listaEventi = typeof window.leggiEventiGlobali === 'function' ? window.leggiEventiGlobali() : (window.eventi || eventi);
     const ev = (listaEventi && eventoId) ? listaEventi[eventoId] : null;
 
     if (ev && ev.abreve && ev.abreveDataApertura && ev.abreveOraApertura) {
@@ -1147,9 +1147,6 @@
             document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
             document.getElementById('form-soldout').checked = false;
             document.getElementById('form-abreve').checked = false;
-            if (document.getElementById('form-abreve-date')) document.getElementById('form-abreve-date').value = "";
-            if (document.getElementById('form-abreve-time')) document.getElementById('form-abreve-time').value = "";
-            if (document.getElementById('abreve-time-fields')) document.getElementById('abreve-time-fields').style.display = 'none';
             document.getElementById('form-evidenza').checked = false;
             document.getElementById('form-category').value = "concerti";
             document.getElementById('form-abreve-date').value = "";
@@ -1343,9 +1340,9 @@
             const titolo = document.getElementById('form-title').value.trim();
             const categoria = document.getElementById('form-category').value;
             const inEvidenza = document.getElementById('form-evidenza').checked;
-            const abreve = document.getElementById('form-abreve').checked;
-            const abreveDataApertura = document.getElementById('form-abreve-date') ? document.getElementById('form-abreve-date').value : "";
-            const abreveOraApertura = document.getElementById('form-abreve-time') ? document.getElementById('form-abreve-time').value : "";
+            const aBreve = document.getElementById('form-abreve').checked;
+            const dataApertura = document.getElementById('form-abreve-date').value || "";
+            const oraApertura = document.getElementById('form-abreve-time').value || "";
             const esauritoTotale = document.getElementById('form-soldout').checked;
             const citta = document.getElementById('form-city').value.trim();
             const location = document.getElementById('form-location').value.trim();
@@ -1422,10 +1419,9 @@
                 titolo,
                 categoria,
                 inEvidenza,
-                abreve,
-                abreveDataApertura: abreveDataApertura,
-                abreveOraApertura: abreveOraApertura,
-                dataCreazione: serverTimestamp()
+                abreve: document.getElementById('form-abreve').checked,
+                abreveDataApertura: dataApertura,
+                abreveOraApertura: oraApertura,
                 esauritoTotale,
                 citta,
                 location,
@@ -1721,16 +1717,6 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
             document.getElementById('form-location').value = ev.location || "";
             document.getElementById('form-link').value = ev.linkMappaUfficiale || "";
 
-            if (document.getElementById('form-abreve-date')) {
-                document.getElementById('form-abreve-date').value = ev.abreveDataApertura || "";
-            }
-            if (document.getElementById('form-abreve-time')) {
-                document.getElementById('form-abreve-time').value = ev.abreveOraApertura || "";
-            }
-            if (document.getElementById('abreve-time-fields')) {
-                document.getElementById('abreve-time-fields').style.display = ev.abreve ? 'block' : 'none';
-            }
-
             const priceContainer = document.getElementById('dynamic-price-container');
             priceContainer.innerHTML = '';
             if (ev.prezziListino && ev.prezziListino.length > 0) {
@@ -1763,9 +1749,55 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
         }
 
         window.apriDettagliSpettacolo = function(id) {
-     idEventoCorrenteAperto = id;
+     
     const ev = eventi[id];
     if (!ev) return;
+    
+    // =========================================================================
+    // BLOCCO CONTROLLO "A BREVE" / "SOLD OUT" PER UTENTI
+    // =========================================================================
+    if (!modalitaAdmin) {
+        // Forza la conversione a booleano dello stato aBreve
+        const aBreveBooleano = (ev.aBreve === true || ev.aBreve === 'true');
+        
+        // Controlla se l'evento è totalmente esaurito
+        const esauritoTotaleBooleano = (ev.esauritoTotale === true || ev.esauritoTotale === 'true');
+        let tutteDateEsaurite = true;
+        if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+            ev.dateSpettacolo.forEach(d => {
+                if (d.dataEsaurita !== true && d.dataEsaurita !== 'true') {
+                    tutteDateEsaurite = false;
+                }
+            });
+        } else {
+            tutteDateEsaurite = false;
+        }
+        const isSoldOut = esauritoTotaleBooleano || tutteDateEsaurite;
+
+        // Se è a breve, svuota l'hash per evitare loop, mostra il pop-up col countdown e ferma tutto
+        if (aBreveBooleano) {
+            window.location.hash = ''; 
+            if (typeof window.mostraMessaggioTemporaneo === 'function') {
+                window.mostraMessaggioTemporaneo("Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!", id);
+            } else {
+                alert("Le vendite per questo spettacolo apriranno a breve!");
+            }
+            return; // BLOCCO IMPEDISCE L'APERTURA DEL MODAL
+        } 
+        
+        // Se è totalmente sold out, blocca l'apertura e mostra il pop-up custom
+        else if (isSoldOut) {
+            window.location.hash = '';
+            const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
+            if (typeof window.mostraPopupCustom === 'function') {
+                window.mostraPopupCustom('Siamo spiacenti! Questo evento è SOLD OUT. Tutti i biglietti sono esauriti.', locandinaImgSrc);
+            } else {
+                alert("Siamo spiacenti! Questo evento è SOLD OUT.");
+            }
+            return; // BLOCCO IMPEDISCE L'APERTURA DEL MODAL
+        }
+    }
+    // =========================================================================
             
     idEventoCorrenteAperto = id;
     window.location.hash = id;
@@ -1830,6 +1862,9 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
             datesListContainer.appendChild(badge);
         });
     }
+
+    // Qui sotto continua la tua funzione originale per l'apertura effettiva del modal...
+    // (Inizializzazione bottoni, display='flex', cambiaDataSpettacoloSelezionataInModal(primaDataValidaTrovata), ecc.)
 
     // Auto-seleziona la prima data valida non scaduta. Se sono tutte passate (es. in modalità admin), seleziona la prima (0).
     if (primaDataValidaTrovata !== -1) {
