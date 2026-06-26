@@ -1582,7 +1582,6 @@
             if (isSoldOut) {
                 clickAzioneHtml = `window.mostraPopupCustom('Siamo spiacenti! Questo evento è SOLD OUT. Tutti i biglietti sono esauriti.', '${locandinaImgSrc}')`;
             } else if (isABreve) {
-                // CORRETTO: Usiamo i doppi apici all'interno per evitare l'errore di sintassi
                 clickAzioneHtml = `window.mostraMessaggioTemporaneo("Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!", "${ev.id}")`;
             }
         }
@@ -1753,12 +1752,6 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
      idEventoCorrenteAperto = id;
     const ev = eventi[id];
     if (!ev) return;
-
-    if (evento.abreve) {
-        // MODIFICATO QUI: Passiamo 'id' come secondo argomento per attivare il countdown
-        window.mostraMessaggioTemporaneo("Questo spettacolo sarà disponibile a breve per la vendita.", id);
-        return;
-    }
             
     idEventoCorrenteAperto = id;
     window.location.hash = id;
