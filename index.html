@@ -191,18 +191,18 @@
 
         .abreve-badge {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            background: #eab308; /* Giallo intenso (Tailwind yellow-500) */
-            color: #0f172a;      /* Testo scuro per massima leggibilità */
+            top: 12px;
+            left: 12px;
+            background-color: #eab308; /* Giallo acceso */
+            color: #0f172a;            /* Testo scuro leggibile */
             font-weight: 700;
-            padding: 6px 14px;
-            border-radius: 9999px;
-            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 6px;        /* Lo stile coerente con il tuo sold-out */
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 0 4px 10px rgba(234, 179, 8, 0.3);
-            z-index: 5;
+            z-index: 10;               /* Per metterlo sopra la foto */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
         }
 
         .scaduto-badge {
@@ -1642,13 +1642,14 @@ window.mostraMessaggioTemporaneo = function(testo, eventoId = null) {
         const isABreve = aBreveBooleano;
 
         // Gestione dei Badge (Con aggiunta del badge Passato per l'admin)
-        let badgeHtml = "";
+       let badgeHtml = "";
         if (tutteDatePassate) {
             badgeHtml = `<div class="soldout-badge" style="background:#64748b;">⚠️ PASSATO</div>`;
         } else if (isSoldOut) {
             badgeHtml = `<div class="soldout-badge">SOLD OUT</div>`;
         } else if (isABreve) {
-            badgeHtml = `<div class="abreve-badge">A Breve in Vendita</div>`;
+            // ABBIAMO AGGIUNTO L'EMOJI DELLA CLESSIDRA ⌛
+            badgeHtml = `<div class="abreve-badge">⌛ A Breve in Vendita</div>`;
         }
 
         const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
