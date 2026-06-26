@@ -1001,10 +1001,13 @@
     
     Object.keys(eventi).forEach(id => {
         const ev = eventi[id];
-        if (ev.abreve && ev.abreveDataApertura && ev.abreveOraApertura) {
+        // Controlliamo in modo sicuro che l'evento e i relativi campi esistano
+        if (ev && ev.abreve && ev.abreveDataApertura && ev.abreveOraApertura) {
             const dataTarget = new Date(`${ev.abreveDataApertura}T${ev.abreveOraApertura}`).getTime();
-            if (oraAttuale >= dataTarget) {
-                // Il tempo è scaduto: l'evento diventa disponibile
+            
+            // Se la data calcolata è valida ed è scaduta
+            if (!isNaN(dataTarget) && oraAttuale >= dataTarget) {
+                // Utilizziamo ref e set importati correttamente dal tuo modulo Firebase
                 set(ref(db, `eventi/${id}/abreve`), false);
                 set(ref(db, `eventi/${id}/abreveDataApertura`), "");
                 set(ref(db, `eventi/${id}/abreveOraApertura`), "");
