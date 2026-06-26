@@ -1147,6 +1147,9 @@
             document.getElementById('btn-salva-evento').innerText = "Pubblica Evento";
             document.getElementById('form-soldout').checked = false;
             document.getElementById('form-abreve').checked = false;
+            if (document.getElementById('form-abreve-date')) document.getElementById('form-abreve-date').value = "";
+            if (document.getElementById('form-abreve-time')) document.getElementById('form-abreve-time').value = "";
+            if (document.getElementById('abreve-time-fields')) document.getElementById('abreve-time-fields').style.display = 'none';
             document.getElementById('form-evidenza').checked = false;
             document.getElementById('form-category').value = "concerti";
             document.getElementById('form-abreve-date').value = "";
@@ -1340,9 +1343,9 @@
             const titolo = document.getElementById('form-title').value.trim();
             const categoria = document.getElementById('form-category').value;
             const inEvidenza = document.getElementById('form-evidenza').checked;
-            const aBreve = document.getElementById('form-abreve').checked;
-            const dataApertura = document.getElementById('form-abreve-date').value || "";
-            const oraApertura = document.getElementById('form-abreve-time').value || "";
+            const abreve = document.getElementById('form-abreve').checked;
+            const abreveDataApertura = document.getElementById('form-abreve-date') ? document.getElementById('form-abreve-date').value : "";
+            const abreveOraApertura = document.getElementById('form-abreve-time') ? document.getElementById('form-abreve-time').value : "";
             const esauritoTotale = document.getElementById('form-soldout').checked;
             const citta = document.getElementById('form-city').value.trim();
             const location = document.getElementById('form-location').value.trim();
@@ -1419,9 +1422,10 @@
                 titolo,
                 categoria,
                 inEvidenza,
-                abreve: document.getElementById('form-abreve').checked,
-                abreveDataApertura: dataApertura,
-                abreveOraApertura: oraApertura,
+                abreve,
+                abreveDataApertura: abreveDataApertura,
+                abreveOraApertura: abreveOraApertura,
+                dataCreazione: serverTimestamp()
                 esauritoTotale,
                 citta,
                 location,
@@ -1716,6 +1720,16 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
             document.getElementById('form-city').value = ev.citta || "";
             document.getElementById('form-location').value = ev.location || "";
             document.getElementById('form-link').value = ev.linkMappaUfficiale || "";
+
+            if (document.getElementById('form-abreve-date')) {
+                document.getElementById('form-abreve-date').value = ev.abreveDataApertura || "";
+            }
+            if (document.getElementById('form-abreve-time')) {
+                document.getElementById('form-abreve-time').value = ev.abreveOraApertura || "";
+            }
+            if (document.getElementById('abreve-time-fields')) {
+                document.getElementById('abreve-time-fields').style.display = ev.abreve ? 'block' : 'none';
+            }
 
             const priceContainer = document.getElementById('dynamic-price-container');
             priceContainer.innerHTML = '';
