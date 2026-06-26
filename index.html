@@ -1579,7 +1579,8 @@
             if (isSoldOut) {
                 clickAzioneHtml = `window.mostraPopupCustom('Siamo spiacenti! Questo evento è SOLD OUT. Tutti i biglietti sono esauriti.', '${locandinaImgSrc}')`;
             } else if (isABreve) {
-                clickAzioneHtml = `window.mostraPopupCustom('Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!', '${locandinaImgSrc}')`;
+                // MODIFICATO QUI: Usiamo mostraMessaggioTemporaneo passando il testo e l'ID dell'evento
+                clickAzioneHtml = `window.mostraMessaggioTemporaneo('Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!', '${ev.id}')`;
             }
         }
 
