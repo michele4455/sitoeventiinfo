@@ -1749,134 +1749,123 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
         }
 
         window.apriDettagliSpettacolo = function(id) {
-     
-    const ev = eventi[id];
-    if (!ev) return;
-    
-    // =========================================================================
-    // BLOCCO CONTROLLO "A BREVE" / "SOLD OUT" PER UTENTI
-    // =========================================================================
-    if (!modalitaAdmin) {
-        // Forza la conversione a booleano dello stato aBreve
-        const aBreveBooleano = (ev.aBreve === true || ev.aBreve === 'true');
-        
-        // Controlla se l'evento è totalmente esaurito
-        const esauritoTotaleBooleano = (ev.esauritoTotale === true || ev.esauritoTotale === 'true');
-        let tutteDateEsaurite = true;
-        if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
-            ev.dateSpettacolo.forEach(d => {
-                if (d.dataEsaurita !== true && d.dataEsaurita !== 'true') {
+            const ev = eventi[id];
+            if (!ev) return;
+            
+            // =========================================================================
+            // BLOCCO CONTROLLO PER UTENTI (A BREVE / SOLD OUT)
+            // =========================================================================
+            if (!modalitaAdmin) {
+                // Legge correttamente il valore dal tuo database Firebase (tutto minuscolo 'abreve')
+                const aBreveBooleano = (ev.abreve === true || ev.abreve === 'true');
+                const esauritoTotaleBooleano = (ev.esauritoTotale === true || ev.esauritoTotale === 'true');
+                
+                // Calcola se tutte le date dell'evento risultano esaurite singolarmente
+                let tutteDateEsaurite = true;
+                if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+                    ev.dateSpettacolo.forEach(d => { 
+                        if (d.dataEsaurita !== true && d.dataEsaurita !== 'true') {
+                            tutteDateEsaurite = false; 
+                        }
+                    });
+                } else {
                     tutteDateEsaurite = false;
                 }
-            });
-        } else {
-            tutteDateEsaurite = false;
-        }
-        const isSoldOut = esauritoTotaleBooleano || tutteDateEsaurite;
 
-        // Se è a breve, svuota l'hash per evitare loop, mostra il pop-up col countdown e ferma tutto
-        if (aBreveBooleano) {
-            window.location.hash = ''; 
-            if (typeof window.mostraMessaggioTemporaneo === 'function') {
-                window.mostraMessaggioTemporaneo("Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!", id);
-            } else {
-                alert("Le vendite per questo spettacolo apriranno a breve!");
-            }
-            return; // BLOCCO IMPEDISCE L'APERTURA DEL MODAL
-        } 
-        
-        // Se è totalmente sold out, blocca l'apertura e mostra il pop-up custom
-        else if (isSoldOut) {
-            window.location.hash = '';
-            const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
-            if (typeof window.mostraPopupCustom === 'function') {
-                window.mostraPopupCustom('Siamo spiacenti! Questo evento è SOLD OUT. Tutti i biglietti sono esauriti.', locandinaImgSrc);
-            } else {
-                alert("Siamo spiacenti! Questo evento è SOLD OUT.");
-            }
-            return; // BLOCCO IMPEDISCE L'APERTURA DEL MODAL
-        }
-    }
-    // =========================================================================
-            
-    idEventoCorrenteAperto = id;
-    window.location.hash = id;
+                const isSoldOut = esauritoTotaleBooleano || tutteDateEsaurite;
 
-    document.getElementById('modal-title').innerText = ev.titolo;
-    document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Luogo:</strong> ${ev.citta.toUpperCase()} — ${ev.location}`;
-
-    const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
-    document.getElementById('modal-locandina-img').src = locandinaImgSrc;
-
-    const datesListContainer = document.getElementById('modal-dates-list');
-    datesListContainer.innerHTML = '';
-
-    // Recuperiamo la data odierna nel formato YYYY-MM-DD
-    const oggiStr = new Date().toISOString().split('T')[0];
-    
-    // Variabile per capire qual è la prima data non scaduta da mostrare inizialmente
-    let primaDataValidaTrovata = -1;
-
-    dataIndiceSelezionatoCorrente = 0;
-
-    if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
-        ev.dateSpettacolo.forEach((d, index) => {
-            // Controllo se questa specifica data è nel passato
-            const dataPassata = d.giorno && d.giorno < oggiStr;
-
-            // Se la data è passata e NON siamo amministratori, la nascondiamo al cliente
-            if (dataPassata && !modalitaAdmin) {
-                return; 
-            }
-
-            // Se troviamo la prima data futura (o odierna), salviamo il suo indice per selezionarla all'apertura
-            if (!dataPassata && primaDataValidaTrovata === -1) {
-                primaDataValidaTrovata = index;
-            }
-
-            const badge = document.createElement('div');
-            badge.className = "detail-badge";
-
-            // Se la data è passata e siamo admin, la mettiamo in grigio semi-trasparente
-            if (dataPassata) {
-                badge.style.opacity = '0.5';
-                badge.style.filter = 'grayscale(100%)';
-            }
-
-            if (d.dataEsaurita) {
-                badge.classList.add('date-soldout');
-                let testoScaduta = dataPassata ? " (PASSATA)" : "";
-                badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> [ESAURITA]<span style="color:var(--danger-color); font-weight:bold;">${testoScaduta}</span>`;
-            } else {
-                if (dataPassata) {
-                    badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> <span style="color:#64748b; font-weight:bold;">(PASSATA)</span>`;
-                } else {
-                    badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> (Disponibile)`;
+                // Se l'evento è a breve, interrompe l'apertura ed esegue il countdown nativo
+                if (aBreveBooleano) {
+                    window.location.hash = '';
+                    if (typeof window.mostraMessaggioTemporaneo === 'function') {
+                        window.mostraMessaggioTemporaneo("Le vendite per questo spettacolo non sono ancora aperte. Torna a trovarci a breve!", id);
+                    } else {
+                        alert("Le vendite per questo spettacolo non sono ancora aperte.");
+                    }
+                    return; // Blocca ed evita l'apertura della scheda dettagli
+                } 
+                // Se l'evento è totalmente sold out, mostra il popup custom
+                else if (isSoldOut) {
+                    window.location.hash = '';
+                    const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
+                    if (typeof window.mostraPopupCustom === 'function') {
+                        window.mostraPopupCustom('Siamo spiacenti! Questo evento è SOLD OUT. Tutti i biglietti sono esauriti.', locandinaImgSrc);
+                    } else {
+                        alert("Siamo spiacenti! Questo evento è SOLD OUT.");
+                    }
+                    return; // Blocca ed evita l'apertura della scheda dettagli
                 }
             }
+            // =========================================================================
 
-            badge.onclick = function() {
-                cambiaDataSpettacoloSelezionataInModal(index);
-            };
+            idEventoCorrenteAperto = id;
+            window.location.hash = id;
 
-            datesListContainer.appendChild(badge);
-        });
-    }
+            document.getElementById('modal-title').innerText = ev.titolo;
+            document.getElementById('modal-detail-location').innerHTML = `📍 <strong>Luogo:</strong> ${ev.citta.toUpperCase()} — ${ev.location}`;
 
-    // Qui sotto continua la tua funzione originale per l'apertura effettiva del modal...
-    // (Inizializzazione bottoni, display='flex', cambiaDataSpettacoloSelezionataInModal(primaDataValidaTrovata), ecc.)
+            const locandinaImgSrc = ev.locandina || "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23cbd5e1%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%2364748b%22>Nessuna Foto</text></svg>";
+            document.getElementById('modal-locandina-img').src = locandinaImgSrc;
 
-    // Auto-seleziona la prima data valida non scaduta. Se sono tutte passate (es. in modalità admin), seleziona la prima (0).
-    if (primaDataValidaTrovata !== -1) {
-        dataIndiceSelezionatoCorrente = primaDataValidaTrovata;
-    } else {
-        dataIndiceSelezionatoCorrente = 0;
-    }
+            const datesListContainer = document.getElementById('modal-dates-list');
+            datesListContainer.innerHTML = '';
 
-    aggiornaDettagliDataInModal();
+            const oggiStr = new Date().toISOString().split('T')[0];
+            let primaDataValidaTrovata = -1;
 
-    document.getElementById('event-modal').style.display = 'flex';
-}
+            dataIndiceSelezionatoCorrente = 0;
+
+            if (ev.dateSpettacolo && ev.dateSpettacolo.length > 0) {
+                ev.dateSpettacolo.forEach((d, index) => {
+                    const dataPassata = d.giorno && d.giorno < oggiStr;
+
+                    if (dataPassata && !modalitaAdmin) {
+                        return; 
+                    }
+
+                    if (!dataPassata && primaDataValidaTrovata === -1) {
+                        primaDataValidaTrovata = index;
+                    }
+
+                    const badge = document.createElement('div');
+                    badge.className = "detail-badge";
+
+                    if (dataPassata) {
+                        badge.style.opacity = '0.5';
+                        badge.style.filter = 'grayscale(100%)';
+                    }
+
+                    if (d.dataEsaurita) {
+                        badge.classList.add('date-soldout');
+                        let testoScaduta = dataPassata ? " (PASSATA)" : "";
+                        badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> [ESAURITA]<span style="color:var(--danger-color); font-weight:bold;">${testoScaduta}</span>`;
+                    } else {
+                        if (dataPassata) {
+                            badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> <span style="color:#64748b; font-weight:bold;">(PASSATA)</span>`;
+                        } else {
+                            badge.innerHTML = `📅 <strong>${formattaDataLeggibile(d.giorno)} ore ${d.orario}</strong> (Disponibile)`;
+                        }
+                    }
+
+                    badge.onclick = function() {
+                        cambiaDataSpettacoloSelezionataInModal(index);
+                    };
+
+                    datesListContainer.appendChild(badge);
+                });
+            }
+
+            if (primaDataValidaTrovata !== -1) {
+                dataIndiceSelezionatoCorrente = primaDataValidaTrovata;
+            } else {
+                dataIndiceSelezionatoCorrente = 0;
+            }
+
+            aggiornaDettagliDataInModal();
+
+            document.getElementById('event-modal').style.display = 'flex';
+        };
+
         function cambiaDataSpettacoloSelezionataInModal(indice) {
             dataIndiceSelezionatoCorrente = indice;
             aggiornaDettagliDataInModal();
