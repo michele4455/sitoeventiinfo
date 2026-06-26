@@ -890,8 +890,16 @@
             <label for="form-evidenza" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">🔥 Metti in evidenza (Sposta in cima alla lista con 🔥)</label>
         </div>
         <div class="checkbox-container abreve-container">
-            <input type="checkbox" id="form-abreve">
+            <input type="checkbox" id="form-abreve" onchange="document.getElementById('abreve-time-fields').style.display = this.checked ? 'block' : 'none';">
             <label for="form-abreve" style="margin:0; color:var(--text-main); cursor:pointer; font-weight: bold;">⚠️ IMPOSTA COME A BREVE IN VENDITA (Visibile anche a tutti i Clienti)</label>
+        </div>
+        
+        <div id="abreve-time-fields" style="display: none; margin: -6px 0 12px 0; background: #fffbeb; padding: 14px; border-radius: 12px; border: 1px solid #fef08a;">
+            <label style="margin-top:0;">📅 Data e Ora di Apertura Automatica Vendite (Opzionale):</label>
+            <div class="form-row-grid" style="margin-top: 5px;">
+                <input type="date" id="form-abreve-date">
+                <input type="time" id="form-abreve-time">
+            </div>
         </div>
         <div class="checkbox-container">
             <input type="checkbox" id="form-soldout">
@@ -987,74 +995,116 @@
             'fiere': '🎪'
         };
 
-        window.mostraMessaggioTemporaneo = function(testo) {
-    // Rimuove eventuali avvisi precedenti ancora aperti
-    const vecchioPopup = document.getElementById('custom-temporary-popup');
-    if (vecchioPopup) vecchioPopup.remove();
+        setInterval(() => {
+    if (!eventi) return;
+    const oraAttuale = new Date().getTime();
+    
+    Object.keys(eventi).forEach(id => {
+        const ev = eventi[id];
+        if (ev.abreve && ev.abreveDataApertura && ev.abreveOraApertura) {
+            const dataTarget = new Date(`${ev.abreveDataApertura}T${ev.abreveOraApertura}`).getTime();
+            if (oraAttuale >= dataTarget) {
+                // Il tempo è scaduto: l'evento diventa disponibile
+                set(ref(db, `eventi/${id}/abreve`), false);
+                set(ref(db, `eventi/${id}/abreveDataApertura`), "");
+                set(ref(db, `eventi/${id}/abreveOraApertura`), "");
+            }
+        }
+    });
+}, 1000);
 
-    // Creazione elemento pop-up container di sfondo (overlay)
+       window.mostraMessaggioTemporaneo = function(testo, eventoId = null) {
+    const vecchioPopup = document.getElementById('custom-temporary-popup');
+    if (vecchioPopup) {
+        if (vecchioPopup.intervalId) clearInterval(vecchioPopup.intervalId);
+        vecchioPopup.remove();
+    }
+
     const overlay = document.createElement('div');
     overlay.id = 'custom-temporary-popup';
     overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.5)';
-    overlay.style.backdropFilter = 'blur(4px)';
-    overlay.style.zIndex = '9999';
-    overlay.style.display = 'flex';
-    overlay.style.justifyContent = 'center';
-    overlay.style.alignItems = 'center';
+    overlay.style.top = '0'; overlay.style.left = '0'; overlay.style.width = '100%'; overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.5)'; overlay.style.backdropFilter = 'blur(4px)';
+    overlay.style.zIndex = '9999'; overlay.style.display = 'flex'; overlay.style.justifyContent = 'center'; overlay.style.alignItems = 'center';
 
-    // Finestra interna dell'avviso
     const box = document.createElement('div');
-    box.style.backgroundColor = '#ffffff';
-    box.style.padding = '30px';
-    box.style.borderRadius = '20px';
-    box.style.boxShadow = '0 20px 25px -5px rgba(0,0,0,0.15)';
-    box.style.maxWidth = '400px';
-    box.style.width = '90%';
-    box.style.textAlign = 'center';
-    box.style.border = '1px solid #e2e8f0';
+    box.style.backgroundColor = '#ffffff'; box.style.padding = '30px'; box.style.borderRadius = '20px';
+    box.style.boxShadow = '0 20px 25px -5px rgba(0,0,0,0.15)'; box.style.maxWidth = '400px'; box.style.width = '90%';
+    box.style.textAlign = 'center'; box.style.border = '1px solid #e2e8f0';
 
-    // Testo del messaggio
     const p = document.createElement('p');
     p.innerText = testo;
-    p.style.fontSize = '1.15rem';
-    p.style.fontWeight = '600';
-    p.style.color = '#0f172a';
-    p.style.marginBottom = '20px';
+    p.style.fontSize = '1.15rem'; p.style.fontWeight = '600'; p.style.color = '#0f172a'; p.style.marginBottom = '20px';
     box.appendChild(p);
 
-    // Bottone OK
+    // Gestione del Countdown se presente un evento programmato
+    let haCountdown = false;
+    let tempoChiusura = 5000; // default 5 secondi
+    const ev = eventoId ? eventi[eventoId] : null;
+
+    if (ev && ev.abreve && ev.abreveDataApertura && ev.abreveOraApertura) {
+        const dataTarget = new Date(`${ev.abreveDataApertura}T${ev.abreveOraApertura}`).getTime();
+        const adesso = new Date().getTime();
+        
+        if (dataTarget > adesso) {
+            haCountdown = true;
+            tempoChiusura = 20000; // Imposta a 20 secondi se c'è il countdown
+
+            const countdownDiv = document.createElement('div');
+            countdownDiv.style.margin = '15px 0 25px 0';
+            countdownDiv.style.padding = '12px';
+            countdownDiv.style.backgroundColor = '#fef3c7';
+            countdownDiv.style.borderRadius = '12px';
+            countdownDiv.style.border = '1px solid #fde68a';
+            countdownDiv.style.color = '#d97706';
+            countdownDiv.style.fontWeight = '700';
+            countdownDiv.style.fontSize = '1.1rem';
+            box.appendChild(countdownDiv);
+
+            const aggiornaTimer = () => {
+                const ora = new Date().getTime();
+                const distanza = dataTarget - ora;
+                if (distanza < 0) {
+                    countdownDiv.innerText = "Vendite in apertura...";
+                    clearInterval(overlay.intervalId);
+                    return;
+                }
+                const giorni = Math.floor(distanza / (1000 * 60 * 60 * 24));
+                const ore = Math.floor((distanza % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minuti = Math.floor((distanza % (1000 * 60 * 60)) / (1000 * 60));
+                const secondi = Math.floor((distanza % (1000 * 60)) / 1000);
+                
+                let stringaTime = "⏳ Apertura vendite tra:\n";
+                if (giorni > 0) stringaTime += `${giorni}g `;
+                stringaTime += `${ore.toString().padStart(2, '0')}:${minuti.toString().padStart(2, '0')}:${secondi.toString().padStart(2, '0')}`;
+                countdownDiv.innerText = stringaTime;
+            };
+
+            aggiornaTimer();
+            overlay.intervalId = setInterval(aggiornaTimer, 1000);
+        }
+    }
+
     const btn = document.createElement('button');
     btn.innerText = 'OK';
-    btn.style.backgroundColor = '#0ea5e9';
-    btn.style.color = '#ffffff';
-    btn.style.border = 'none';
-    btn.style.padding = '10px 25px';
-    btn.style.fontSize = '1rem';
-    btn.style.fontWeight = 'bold';
-    btn.style.borderRadius = '10px';
-    btn.style.cursor = 'pointer';
-    
-    // Funzione per distruggere il popup
+    btn.style.backgroundColor = '#0ea5e9'; btn.style.color = '#ffffff'; btn.style.border = 'none';
+    btn.style.padding = '10px 25px'; btn.style.fontSize = '1rem'; btn.style.fontWeight = 'bold';
+    btn.style.borderRadius = '10px'; btn.style.cursor = 'pointer';
+
     const chiudiPopup = () => {
+        if (overlay.intervalId) clearInterval(overlay.intervalId);
         if (overlay.parentNode) {
             overlay.remove();
             clearTimeout(timerAutochiusura);
         }
     };
-
     btn.onclick = chiudiPopup;
     box.appendChild(btn);
     overlay.appendChild(box);
     document.body.appendChild(overlay);
 
-    // Timer per la chiusura automatica dopo 5 secondi (5000 millisecondi)
-    const timerAutochiusura = setTimeout(chiudiPopup, 5000);
-}
+    const timerAutochiusura = setTimeout(chiudiPopup, tempoChiusura);
+};
 
         window.apriLoginAdmin = function() {
             document.getElementById('login-password-field').value = '';
@@ -1082,6 +1132,8 @@
             }
         }
 
+        
+
         window.chiudiSessioneAdmin = function() {
             document.getElementById('admin-panel').style.display = 'none';
             document.getElementById('edit-id').value = "";
@@ -1091,6 +1143,9 @@
             document.getElementById('form-abreve').checked = false;
             document.getElementById('form-evidenza').checked = false;
             document.getElementById('form-category').value = "concerti";
+            document.getElementById('form-abreve-date').value = "";
+            document.getElementById('form-abreve-time').value = "";
+            document.getElementById('abreve-time-fields').style.display = 'none';
             resettaCampiForm();
             modalitaAdmin = false;
             aggiornaVisibilitaSito();
@@ -1280,6 +1335,8 @@
             const categoria = document.getElementById('form-category').value;
             const inEvidenza = document.getElementById('form-evidenza').checked;
             const aBreve = document.getElementById('form-abreve').checked;
+            const dataApertura = document.getElementById('form-abreve-date').value || "";
+            const oraApertura = document.getElementById('form-abreve-time').value || "";
             const esauritoTotale = document.getElementById('form-soldout').checked;
             const citta = document.getElementById('form-city').value.trim();
             const location = document.getElementById('form-location').value.trim();
@@ -1356,7 +1413,9 @@
                 titolo,
                 categoria,
                 inEvidenza,
-                aBreve,
+                abreve: document.getElementById('form-abreve').checked,
+                abreveDataApertura: dataApertura,
+                abreveOraApertura: oraApertura,
                 esauritoTotale,
                 citta,
                 location,
@@ -1643,7 +1702,10 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
             document.getElementById('form-title').value = ev.titolo || "";
             document.getElementById('form-category').value = ev.categoria || "concerti";
             document.getElementById('form-evidenza').checked = !!ev.inEvidenza;
-            document.getElementById('form-abreve').checked = !!ev.aBreve;
+            document.getElementById('form-abreve').checked = !!ev.abreve;
+            document.getElementById('form-abreve-date').value = ev.abreveDataApertura || "";
+            document.getElementById('form-abreve-time').value = ev.abreveOraApertura || "";
+            document.getElementById('abreve-time-fields').style.display = ev.abreve ? 'block' : 'none';
             document.getElementById('form-soldout').checked = !!ev.esauritoTotale;
             document.getElementById('form-city').value = ev.citta || "";
             document.getElementById('form-location').value = ev.location || "";
@@ -1684,6 +1746,12 @@ window.mostraPopupCustom = function(testo, urlImmagine) {
     const ev = eventi[id];
     if (!ev) return;
 
+    if (evento.abreve) {
+        // MODIFICATO QUI: Passiamo 'id' come secondo argomento per attivare il countdown
+        window.mostraMessaggioTemporaneo("Questo spettacolo sarà disponibile a breve per la vendita.", id);
+        return;
+    }
+            
     idEventoCorrenteAperto = id;
     window.location.hash = id;
 
